@@ -8,8 +8,7 @@ import {
   startOfWeek,
   startOfMonth,
   startOfYear,
-  startOfQuarter,
-  endOfWeek,
+  endOfMonth,
   differenceInDays,
   differenceInWeeks,
   differenceInMonths,
@@ -18,6 +17,10 @@ import {
 } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import type { DateRangeUnit, DateRangeSelection } from "../types/dateRange";
+import {
+  WEEK_STARTS_ON,
+  CONSTRAIN_WEEK_TO_CURRENT_MONTH,
+} from "../config/dateConfig";
 
 const UTC_ZONE = "UTC";
 
@@ -289,8 +292,29 @@ export function getPresets() {
     thisWeek: {
       label: "This Week",
       getValue: () => {
-        const weekStart = startOfWeek(todayDate);
-        const weekEnd = endOfWeek(todayDate);
+        // Start of week using configured week start day
+        let weekStart = startOfWeek(todayDate, {
+          weekStartsOn: WEEK_STARTS_ON,
+        });
+        // End of week is start + 6 days (7 days total)
+        let weekEnd = addDays(weekStart, 6);
+
+        // If constraining to current month, adjust boundaries
+        if (CONSTRAIN_WEEK_TO_CURRENT_MONTH) {
+          const currentMonthStart = startOfMonth(todayDate);
+          const currentMonthEnd = endOfMonth(todayDate);
+
+          // If weekStart is before current month, start from month start
+          if (weekStart < currentMonthStart) {
+            weekStart = currentMonthStart;
+          }
+
+          // If weekEnd is after current month, end at month end
+          if (weekEnd > currentMonthEnd) {
+            weekEnd = currentMonthEnd;
+          }
+        }
+
         return {
           startDateUtc: formatUtc(weekStart),
           endDateUtc: formatUtc(weekEnd),
@@ -313,16 +337,6 @@ export function getPresets() {
         const yearStart = startOfYear(todayDate);
         return {
           startDateUtc: formatUtc(yearStart),
-          endDateUtc: today,
-        };
-      },
-    },
-    thisQuarter: {
-      label: "This Quarter",
-      getValue: () => {
-        const quarterStart = startOfQuarter(todayDate);
-        return {
-          startDateUtc: formatUtc(quarterStart),
           endDateUtc: today,
         };
       },

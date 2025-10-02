@@ -109,7 +109,7 @@ export default function PresetSidebar({
             Quick Select
           </h3>
         </div>
-        <div className="space-y-1">
+        <div className="">
           {Object.values(presets).map((preset) => {
             const { startDateUtc, endDateUtc } = preset.getValue();
             return (

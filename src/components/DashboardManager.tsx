@@ -1,8 +1,9 @@
 import { Download, Upload, RotateCcw, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import type { DashboardLayout } from "../DashbiardExampleProps";
+import { useIndexedDB } from "../helper/useIndexedDB";
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -17,7 +18,66 @@ const DashboardManager: React.FC<{
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
-  const { unreadCount } = useSelector((state: RootState) => state.notifications);
+  const { unreadCount } = useSelector(
+    (state: RootState) => state.notifications
+  );
+  const [dashboardOptions, setDashboardOptions] = useState([
+    { label: "My Dashboard", value: "default-dashboard" },
+  ]);
+  const [selectedDashboard, setSelectedDashboard] = useState(
+    dashboardOptions[0].value
+  );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newDashboardName, setNewDashboardName] = useState("");
+
+  const { saveData, getData } = useIndexedDB();
+
+  useEffect(() => {
+    const loadData = async () => {
+      const savedOptions = await getData("dashboardOptions");
+      if (savedOptions && Array.isArray(savedOptions) && savedOptions.length > 0) {
+        setDashboardOptions(savedOptions as { label: string; value: string }[]);
+      } else {
+        await saveData("dashboardOptions", dashboardOptions);
+      }
+
+      const savedValue = await getData("selectedDashboard");
+      if (savedValue) {
+        setSelectedDashboard(savedValue as string);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleCreateNewDashboard = async () => {
+    if (newDashboardName.trim() === "") {
+      alert("Dashboard name cannot be empty");
+      return;
+    }
+    const newDashboard = {
+      label: newDashboardName,
+      value: `dashboard-${Date.now()}`,
+    };
+    const newOptions = [...dashboardOptions, newDashboard];
+    setDashboardOptions(newOptions);
+    await saveData("dashboardOptions", newOptions);
+
+    setSelectedDashboard(newDashboard.value);
+    await saveData("selectedDashboard", newDashboard.value);
+
+    setIsCreateModalOpen(false);
+    setNewDashboardName("");
+  };
+
+  const handleDashboardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    if (value === "create-new") {
+      setIsCreateModalOpen(true);
+    } else {
+      setSelectedDashboard(value);
+      saveData("selectedDashboard", value);
+    }
+  };
 
   const exportConfig = () => {
     const config = JSON.stringify(currentDashboard, null, 2);
@@ -50,10 +110,17 @@ const DashboardManager: React.FC<{
   return (
     <>
       <div className="flex gap-2 ">
-        <select className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none bg-white border border-gray-200 rounded-lg p-2 ">
-          <option>My Dashboard</option>
-          <option>Analytics Dashboard</option>
-          <option>Sales Dashboard</option>
+        <select
+          value={selectedDashboard}
+          onChange={handleDashboardChange}
+          className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none bg-white border border-gray-200 rounded-lg p-2 "
+        >
+          {dashboardOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+          <option value="create-new">+ Create New</option>
         </select>
         <button
           onClick={exportConfig}
@@ -104,6 +171,34 @@ const DashboardManager: React.FC<{
         </button>
       </div>
 
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-semibold mb-4">Create New Dashboard</h3>
+            <input
+              type="text"
+              value={newDashboardName}
+              onChange={(e) => setNewDashboardName(e.target.value)}
+              placeholder="Enter dashboard name"
+              className="w-full p-2 border border-gray-300 rounded-md mb-4"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateNewDashboard}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Configuration Modal */}
       {isConfigModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -542,12 +542,11 @@ const JsonDrivenDashboard: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize IndexedDB and load layout for current navigation path
-  React.useEffect(() => {
+  useEffect(() => {
     const initializeLayout = async () => {
       try {
         dispatch(setLayoutLoading(true));
         await layoutStorage.init();
-
         // Load layout for current navigation path
         const savedLayout = await layoutStorage.getLayout(
           currentNavigationPath
@@ -574,7 +573,7 @@ const JsonDrivenDashboard: React.FC = () => {
   }, [currentNavigationPath, dispatch]);
 
   // Load layout when navigation path changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isInitialized) return;
 
     const loadLayoutForPath = async () => {
@@ -606,68 +605,68 @@ const JsonDrivenDashboard: React.FC = () => {
   }, [currentNavigationPath, dispatch, isInitialized]);
 
   // Initialize IndexedDB and load layout for current navigation path
-  useEffect(() => {
-    const initializeLayout = async () => {
-      try {
-        dispatch(setLayoutLoading(true));
-        await layoutStorage.init();
+  // useEffect(() => {
+  //   const initializeLayout = async () => {
+  //     try {
+  //       dispatch(setLayoutLoading(true));
+  //       await layoutStorage.init();
 
-        // Load layout for current navigation path
-        const savedLayout = await layoutStorage.getLayout(
-          currentNavigationPath
-        );
-        if (savedLayout) {
-          dispatch(
-            setLayoutForPath({
-              path: currentNavigationPath,
-              layout: savedLayout,
-            })
-          );
-        }
+  //       // Load layout for current navigation path
+  //       const savedLayout = await layoutStorage.getLayout(
+  //         currentNavigationPath
+  //       );
+  //       if (savedLayout) {
+  //         dispatch(
+  //           setLayoutForPath({
+  //             path: currentNavigationPath,
+  //             layout: savedLayout,
+  //           })
+  //         );
+  //       }
 
-        setIsInitialized(true);
-      } catch (error) {
-        console.error("Failed to initialize layout storage:", error);
-        setIsInitialized(true);
-      } finally {
-        dispatch(setLayoutLoading(false));
-      }
-    };
+  //       setIsInitialized(true);
+  //     } catch (error) {
+  //       console.error("Failed to initialize layout storage:", error);
+  //       setIsInitialized(true);
+  //     } finally {
+  //       dispatch(setLayoutLoading(false));
+  //     }
+  //   };
 
-    initializeLayout();
-  }, [currentNavigationPath, dispatch]);
+  //   initializeLayout();
+  // }, [currentNavigationPath, dispatch]);
 
   // Load layout when navigation path changes
-  useEffect(() => {
-    if (!isInitialized) return;
+  // useEffect(() => {
+  //   if (!isInitialized) return;
 
-    const loadLayoutForPath = async () => {
-      try {
-        dispatch(setLayoutLoading(true));
-        const savedLayout = await layoutStorage.getLayout(
-          currentNavigationPath
-        );
-        if (savedLayout) {
-          dispatch(
-            setLayoutForPath({
-              path: currentNavigationPath,
-              layout: savedLayout,
-            })
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Failed to load layout for path:",
-          currentNavigationPath,
-          error
-        );
-      } finally {
-        dispatch(setLayoutLoading(false));
-      }
-    };
+  //   const loadLayoutForPath = async () => {
+  //     try {
+  //       dispatch(setLayoutLoading(true));
+  //       const savedLayout = await layoutStorage.getLayout(
+  //         currentNavigationPath
+  //       );
+  //       if (savedLayout) {
+  //         dispatch(
+  //           setLayoutForPath({
+  //             path: currentNavigationPath,
+  //             layout: savedLayout,
+  //           })
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error(
+  //         "Failed to load layout for path:",
+  //         currentNavigationPath,
+  //         error
+  //       );
+  //     } finally {
+  //       dispatch(setLayoutLoading(false));
+  //     }
+  //   };
 
-    loadLayoutForPath();
-  }, [currentNavigationPath, dispatch, isInitialized]);
+  //   loadLayoutForPath();
+  // }, [currentNavigationPath, dispatch, isInitialized]);
 
   const handleItemClick = (): void => {
     if (!isEditMode) {
@@ -867,6 +866,11 @@ const JsonDrivenDashboard: React.FC = () => {
     if (savedLayout && savedLayout.length > 0) {
       // Create a deep copy to avoid issues with frozen objects from Redux
       return JSON.parse(JSON.stringify(savedLayout));
+    }
+
+    const defaultLayout = layouts["default"];
+    if (defaultLayout && defaultLayout.length > 0) {
+      return JSON.parse(JSON.stringify(defaultLayout));
     }
 
     // Fallback to widget positions

@@ -9,8 +9,9 @@ import type {
   MatrixData,
 } from "./DashbiardExampleProps";
 import type { RootState } from "./redux/store";
-import { setLayoutForPath, setLayoutLoading } from "./redux/layoutSlice";
+import { setLayoutForPath, setLayoutLoading, setCurrentNavigationPath } from "./redux/layoutSlice";
 import { layoutStorage } from "./utils/layoutStorage";
+import { useIndexedDB } from "./helper/useIndexedDB";
 import DashboardManager from "./components/DashboardManager";
 import MatrixDisplay from "./components/MatrixDisplay";
 import WidgetEditor from "./components/WidgetEditor";
@@ -21,7 +22,6 @@ import WidgetPanel from "./components/WidgetPanel";
 import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-
 const predefinedWidgets = [
   {
     id: "revenue-widget",
@@ -540,6 +540,29 @@ const JsonDrivenDashboard: React.FC = () => {
     Record<string, AppliedFilter[]>
   >({});
   const [isInitialized, setIsInitialized] = useState(false);
+  const [selectedDashboard, setSelectedDashboard] = useState("default-dashboard");
+
+  const { saveData, getData } = useIndexedDB();
+  useEffect(() => {
+    const loadSelected = async () => {
+      const saved = await getData('selectedDashboard');
+      if (saved) {
+        setSelectedDashboard(saved as string);
+      }
+    };
+    loadSelected();
+  }, []);
+
+  const handleSelectDashboard = (dashboardId: string) => {
+    setSelectedDashboard(dashboardId);
+    saveData('selectedDashboard', dashboardId);
+    dispatch(setCurrentNavigationPath(dashboardId));
+  };
+
+  const handleCreateDashboard = async (dashboardId: string) => {
+    handleSelectDashboard(dashboardId);
+    await layoutStorage.saveLayout(dashboardId, [], dashboardId);
+  };
 
   // Initialize IndexedDB and load layout for current navigation path
   useEffect(() => {
@@ -778,11 +801,11 @@ const JsonDrivenDashboard: React.FC = () => {
 
       const newLayout = JSON.parse(JSON.stringify(layout));
       newLayout.push(newLayoutItem);
-
       dispatch(
         setLayoutForPath({ path: currentNavigationPath, layout: newLayout })
       );
-      layoutStorage.saveLayout(currentNavigationPath, newLayout);
+      debugger;
+      layoutStorage.saveLayout(currentNavigationPath, newLayout, selectedDashboard);
     }
   };
 
@@ -800,14 +823,14 @@ const JsonDrivenDashboard: React.FC = () => {
     layout: ReactGridLayout.Layout[]
   ): Promise<void> => {
     const layoutData = JSON.parse(JSON.stringify(layout));
-
     dispatch(
       setLayoutForPath({ path: currentNavigationPath, layout: layoutData })
     );
 
+    debugger;
     // Save layout to IndexedDB
     layoutStorage
-      .saveLayout(currentNavigationPath, layoutData)
+      .saveLayout(currentNavigationPath, layoutData, selectedDashboard)
       .catch((error) => {
         console.error("Failed to save layout to IndexedDB:", error);
       });
@@ -928,8 +951,12 @@ const JsonDrivenDashboard: React.FC = () => {
                 currentDashboard={currentDashboard}
                 onLoadDashboard={handleLoadDashboard}
                 currentNavigationPath={currentNavigationPath}
+                selectedDashboard={selectedDashboard}
+                onSelectDashboard={handleSelectDashboard}
+                onCreateDashboard={handleCreateDashboard}
                 onClearLayout={() => {
                   layoutStorage.deleteLayout(currentNavigationPath);
+                  debugger;
                   dispatch(
                     setLayoutForPath({
                       path: currentNavigationPath,

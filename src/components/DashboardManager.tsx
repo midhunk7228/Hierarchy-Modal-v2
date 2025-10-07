@@ -8,45 +8,42 @@ import { useIndexedDB } from "../helper/useIndexedDB";
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
   onLoadDashboard: (config: string) => void;
+  onSelectDashboard: (id: string) => void;
+  onCreateDashboard: (id: string) => void;
   currentNavigationPath: string;
   onClearLayout: () => void;
+  selectedDashboard: string;
 }> = ({
   currentDashboard,
   onLoadDashboard,
+  onSelectDashboard,
+  onCreateDashboard,
   currentNavigationPath,
   onClearLayout,
+  selectedDashboard,
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
   const { unreadCount } = useSelector(
     (state: RootState) => state.notifications
   );
-  const [dashboardOptions, setDashboardOptions] = useState([
-    { label: "My Dashboard", value: "default-dashboard" },
-  ]);
-  const [selectedDashboard, setSelectedDashboard] = useState(
-    dashboardOptions[0].value
-  );
+  const [dashboards, setDashboards] = useState<DashboardLayout[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState("");
 
   const { saveData, getData } = useIndexedDB();
 
   useEffect(() => {
-    const loadData = async () => {
-      const savedOptions = await getData("dashboardOptions");
-      if (savedOptions && Array.isArray(savedOptions) && savedOptions.length > 0) {
-        setDashboardOptions(savedOptions as { label: string; value: string }[]);
+    const loadDashboards = async () => {
+      const savedDashboards = (await getData("dashboards")) as DashboardLayout[];
+      if (savedDashboards && savedDashboards.length > 0) {
+        setDashboards(savedDashboards);
       } else {
-        await saveData("dashboardOptions", dashboardOptions);
-      }
-
-      const savedValue = await getData("selectedDashboard");
-      if (savedValue) {
-        setSelectedDashboard(savedValue as string);
+        await saveData("dashboards", [currentDashboard]);
+        setDashboards([currentDashboard]);
       }
     };
-    loadData();
+    loadDashboards();
   }, []);
 
   const handleCreateNewDashboard = async () => {
@@ -54,16 +51,19 @@ const DashboardManager: React.FC<{
       alert("Dashboard name cannot be empty");
       return;
     }
-    const newDashboard = {
-      label: newDashboardName,
-      value: `dashboard-${Date.now()}`,
+    const newDashboard: DashboardLayout = {
+      id: `dashboard-${Date.now()}`,
+      name: newDashboardName,
+      description: "New custom dashboard",
+      grid: { columns: 12, rows: 8, gap: 16 },
+      widgets: [],
     };
-    const newOptions = [...dashboardOptions, newDashboard];
-    setDashboardOptions(newOptions);
-    await saveData("dashboardOptions", newOptions);
+    const newDashboards = [...dashboards, newDashboard];
+    setDashboards(newDashboards);
+    await saveData("dashboards", newDashboards);
 
-    setSelectedDashboard(newDashboard.value);
-    await saveData("selectedDashboard", newDashboard.value);
+    onCreateDashboard(newDashboard.id);
+    onLoadDashboard(JSON.stringify(newDashboard));
 
     setIsCreateModalOpen(false);
     setNewDashboardName("");
@@ -74,8 +74,11 @@ const DashboardManager: React.FC<{
     if (value === "create-new") {
       setIsCreateModalOpen(true);
     } else {
-      setSelectedDashboard(value);
-      saveData("selectedDashboard", value);
+      const selected = dashboards.find(d => d.id === value);
+      if (selected) {
+        onSelectDashboard(value);
+        onLoadDashboard(JSON.stringify(selected));
+      }
     }
   };
 
@@ -85,11 +88,17 @@ const DashboardManager: React.FC<{
     setIsConfigModalOpen(true);
   };
 
-  const importConfig = () => {
+  const importConfig = async () => {
     try {
-      JSON.parse(configText);
+      const newDashboard: DashboardLayout = JSON.parse(configText);
+      const newDashboards = [...dashboards, newDashboard];
+      setDashboards(newDashboards);
+      await saveData("dashboards", newDashboards);
+
+      onSelectDashboard(newDashboard.id);
       onLoadDashboard(configText);
-      setIsConfigModalOpen(false);
+
+      setIsCreateModalOpen(false);
       setConfigText("");
     } catch {
       alert("Invalid JSON configuration");
@@ -115,9 +124,9 @@ const DashboardManager: React.FC<{
           onChange={handleDashboardChange}
           className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none bg-white border border-gray-200 rounded-lg p-2 "
         >
-          {dashboardOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          {dashboards.map((dashboard) => (
+            <option key={dashboard.id} value={dashboard.id}>
+              {dashboard.name}
             </option>
           ))}
           <option value="create-new">+ Create New</option>

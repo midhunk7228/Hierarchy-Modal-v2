@@ -1,9 +1,10 @@
 import { Download, Upload, RotateCcw, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import type { DashboardLayout } from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
+import { setDashboards } from "../redux/dashboardsSlice";
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -27,7 +28,10 @@ const DashboardManager: React.FC<{
   const { unreadCount } = useSelector(
     (state: RootState) => state.notifications
   );
-  const [dashboards, setDashboards] = useState<DashboardLayout[]>([]);
+  const dispatch = useDispatch();
+  const dashboards = useSelector(
+    (state: RootState) => state.dashboards.dashboards
+  );
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState("");
 
@@ -35,31 +39,37 @@ const DashboardManager: React.FC<{
 
   useEffect(() => {
     const loadDashboards = async () => {
-      const savedDashboards = (await getData("dashboards")) as DashboardLayout[];
+      const savedDashboards = (await getData(
+        "dashboards"
+      )) as DashboardLayout[];
+      debugger;
+
       if (savedDashboards && savedDashboards.length > 0) {
-        setDashboards(savedDashboards);
+        dispatch(setDashboards([...savedDashboards, currentDashboard]));
       } else {
+        debugger;
         await saveData("dashboards", [currentDashboard]);
-        setDashboards([currentDashboard]);
+        dispatch(setDashboards([currentDashboard]));
       }
     };
     loadDashboards();
-  }, []);
-
+  }, [currentNavigationPath]);
+  console.log("setDashboards", dashboards);
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
       alert("Dashboard name cannot be empty");
       return;
     }
     const newDashboard: DashboardLayout = {
-      id: `dashboard-${Date.now()}`,
+      id: `dashboard-${newDashboardName.replace(/\s+/g, "")}`,
       name: newDashboardName,
       description: "New custom dashboard",
       grid: { columns: 12, rows: 8, gap: 16 },
       widgets: [],
     };
     const newDashboards = [...dashboards, newDashboard];
-    setDashboards(newDashboards);
+    dispatch(setDashboards(newDashboards));
+    debugger;
     await saveData("dashboards", newDashboards);
 
     onCreateDashboard(newDashboard.id);
@@ -74,9 +84,11 @@ const DashboardManager: React.FC<{
     if (value === "create-new") {
       setIsCreateModalOpen(true);
     } else {
-      const selected = dashboards.find(d => d.id === value);
+      const selected = dashboards.find((d) => d.id === value);
       if (selected) {
+        debugger;
         onSelectDashboard(value);
+        debugger;
         onLoadDashboard(JSON.stringify(selected));
       }
     }
@@ -92,7 +104,8 @@ const DashboardManager: React.FC<{
     try {
       const newDashboard: DashboardLayout = JSON.parse(configText);
       const newDashboards = [...dashboards, newDashboard];
-      setDashboards(newDashboards);
+      dispatch(setDashboards(newDashboards));
+      debugger;
       await saveData("dashboards", newDashboards);
 
       onSelectDashboard(newDashboard.id);

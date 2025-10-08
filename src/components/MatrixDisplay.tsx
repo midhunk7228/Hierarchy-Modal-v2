@@ -105,7 +105,7 @@ const MatrixDisplay: React.FC<
   const applyFiltersToData = useCallback(
     (
       data: MatrixData,
-      displayType: "summary" | "details",
+      displayType: string,
       appliedFilters: AppliedFilter[],
       filters: FilterConfig[]
     ): MatrixData => {

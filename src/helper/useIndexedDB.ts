@@ -70,6 +70,22 @@ export function useIndexedDB() {
     });
   };
 
+  // Get all API data
+  const getAllData = async <T = unknown>(): Promise<T[]> => {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(API_DATA_STORE_NAME, "readonly");
+      const store = tx.objectStore(API_DATA_STORE_NAME);
+      const request = store.getAll();
 
-  return { saveLayout, getLayout, saveData, getData };
+      request.onsuccess = () => {
+        const results = request.result?.map((item: any) => item.data) ?? [];
+        resolve(results);
+      };
+
+      request.onerror = () => resolve([]);
+    });
+  };
+
+  return { saveLayout, getLayout, saveData, getData, getAllData };
 }

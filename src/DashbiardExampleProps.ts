@@ -91,8 +91,8 @@ interface AppliedFilter {
 
 interface MatrixDisplayProps {
   apiEndpoint?: string;
-  displayType?: "summary" | "details";
-  viewType?: "tabular" | "single-value" | "pie-chart" | "chart" | "comparison";
+  displayType: string;
+  viewType: string;
   additionalInfo?: {
     outcome?: boolean;
   };
@@ -121,8 +121,8 @@ interface TableColumn {
 interface DashboardWidget {
   id: string;
   title: string;
-  displayType: "summary" | "details";
-  viewType: "tabular" | "single-value" | "pie-chart" | "chart" | "comparison";
+  displayType?: string;
+  viewType?: string;
   position: {
     row: number;
     col: number;

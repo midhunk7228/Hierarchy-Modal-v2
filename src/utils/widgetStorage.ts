@@ -1,15 +1,17 @@
+import type { DashboardLayout } from "../DashbiardExampleProps";
+
 // IndexedDB utility for storing dashboard layouts by navigation path
 export interface StoredLayout {
   navigationPath: string;
-  layout: ReactGridLayout.Layout[];
+  widget: DashboardLayout;
   selectedDashboard: string;
   timestamp: number;
 }
 
-class LayoutStorage {
-  private dbName = "DashboardLayoutDB";
+class WidgetStorage {
+  private dbName = "DashboardWidgetDB";
   private dbVersion = 1;
-  private storeName = "layouts";
+  private storeName = "widgets";
   private db: IDBDatabase | null = null;
 
   async init(): Promise<void> {
@@ -34,9 +36,9 @@ class LayoutStorage {
     });
   }
 
-  async saveLayout(
+  async saveWidget(
     navigationPath: string,
-    layout: ReactGridLayout.Layout[],
+    widget: DashboardLayout,
     selectedDashboard: string
   ): Promise<void> {
     if (!this.db) await this.init();
@@ -45,22 +47,20 @@ class LayoutStorage {
       const transaction = this.db!.transaction([this.storeName], "readwrite");
       const store = transaction.objectStore(this.storeName);
 
-      const layoutData: StoredLayout = {
+      const widgetData: StoredLayout = {
         navigationPath,
-        layout,
+        widget,
         selectedDashboard,
         timestamp: Date.now(),
       };
 
-      const request = store.put(layoutData);
+      const request = store.put(widgetData);
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve();
     });
   }
 
-  async getLayout(
-    navigationPath: string
-  ): Promise<ReactGridLayout.Layout[] | null> {
+  async getWidget(navigationPath: string): Promise<DashboardLayout | null> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -71,12 +71,12 @@ class LayoutStorage {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         const result = request.result as StoredLayout | undefined;
-        resolve(result ? result.layout : null);
+        resolve(result ? result.widget : null);
       };
     });
   }
 
-  async getAllLayouts(): Promise<StoredLayout[]> {
+  async getAllWidgets(): Promise<StoredLayout[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -89,7 +89,7 @@ class LayoutStorage {
     });
   }
 
-  async deleteLayout(navigationPath: string): Promise<void> {
+  async deleteWidget(navigationPath: string): Promise<void> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -102,7 +102,7 @@ class LayoutStorage {
     });
   }
 
-  async clearAllLayouts(): Promise<void> {
+  async clearAllWidgets(): Promise<void> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -116,4 +116,4 @@ class LayoutStorage {
   }
 }
 
-export const layoutStorage = new LayoutStorage();
+export const widgetStorage = new WidgetStorage();

@@ -3,6 +3,7 @@ import filtersReducer from "./filtersSlice";
 import naviagtionPathReducer from "./navigationPathSlice";
 import layoutReducer from "./layoutSlice";
 import notificationsReducer from "./notificationsSlice";
+import dashboardsReducer from "./dashboardsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     navigationPath: naviagtionPathReducer,
     layout: layoutReducer,
     notifications: notificationsReducer,
+    dashboards: dashboardsReducer,
   },
 });
 

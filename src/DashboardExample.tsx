@@ -944,7 +944,6 @@ const JsonDrivenDashboard: React.FC = () => {
 
   // Get layout from Redux store or fallback to widget positions
   const getCurrentLayout = (): ReactGridLayout.Layout[] => {
-    // debugger;
     const savedLayout =
       layouts[`${selectedDashboard}:${currentNavigationPath}`];
     if (savedLayout && savedLayout.length > 0) {
@@ -953,7 +952,7 @@ const JsonDrivenDashboard: React.FC = () => {
     }
 
     const defaultLayout = layouts[`${selectedDashboard}:default`];
-    if (defaultLayout) {
+    if (defaultLayout && defaultLayout.length > 0) {
       return JSON.parse(JSON.stringify(defaultLayout));
     }
 

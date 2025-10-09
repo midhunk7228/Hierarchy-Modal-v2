@@ -26,6 +26,7 @@ import "react-resizable/css/styles.css";
 import WidgetPanel from "./components/WidgetPanel";
 import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
 import { setDashboards } from "./redux/dashboardsSlice";
+import { dashboardStorage } from "./utils/dashboardStorage";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const predefinedWidgets = [
@@ -557,7 +558,6 @@ const JsonDrivenDashboard: React.FC = () => {
     const loadSelected = async () => {
       const saved = await getData("selectedDashboard");
       if (saved) {
-        debugger;
         setSelectedDashboard(saved as string);
       }
     };
@@ -571,8 +571,24 @@ const JsonDrivenDashboard: React.FC = () => {
   };
 
   const handleCreateDashboard = async (dashboardId: string) => {
+    //need to update newDashboard
+    const newDashboard: DashboardLayout = {
+      id: `dashboard-${Date.now()}`,
+      name: dashboardId,
+      description: "A new dashboard",
+      grid: {
+        columns: 12,
+        rows: 8,
+        gap: 16,
+      },
+      widgets: [],
+    };
     handleSelectDashboard(dashboardId);
     await layoutStorage.saveLayout(dashboardId, [], dashboardId);
+    dashboardStorage.saveDashboard(
+      `${dashboardId}:${currentNavigationPath}`,
+      newDashboard
+    );
   };
 
   // Initialize IndexedDB and load layout for current navigation path
@@ -580,7 +596,30 @@ const JsonDrivenDashboard: React.FC = () => {
     const initializeLayout = async () => {
       try {
         dispatch(setLayoutLoading(true));
-        await layoutStorage.init();
+        await Promise.all([layoutStorage.init(), dashboardStorage.init()]);
+        const storedDashboards = await dashboardStorage.getAllDashboards();
+        if (storedDashboards.length > 0) {
+          const dashboardsObj = storedDashboards.reduce(
+            (acc, { dashboard, dashboardName }) => ({
+              ...acc,
+              [dashboardName]: dashboard,
+            }),
+            {}
+          );
+          setCurrentDashboard(
+            dashboardsObj[`${selectedDashboard}:${currentNavigationPath}`]
+          );
+
+          // dispatch(setDashboards(dashboardsObj));
+          // dispatch(setSelectedDashboard(storedDashboards[0].dashboard.name));
+        } else {
+          // dispatch(setDashboards({ "My Dashboard": DEFAULT_DASHBOARD }));
+          // dispatch(setSelectedDashboard("My Dashboard"));
+          await dashboardStorage.saveDashboard(
+            `${selectedDashboard}:${currentNavigationPath}`,
+            DEFAULT_DASHBOARD
+          );
+        }
         // Load layout for current navigation path
         const savedLayout = await layoutStorage.getLayout(
           `${selectedDashboard}:${currentNavigationPath}`
@@ -604,7 +643,7 @@ const JsonDrivenDashboard: React.FC = () => {
     };
 
     initializeLayout();
-  }, [currentNavigationPath, dispatch]);
+  }, [selectedDashboard, dispatch]);
 
   // Load layout when navigation path changes
   useEffect(() => {
@@ -736,6 +775,10 @@ const JsonDrivenDashboard: React.FC = () => {
         widgets: currentDashboard.widgets.filter((w) => w.id !== widgetId),
       };
       setCurrentDashboard(updatedDashboard);
+      dashboardStorage.saveDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`,
+        updatedDashboard
+      );
       const newWidgetFilters = { ...widgetFilters };
       delete newWidgetFilters[widgetId];
       setWidgetFilters(newWidgetFilters);
@@ -755,12 +798,20 @@ const JsonDrivenDashboard: React.FC = () => {
         ),
       };
       setCurrentDashboard(updatedDashboard);
+      dashboardStorage.saveDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`,
+        updatedDashboard
+      );
     } else {
       const updatedDashboard = {
         ...currentDashboard,
         widgets: [...currentDashboard.widgets, updatedWidget],
       };
       setCurrentDashboard(updatedDashboard);
+      dashboardStorage.saveDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`,
+        updatedDashboard
+      );
     }
   };
 
@@ -813,7 +864,6 @@ const JsonDrivenDashboard: React.FC = () => {
         ...currentDashboard,
         widgets: [...currentDashboard.widgets, newWidget],
       };
-      debugger;
       setCurrentDashboard(updatedDashboard);
       console.log("dashboards", dashboards);
       widgetStorage.saveWidget(
@@ -830,6 +880,11 @@ const JsonDrivenDashboard: React.FC = () => {
           )
         )
       );
+      dashboardStorage.saveDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`,
+        updatedDashboard
+      );
+
       const newLayoutItem = {
         i: newWidgetId,
         x: item.x,
@@ -862,6 +917,10 @@ const JsonDrivenDashboard: React.FC = () => {
         ...prevDashboard,
         ...config,
       }));
+      dashboardStorage.saveDashboard(
+        `${config.name}:${currentNavigationPath}`,
+        config
+      );
       setWidgetFilters({});
     } catch (error) {
       console.error("Error loading dashboard:", error);
@@ -915,6 +974,20 @@ const JsonDrivenDashboard: React.FC = () => {
       ...currentDashboard,
       widgets: updatedWidgets,
     });
+    dashboardStorage.saveDashboard(
+      `${selectedDashboard}:${currentNavigationPath}`,
+      {
+        ...currentDashboard,
+        widgets: updatedWidgets,
+      }
+    );
+    // dispatch(
+    //   setDashboards(
+    //     dashboards.map((d) =>
+    //       d.id === selectedDashboard ? { ...d, widgets: updatedWidgets } : d
+    //     )
+    //   )
+    // );
   };
 
   const handleHeightChange = (widgetId: string, height: number) => {
@@ -939,6 +1012,13 @@ const JsonDrivenDashboard: React.FC = () => {
           : w
       );
       setCurrentDashboard({ ...currentDashboard, widgets: updatedWidgets });
+      dashboardStorage.saveDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`,
+        {
+          ...currentDashboard,
+          widgets: updatedWidgets,
+        }
+      );
     }
   };
 
@@ -955,9 +1035,8 @@ const JsonDrivenDashboard: React.FC = () => {
     if (defaultLayout && defaultLayout.length > 0) {
       return JSON.parse(JSON.stringify(defaultLayout));
     }
-
     // Fallback to widget positions
-    return currentDashboard.widgets.map((w) => ({
+    return currentDashboard?.widgets.map((w) => ({
       i: w.id,
       x: w.position.col,
       y: w.position.row,
@@ -981,6 +1060,7 @@ const JsonDrivenDashboard: React.FC = () => {
       </div>
     );
   }
+  console.log("currentDashboardNew", currentDashboard);
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -1068,7 +1148,8 @@ const JsonDrivenDashboard: React.FC = () => {
             onDrop={onDrop}
             margin={[16, 16]}
           >
-            {currentDashboard.widgets.map((widget) => (
+            {console.log("currentDashboardwidgets", currentDashboard)}
+            {currentDashboard.widgets.map((widget, index) => (
               <div
                 key={widget.id}
                 className="bg-white rounded-lg shadow-md border"

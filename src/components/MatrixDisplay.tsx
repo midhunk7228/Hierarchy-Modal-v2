@@ -254,6 +254,7 @@ const MatrixDisplay: React.FC<
       }
       const result: MatrixData = await response.json();
       setData(result);
+      // debugger;
       await saveData(apiEndpoint, result);
     } catch (err) {
       const cachedData = await getData<MatrixData>(apiEndpoint);

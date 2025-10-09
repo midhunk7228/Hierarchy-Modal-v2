@@ -5,6 +5,9 @@ import type { RootState } from "../redux/store";
 import type { DashboardLayout } from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
 import { setDashboards } from "../redux/dashboardsSlice";
+import { mergeDashboard } from "../helper";
+import { layoutStorage } from "../utils/layoutStorage";
+import { dashboardStorage } from "../utils/dashboardStorage";
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -35,25 +38,44 @@ const DashboardManager: React.FC<{
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState("");
 
-  const { saveData, getData } = useIndexedDB();
+  const { saveData, getData, getAllData } = useIndexedDB();
 
   useEffect(() => {
     const loadDashboards = async () => {
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
-      debugger;
-
+      // debugger;
+      console.log("selectedDashboard", selectedDashboard);
+      const savedLayout = await dashboardStorage.getDashboard(
+        `${selectedDashboard}:${currentNavigationPath}`
+      );
+      if (savedLayout) {
+        const newDashboards = savedDashboards?.map((val) => {
+          if (val.id === savedLayout.id) {
+            return savedLayout;
+          }
+          return val;
+        });
+        if (newDashboards && newDashboards.length > 0) {
+          dispatch(setDashboards(newDashboards));
+        } else {
+          await saveData("dashboards", [currentDashboard]);
+          dispatch(setDashboards([currentDashboard]));
+        }
+        return;
+      }
       if (savedDashboards && savedDashboards.length > 0) {
-        dispatch(setDashboards([...savedDashboards, currentDashboard]));
+        dispatch(
+          setDashboards(mergeDashboard(savedDashboards, currentDashboard))
+        );
       } else {
-        debugger;
         await saveData("dashboards", [currentDashboard]);
         dispatch(setDashboards([currentDashboard]));
       }
     };
     loadDashboards();
-  }, [currentNavigationPath]);
+  }, [currentNavigationPath, currentDashboard]);
   console.log("setDashboards", dashboards);
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
@@ -67,9 +89,9 @@ const DashboardManager: React.FC<{
       grid: { columns: 12, rows: 8, gap: 16 },
       widgets: [],
     };
+    // debugger;
     const newDashboards = [...dashboards, newDashboard];
     dispatch(setDashboards(newDashboards));
-    debugger;
     await saveData("dashboards", newDashboards);
 
     onCreateDashboard(newDashboard.id);
@@ -79,16 +101,34 @@ const DashboardManager: React.FC<{
     setNewDashboardName("");
   };
 
-  const handleDashboardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDashboardChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const { value } = e.target;
     if (value === "create-new") {
       setIsCreateModalOpen(true);
     } else {
+      // debugger;
+      const savedLayout = await dashboardStorage.getDashboard(
+        `${value}:${currentNavigationPath}`
+      );
+      if (savedLayout) {
+        const newDashboards = dashboards.map((val) => {
+          if (val.id === savedLayout.id) {
+            return savedLayout;
+          }
+          return val;
+        });
+        const selected = newDashboards.find((d) => d.id === value);
+        if (selected) {
+          onSelectDashboard(value);
+          onLoadDashboard(JSON.stringify(selected));
+        }
+        return;
+      }
       const selected = dashboards.find((d) => d.id === value);
       if (selected) {
-        debugger;
         onSelectDashboard(value);
-        debugger;
         onLoadDashboard(JSON.stringify(selected));
       }
     }
@@ -104,8 +144,8 @@ const DashboardManager: React.FC<{
     try {
       const newDashboard: DashboardLayout = JSON.parse(configText);
       const newDashboards = [...dashboards, newDashboard];
+      // debugger;
       dispatch(setDashboards(newDashboards));
-      debugger;
       await saveData("dashboards", newDashboards);
 
       onSelectDashboard(newDashboard.id);
@@ -129,6 +169,7 @@ const DashboardManager: React.FC<{
     URL.revokeObjectURL(url);
   };
 
+  console.log("dashboardsNew", dashboards);
   return (
     <>
       <div className="flex gap-2 ">

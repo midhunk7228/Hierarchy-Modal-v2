@@ -48,7 +48,7 @@ class DashboardStorage {
       // debugger;
       const dashboardData: StoredDashboard = {
         dashboardName,
-        dashboard,
+        dashboard: { ...dashboard, dashboardName },
         timestamp: Date.now(),
       };
 

@@ -6,7 +6,6 @@ import type { DashboardLayout } from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
 import { setDashboards } from "../redux/dashboardsSlice";
 import { mergeDashboard } from "../helper";
-import { layoutStorage } from "../utils/layoutStorage";
 import { dashboardStorage } from "../utils/dashboardStorage";
 
 const DashboardManager: React.FC<{
@@ -38,7 +37,7 @@ const DashboardManager: React.FC<{
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState("");
 
-  const { saveData, getData, getAllData } = useIndexedDB();
+  const { saveData, getData } = useIndexedDB();
 
   useEffect(() => {
     const loadDashboards = async () => {
@@ -122,6 +121,7 @@ const DashboardManager: React.FC<{
         const selected = newDashboards.find((d) => d.id === value);
         if (selected) {
           onSelectDashboard(value);
+          // debugger;;
           onLoadDashboard(JSON.stringify(selected));
         }
         return;
@@ -129,6 +129,7 @@ const DashboardManager: React.FC<{
       const selected = dashboards.find((d) => d.id === value);
       if (selected) {
         onSelectDashboard(value);
+        // debugger;;
         onLoadDashboard(JSON.stringify(selected));
       }
     }

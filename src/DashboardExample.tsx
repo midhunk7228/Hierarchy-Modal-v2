@@ -785,7 +785,10 @@ const JsonDrivenDashboard: React.FC = () => {
           setCurrentDashboard(
             dashboardsObj[
               `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
-            ]
+            ] ||
+              dashboardsObj[
+                `${selectedDashboard}:default` as keyof typeof dashboardsObj
+              ]
           );
           // debugger;
           // dispatch(setDashboards(dashboardsObj));

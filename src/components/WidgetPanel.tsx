@@ -15,10 +15,33 @@ const predefinedWidgets = [
     id: "performance-chart-widget",
     title: "Performance Chart",
     icon: <BarChart className="w-8 h-8 text-blue-500" />,
-    defaultLayout: { w: 4, h: 4, minW: 3, minH: 3 },
+    defaultLayout: { w: 4, h: 4, minW: 3, minH: 4 },
+    // defaultLayout: { row: 0, col: 6, width: 3, height: 4 }
     displayType: "summary",
     viewType: "chart",
     apiEndpoint: "/api/performance",
+    filters: [
+      {
+        id: "revenue-range",
+        type: "number-range",
+        label: "Revenue Range",
+        field: "revenue",
+        min: 0,
+        max: 1000000,
+        defaultValue: { min: 100000, max: 800000 },
+      },
+    ],
+    inVisibleFilters: [
+      {
+        id: "revenue-range",
+        type: "number-range",
+        label: "Revenue Range",
+        field: "revenue",
+        min: 0,
+        max: 1000000,
+        defaultValue: { min: 100000, max: 800000 },
+      },
+    ],
   },
   {
     id: "distribution-widget",
@@ -46,7 +69,11 @@ interface WidgetPanelProps {
   onAddCustomWidget: () => void;
 }
 
-const WidgetPanel: React.FC<WidgetPanelProps> = ({ isOpen, onClose, onAddCustomWidget }) => {
+const WidgetPanel: React.FC<WidgetPanelProps> = ({
+  isOpen,
+  onClose,
+  onAddCustomWidget,
+}) => {
   if (!isOpen) {
     return null;
   }

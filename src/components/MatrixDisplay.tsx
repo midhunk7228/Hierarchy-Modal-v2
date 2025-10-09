@@ -239,14 +239,16 @@ const MatrixDisplay: React.FC<
   const fetchData = useCallback(async (): Promise<void> => {
     if (!apiEndpoint) return;
 
-    setLoading(true);
     setError(null);
+    const cachedData = await getData<MatrixData>(apiEndpoint);
+
+    if (cachedData) {
+      setData(cachedData);
+    } else {
+      setLoading(true);
+    }
 
     try {
-      const cachedData = await getData<MatrixData>(apiEndpoint);
-      if (cachedData) {
-        setData(cachedData);
-      }
       const url = `${baseUrl}${apiEndpoint}`;
       const response = await fetch(url);
       if (!response.ok) {
@@ -257,7 +259,6 @@ const MatrixDisplay: React.FC<
       // debugger;
       await saveData(apiEndpoint, result);
     } catch (err) {
-      const cachedData = await getData<MatrixData>(apiEndpoint);
       if (!cachedData) {
         setData(sampleData);
         setError(err instanceof Error ? err.message : "Unknown error");

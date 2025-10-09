@@ -35,18 +35,103 @@ const predefinedWidgets = [
     title: "Total Revenue",
     icon: <DollarSign className="w-8 h-8 text-green-500" />,
     defaultLayout: { w: 3, h: 2, minW: 2, minH: 2 },
+    position: { row: 0, col: 0, width: 3, height: 2 },
     displayType: "summary",
     viewType: "single-value",
     apiEndpoint: "/api/summary",
+    filters: [
+      {
+        id: "revenue-date-range",
+        type: "date-range",
+        label: "Date Range",
+        field: "date",
+        defaultValue: { start: "2024-01-01", end: "2024-12-31" },
+      },
+    ],
+    inVisibleFilters: [
+      {
+        id: "revenue-date-range",
+        type: "date-range",
+        label: "Date Range",
+        field: "date",
+        defaultValue: { start: "2024-01-01", end: "2024-12-31" },
+      },
+      {
+        id: "search-filter",
+        type: "text",
+        label: "Search",
+        field: "name",
+        placeholder: "Search by name...",
+      },
+    ],
   },
   {
     id: "performance-chart-widget",
     title: "Performance Chart",
     icon: <BarChart className="w-8 h-8 text-blue-500" />,
     defaultLayout: { w: 4, h: 4, minW: 3, minH: 3 },
+    position: { row: 0, col: 3, width: 3, height: 4 },
     displayType: "summary",
     viewType: "chart",
     apiEndpoint: "/api/performance",
+    filters: [
+      {
+        id: "region-filter",
+        type: "multi-select",
+        label: "Regions",
+        field: "name",
+        options: [
+          { label: "UK", value: "UK" },
+          { label: "Germany", value: "Germany" },
+          { label: "France", value: "France" },
+          { label: "Spain", value: "Spain" },
+          { label: "Poland", value: "Poland" },
+        ],
+      },
+      {
+        id: "outcome-filter",
+        type: "select",
+        label: "Outcome",
+        field: "outcome",
+        options: [
+          { label: "All", value: "" },
+          { label: "Positive", value: "positive" },
+          { label: "Negative", value: "negative" },
+        ],
+      },
+    ],
+    inVisibleFilters: [
+      {
+        id: "search-filter",
+        type: "text",
+        label: "Search",
+        field: "name",
+        placeholder: "Search by name...",
+      },
+      {
+        id: "region-filter",
+        type: "multi-select",
+        label: "Regions",
+        field: "name",
+        options: [
+          { label: "UK", value: "UK" },
+          { label: "Germany", value: "Germany" },
+          { label: "France", value: "France" },
+          { label: "Spain", value: "Spain" },
+        ],
+      },
+      {
+        id: "outcome-filter",
+        type: "select",
+        label: "Outcome",
+        field: "outcome",
+        options: [
+          { label: "All", value: "" },
+          { label: "Positive", value: "positive" },
+          { label: "Negative", value: "negative" },
+        ],
+      },
+    ],
   },
   {
     id: "distribution-widget",
@@ -55,7 +140,26 @@ const predefinedWidgets = [
     defaultLayout: { w: 3, h: 4, minW: 3, minH: 3 },
     displayType: "summary",
     viewType: "pie-chart",
-    apiEndpoint: "/api/distribution",
+    apiEndpoint: "/api/performance",
+    position: { row: 0, col: 6, width: 3, height: 4 },
+    filters: [
+      {
+        id: "category-date",
+        type: "single-date",
+        label: "Date",
+        field: "date",
+        defaultValue: "2024-01-15",
+      },
+    ],
+    inVisibleFilters: [
+      {
+        id: "category-date",
+        type: "single-date",
+        label: "Date",
+        field: "date",
+        defaultValue: "2024-01-15",
+      },
+    ],
   },
   {
     id: "details-table-widget",
@@ -65,6 +169,66 @@ const predefinedWidgets = [
     displayType: "details",
     viewType: "tabular",
     apiEndpoint: "/api/metrics",
+    position: { row: 4, col: 0, width: 12, height: 4 },
+    additionalInfo: { outcome: true },
+    filters: [
+      {
+        id: "region-filter",
+        type: "multi-select",
+        label: "Regions",
+        field: "name",
+        options: [
+          { label: "UK", value: "UK" },
+          { label: "Germany", value: "Germany" },
+          { label: "France", value: "France" },
+          { label: "Spain", value: "Spain" },
+          { label: "Poland", value: "Poland" },
+        ],
+      },
+      {
+        id: "outcome-filter",
+        type: "select",
+        label: "Outcome",
+        field: "outcome",
+        options: [
+          { label: "All", value: "" },
+          { label: "Positive", value: "positive" },
+          { label: "Negative", value: "negative" },
+        ],
+      },
+    ],
+    inVisibleFilters: [
+      {
+        id: "search-filter",
+        type: "text",
+        label: "Search",
+        field: "name",
+        placeholder: "Search by name...",
+      },
+      {
+        id: "region-filter",
+        type: "multi-select",
+        label: "Regions",
+        field: "name",
+        options: [
+          { label: "UK", value: "UK" },
+          { label: "Germany", value: "Germany" },
+          { label: "France", value: "France" },
+          { label: "Spain", value: "Spain" },
+        ],
+      },
+      {
+        id: "outcome-filter",
+        type: "select",
+        label: "Outcome",
+        field: "outcome",
+        options: [
+          { label: "All", value: "" },
+          { label: "Positive", value: "positive" },
+          { label: "Negative", value: "negative" },
+        ],
+      },
+    ],
   },
 ];
 
@@ -655,7 +819,6 @@ const JsonDrivenDashboard: React.FC = () => {
         const savedLayout = await layoutStorage.getLayout(
           `${selectedDashboard}:${currentNavigationPath}`
         );
-        // debugger;
         if (savedLayout) {
           dispatch(
             setLayoutForPath({
@@ -668,7 +831,6 @@ const JsonDrivenDashboard: React.FC = () => {
           const defaultLayout = await layoutStorage.getLayout(
             `${selectedDashboard}:default`
           );
-          // debugger;
           dispatch(
             setLayoutForPath({
               path: `${selectedDashboard}:default`,
@@ -789,7 +951,6 @@ const JsonDrivenDashboard: React.FC = () => {
     const existingWidget = currentDashboard.widgets.find(
       (w) => w.id === updatedWidget.id
     );
-
     if (existingWidget) {
       const updatedDashboard = {
         ...currentDashboard,
@@ -835,6 +996,19 @@ const JsonDrivenDashboard: React.FC = () => {
     setWidgetFilters((prev) => ({ ...prev, [widgetId]: filters }));
   };
 
+  // const onDropDragOver = (e: DragEvent): { w: number; h: number } | false => {
+  //   const widgetId = e.dataTransfer?.getData("text/plain");
+  //   const predefinedWidget = predefinedWidgets.find((p) => p.id === widgetId);
+
+  //   if (predefinedWidget) {
+  //     return {
+  //       w: predefinedWidget.defaultLayout.w,
+  //       h: predefinedWidget.defaultLayout.h,
+  //     };
+  //   }
+  //   return false;
+  // };
+
   const onDrop = (
     layout: ReactGridLayout.Layout[],
     item: ReactGridLayout.Layout,
@@ -842,7 +1016,7 @@ const JsonDrivenDashboard: React.FC = () => {
   ) => {
     const widgetId = e.dataTransfer?.getData("text/plain");
     const predefinedWidget = predefinedWidgets.find((p) => p.id === widgetId);
-
+    // debugger;
     if (predefinedWidget) {
       const newWidgetId = `widget-${Date.now()}`;
       const newWidget: DashboardWidget = {
@@ -851,13 +1025,15 @@ const JsonDrivenDashboard: React.FC = () => {
         displayType: predefinedWidget.displayType,
         viewType: predefinedWidget.viewType,
         apiEndpoint: predefinedWidget.apiEndpoint,
-        position: {
-          row: item.y,
-          col: item.x,
-          width: predefinedWidget.defaultLayout.w,
-          height: predefinedWidget.defaultLayout.h,
-        },
-        filters: [],
+        // position: {
+        //   row: item.y,
+        //   col: item.x,
+        //   width: predefinedWidget.defaultLayout.w,
+        //   height: predefinedWidget.defaultLayout.h,
+        // },
+        position: predefinedWidget?.position,
+        filters: predefinedWidget?.filters || [],
+        inVisibleFilters: predefinedWidget?.inVisibleFilters || [],
       };
 
       const updatedDashboard = {
@@ -887,18 +1063,24 @@ const JsonDrivenDashboard: React.FC = () => {
 
       const newLayoutItem = {
         i: newWidgetId,
-        x: item.x,
-        y: item.y,
-        w: predefinedWidget.defaultLayout.w,
-        h: predefinedWidget.defaultLayout.h,
+        x: predefinedWidget.position.col,
+        y: predefinedWidget.position.row,
+        w: predefinedWidget.position.width,
+        h: predefinedWidget.position.height,
       };
 
-      const newLayout = JSON.parse(JSON.stringify(layout));
+      const newLayoutExist = JSON.parse(JSON.stringify(layout));
+      const newLayout = newLayoutExist.map((val) => {
+        if (val?.isDraggable) {
+          return { ...val, w: newLayoutItem.w, h: newLayoutItem.h };
+        } else {
+          return val;
+        }
+      });
       newLayout.push(newLayoutItem);
-      // debugger;
       dispatch(
         setLayoutForPath({
-          path: currentNavigationPath,
+          path: `${selectedDashboard}:${currentNavigationPath}`,
           layout: newLayout,
         })
       );
@@ -936,7 +1118,6 @@ const JsonDrivenDashboard: React.FC = () => {
       layout?.length === 0
         ? layouts[`${selectedDashboard}:${currentNavigationPath}`]
         : JSON.parse(JSON.stringify(layout));
-    // debugger;
     // Dispatch the new layout to the Redux store.
     dispatch(
       setLayoutForPath({
@@ -952,28 +1133,35 @@ const JsonDrivenDashboard: React.FC = () => {
         console.error("Failed to save layout to IndexedDB:", error);
       });
 
-    const updatedWidgets = currentDashboard.widgets.map((widget) => {
-      const layoutItem = layoutData.find(
-        (item: { i: string }) => item.i === widget.id
-      );
-      if (layoutItem) {
-        return {
-          ...widget,
-          position: {
-            ...widget.position,
-            col: layoutItem.x,
-            row: layoutItem.y,
-            width: layoutItem.w,
-            height: layoutItem.h,
-          },
-        };
-      }
-      return widget;
-    });
+    // const updatedWidgets = currentDashboard.widgets.map((widget) => {
+    //   const layoutItem = layoutData.find(
+    //     (item: { i: string }) => item.i === widget.id
+    //   );
+    //   if (layoutItem) {
+    //     return {
+    //       ...widget,
+    //       position: {
+    //         ...widget.position,
+    //         col: layoutItem.x,
+    //         row: layoutItem.y,
+    //         width: layoutItem.w,
+    //         height: layoutItem.h,
+    //       },
+    //     };
+    //   }
+    //   return widget;
+    // });
+    const updatedWidgets = currentDashboard.widgets;
     setCurrentDashboard({
       ...currentDashboard,
       widgets: updatedWidgets,
     });
+    console.log(
+      "TEST NEW",
+      updatedWidgets,
+      layoutData,
+      currentDashboard.widgets
+    );
     dashboardStorage.saveDashboard(
       `${selectedDashboard}:${currentNavigationPath}`,
       {
@@ -1026,11 +1214,15 @@ const JsonDrivenDashboard: React.FC = () => {
   const getCurrentLayout = (): ReactGridLayout.Layout[] => {
     const savedLayout =
       layouts[`${selectedDashboard}:${currentNavigationPath}`];
+    console.log(
+      "savedLayout",
+      savedLayout,
+      `${selectedDashboard}:${currentNavigationPath}`
+    );
     if (savedLayout && savedLayout.length > 0) {
       // Create a deep copy to avoid issues with frozen objects from Redux
       return JSON.parse(JSON.stringify(savedLayout));
     }
-
     const defaultLayout = layouts[`${selectedDashboard}:default`];
     if (defaultLayout && defaultLayout.length > 0) {
       return JSON.parse(JSON.stringify(defaultLayout));
@@ -1050,16 +1242,16 @@ const JsonDrivenDashboard: React.FC = () => {
   console.log("currentDashboard", currentDashboard);
 
   // Show loading state while initializing
-  if (!isInitialized || isLayoutLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard layout...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (!isInitialized || isLayoutLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Loading dashboard layout...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
   console.log("currentDashboardNew", currentDashboard);
 
   return (
@@ -1146,6 +1338,7 @@ const JsonDrivenDashboard: React.FC = () => {
             isResizable={isEditMode}
             isDroppable={true}
             onDrop={onDrop}
+            // onDropDragOver={onDropDragOver}
             margin={[16, 16]}
           >
             {console.log("currentDashboardwidgets", currentDashboard)}

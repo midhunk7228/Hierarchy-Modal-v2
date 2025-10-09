@@ -58,13 +58,7 @@ interface FilterOption {
 
 interface FilterConfig {
   id: string;
-  type:
-    | "date-range"
-    | "single-date"
-    | "select"
-    | "multi-select"
-    | "text"
-    | "number-range";
+  type: string;
   label: string;
   field: string; // The field this filter applies to
   required?: boolean;

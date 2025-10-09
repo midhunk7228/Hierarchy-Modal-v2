@@ -695,7 +695,7 @@ const SAMPLE_DATA: MatrixData = {
 const JsonDrivenDashboard: React.FC = () => {
   // const { saveLayout, getLayout } = useIndexedDB();
   const dispatch = useDispatch();
-  const { currentNavigationPath, layouts, isLayoutLoading } = useSelector(
+  const { currentNavigationPath, layouts } = useSelector(
     (state: RootState) => state.layout
   );
   const dashboards = useSelector(

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Plus, Grid, Settings } from "lucide-react";
+import { Plus, Grid, Settings, ChartBarBig } from "lucide-react";
 import type {
   DashboardLayout,
   AppliedFilter,
@@ -229,6 +229,31 @@ const predefinedWidgets = [
         ],
       },
     ],
+  },
+  {
+    id: "bar-graph-widget",
+    title: "Bar Graph",
+    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
+    defaultLayout: { w: 12, h: 4, minW: 6, minH: 3 },
+    displayType: "details",
+    viewType: "bar-graph",
+    apiEndpoint: "/api/metrics",
+    position: {
+      row: 12,
+      col: 0,
+      width: 12,
+      height: 8,
+
+      //       col: 0
+      // h: 4
+      // height: 4
+      // row: 4
+      // w: 12
+      // width: 12
+      // x: 0
+      // y: 4
+    },
+    additionalInfo: { outcome: true },
   },
 ];
 
@@ -782,14 +807,24 @@ const JsonDrivenDashboard: React.FC = () => {
           // ) {
           //   debugger;
           // }
-          setCurrentDashboard(
+          // debugger;
+
+          //later remove this condition
+          if (
             dashboardsObj[
               `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
-            ] ||
+            ] !== undefined
+          ) {
+            setCurrentDashboard(
               dashboardsObj[
-                `${selectedDashboard}:default` as keyof typeof dashboardsObj
-              ]
-          );
+                `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
+              ] ||
+                dashboardsObj[
+                  `${selectedDashboard}:default` as keyof typeof dashboardsObj
+                ]
+            );
+          }
+
           // debugger;
           // dispatch(setDashboards(dashboardsObj));
           // dispatch(setSelectedDashboard(storedDashboards[0].dashboard.name));
@@ -1167,11 +1202,14 @@ const JsonDrivenDashboard: React.FC = () => {
       }
       return widget;
     });
-    // debugger;;
+    // if (!isInitialized) return;
+    // debugger;
+
     if (currentDashboard?.id !== selectedDashboard) {
       return;
     }
 
+    // debugger;
     if (
       `${selectedDashboard}:${currentNavigationPath}` !==
       currentDashboard?.dashboardName

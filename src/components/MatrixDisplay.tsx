@@ -41,6 +41,7 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import BarGraphWidget from "./BarGraph";
 
 // const baseUrl = "https://01a9b102-272b-4a62-9992-55f628a4b9a3.mock.pstmn.io";
 const baseUrl = "https://node-server-jcf5.onrender.com";
@@ -870,6 +871,10 @@ const MatrixDisplay: React.FC<
     );
   };
 
+  const renderBarGraph = (): JSX.Element => {
+    return <BarGraphWidget />;
+  };
+
   // Main render logic
   const renderContent = (): JSX.Element => {
     switch (viewType) {
@@ -881,6 +886,8 @@ const MatrixDisplay: React.FC<
         return renderChart();
       case "comparison":
         return renderComparison();
+      case "bar-graph":
+        return renderBarGraph();
       case "tabular":
       default:
         return renderTabular();

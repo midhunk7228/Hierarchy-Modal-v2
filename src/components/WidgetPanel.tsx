@@ -1,5 +1,11 @@
 import React from "react";
-import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
+import {
+  BarChart,
+  PieChart,
+  Table,
+  DollarSign,
+  ChartBarBig,
+} from "lucide-react";
 
 const predefinedWidgets = [
   {
@@ -59,6 +65,15 @@ const predefinedWidgets = [
     defaultLayout: { w: 12, h: 4, minW: 6, minH: 3 },
     displayType: "details",
     viewType: "tabular",
+    apiEndpoint: "/api/metrics",
+  },
+  {
+    id: "bar-graph-widget",
+    title: "Bar Graph",
+    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
+    defaultLayout: { w: 10, h: 5, minW: 10, minH: 5 },
+    displayType: "details",
+    viewType: "bar-graph",
     apiEndpoint: "/api/metrics",
   },
 ];

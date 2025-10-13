@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addNotification } from "./redux/notificationsSlice";
 import JsonDrivenDashboard from "./DashboardExample";
-import NavigationBar from "./NavigationBar";
+import TopBar from "./components/TopBarUi";
 // import TopBar from "./components/TopBarUi";
 
 function App() {
@@ -56,8 +56,7 @@ function App() {
 
   return (
     <>
-      {/* <TopBar /> */}
-      <NavigationBar />
+      <TopBar />
       <JsonDrivenDashboard />
     </>
   );

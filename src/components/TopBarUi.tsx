@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  //   ChevronRight,
   Package,
+  Tag,
+  Folder,
+  Smartphone,
+  Phone,
+  Tablet,
+  Headphones,
+  Gamepad2,
+  Video,
+  Zap,
   Flag,
+  Globe,
   Store,
   ShoppingCart,
   Building2,
@@ -22,32 +31,87 @@ import {
   Calendar,
   Filter,
   X,
-  Headphones,
-  Gamepad2,
-  Video,
-  //   Zap,
-  Smartphone,
-  Phone,
-  Tablet,
-  Globe,
-  MoreHorizontal,
-  //   Repeat,
   Coins,
 } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setCurrentNavigationPath } from "../redux/layoutSlice";
+import { generateNavigationPathKey } from "../utils/navigationUtils";
 import { IoLogoAmazon } from "react-icons/io5";
 
 import type {
   DimensionItem,
-  //   Modifier,
+  Modifier,
   ModifierValues,
   SelectedItems,
 } from "../types";
+
+// Improved Date Range Filter Component (from NavigationBar)
+const DateRangeFilter: React.FC<{
+  onDateChange: (startDate: string, endDate: string) => void;
+  startDate?: string;
+  endDate?: string;
+}> = ({ onDateChange, startDate = "", endDate = "" }) => {
+  const [localStartDate, setLocalStartDate] = useState(startDate);
+  const [localEndDate, setLocalEndDate] = useState(endDate);
+
+  const handleStartDateChange = (date: string) => {
+    setLocalStartDate(date);
+    onDateChange(date, localEndDate);
+  };
+
+  const handleEndDateChange = (date: string) => {
+    setLocalEndDate(date);
+    onDateChange(localStartDate, date);
+  };
+
+  return (
+    <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+      <Calendar className="w-4 h-4 text-slate-500" />
+      <input
+        type="date"
+        value={localStartDate}
+        onChange={(e) => handleStartDateChange(e.target.value)}
+        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+        placeholder="Start Date"
+      />
+      <span className="text-slate-400">-</span>
+      <input
+        type="date"
+        value={localEndDate}
+        onChange={(e) => handleEndDateChange(e.target.value)}
+        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+        placeholder="End Date"
+      />
+    </div>
+  );
+};
+
+// Improved Generic Filter Component (from NavigationBar)
+const GenericFilter: React.FC<{
+  modifier: Modifier;
+  onFilterChange: (value: string) => void;
+  value?: string;
+}> = ({ modifier, onFilterChange, value = "" }) => {
+  return (
+    <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+      <Filter className="w-4 h-4 text-slate-500" />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onFilterChange(e.target.value)}
+        placeholder={modifier.displayText}
+        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-36"
+      />
+    </div>
+  );
+};
 
 interface DimensionProps {
   data?: DimensionItem[];
 }
 
 const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
+  const dispatch = useDispatch();
   const defaultData: DimensionItem[] = [
     {
       code: "APPLE",
@@ -169,6 +233,28 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
             },
           ],
         },
+        {
+          code: "APPLE_JAPAN",
+          name: "Japan",
+          icon: "flag-jp",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "APPLE_JAPAN_RETAIL",
+              name: "Apple Store Japan",
+              icon: "store",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+            {
+              code: "APPLE_JAPAN_CARRIER",
+              name: "Carrier Partnerships",
+              icon: "phone",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Partnership Period" },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -220,6 +306,60 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
             },
           ],
         },
+        {
+          code: "MICROSOFT_INDIA",
+          name: "India",
+          icon: "flag-in",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "MICROSOFT_INDIA_SERVICES",
+              name: "IT Services",
+              icon: "monitor",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Service Period" },
+              ],
+            },
+            {
+              code: "MICROSOFT_INDIA_SUPPORT",
+              name: "Customer Support",
+              icon: "headphones",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Support Period" },
+              ],
+            },
+            {
+              code: "MICROSOFT_INDIA_DEVELOPMENT",
+              name: "R&D Centers",
+              icon: "code",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Development Period" },
+              ],
+            },
+          ],
+        },
+        {
+          code: "MICROSOFT_GERMANY",
+          name: "Germany",
+          icon: "flag-de",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "MICROSOFT_GERMANY_ENTERPRISE",
+              name: "Enterprise Sales",
+              icon: "building-2",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+            {
+              code: "MICROSOFT_GERMANY_CONSULTING",
+              name: "Consulting Services",
+              icon: "users",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Consulting Period" },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -253,6 +393,104 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
               modifiers: [
                 { code: "DATE_RANGE", displayText: "Service Period" },
                 { code: "SERVICE_TYPE", displayText: "AWS Service" },
+              ],
+            },
+            {
+              code: "AMAZON_USA_PRIME",
+              name: "Prime Membership",
+              icon: "crown",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Membership Period" },
+              ],
+            },
+            {
+              code: "AMAZON_USA_ADVERTISING",
+              name: "Advertising Services",
+              icon: "megaphone",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Campaign Period" },
+              ],
+            },
+            {
+              code: "AMAZON_USA_LOGISTICS",
+              name: "Fulfillment Centers",
+              icon: "truck",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Fulfillment Period" },
+              ],
+            },
+          ],
+        },
+        {
+          code: "AMAZON_UK",
+          name: "United Kingdom",
+          icon: "flag-gb",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "AMAZON_UK_RETAIL",
+              name: "Amazon.co.uk",
+              icon: "shopping-cart",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+            {
+              code: "AMAZON_UK_AWS",
+              name: "AWS Europe",
+              icon: "cloud",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Service Period" },
+              ],
+            },
+            {
+              code: "AMAZON_UK_FRESH",
+              name: "Amazon Fresh",
+              icon: "apple",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Delivery Period" },
+              ],
+            },
+          ],
+        },
+        {
+          code: "AMAZON_BRAZIL",
+          name: "Brazil",
+          icon: "flag-br",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "AMAZON_BRAZIL_MARKETPLACE",
+              name: "Brazilian Marketplace",
+              icon: "store",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+            {
+              code: "AMAZON_BRAZIL_LOGISTICS",
+              name: "Local Delivery",
+              icon: "truck",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Delivery Period" },
+              ],
+            },
+          ],
+        },
+        {
+          code: "AMAZON_AUSTRALIA",
+          name: "Australia",
+          icon: "flag-au",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "AMAZON_AUSTRALIA_RETAIL",
+              name: "Amazon.com.au",
+              icon: "shopping-cart",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+            {
+              code: "AMAZON_AUSTRALIA_AWS",
+              name: "AWS Australia",
+              icon: "server",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Service Period" },
               ],
             },
           ],
@@ -291,6 +529,67 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                 { code: "DATE_RANGE", displayText: "Service Period" },
               ],
             },
+            {
+              code: "GOOGLE_USA_YOUTUBE",
+              name: "YouTube Revenue",
+              icon: "video",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Content Period" },
+                { code: "CONTENT_TYPE", displayText: "Content Type" },
+              ],
+            },
+            {
+              code: "GOOGLE_USA_HARDWARE",
+              name: "Pixel & Nest",
+              icon: "smartphone",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+          ],
+        },
+        {
+          code: "GOOGLE_IRELAND",
+          name: "Ireland",
+          icon: "flag-ie",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "GOOGLE_IRELAND_EMEA",
+              name: "EMEA Operations",
+              icon: "globe",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Operations Period" },
+              ],
+            },
+            {
+              code: "GOOGLE_IRELAND_SALES",
+              name: "International Sales",
+              icon: "trending-up",
+              modifiers: [{ code: "DATE_RANGE", displayText: "Sales Period" }],
+            },
+          ],
+        },
+        {
+          code: "GOOGLE_SINGAPORE",
+          name: "Singapore",
+          icon: "flag-sg",
+          modifiers: [{ code: "DATE_RANGE", displayText: "Period" }],
+          children: [
+            {
+              code: "GOOGLE_SINGAPORE_APAC",
+              name: "APAC Hub",
+              icon: "map",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Regional Period" },
+              ],
+            },
+            {
+              code: "GOOGLE_SINGAPORE_CLOUD",
+              name: "GCP Asia",
+              icon: "server",
+              modifiers: [
+                { code: "DATE_RANGE", displayText: "Service Period" },
+              ],
+            },
           ],
         },
       ],
@@ -301,28 +600,58 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
   const [navigationPath, setNavigationPath] = useState<DimensionItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<SelectedItems>({});
   const [modifierValues, setModifierValues] = useState<ModifierValues>({});
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedDate] = useState("Mar, 2025");
+  const [dateRange, setDateRange] = useState({
+    startDate: "2025-03-01",
+    endDate: "2025-03-31",
+  });
+  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
   const [comparisonDate] = useState("Feb, 2025");
 
-  const getIcon = (iconName?: string): React.ReactNode => {
+  const formatDateRangeForDisplay = (
+    startDate: string,
+    endDate: string
+  ): string => {
+    const format = (dateStr: string) => {
+      if (!dateStr) return "?";
+      const date = new Date(dateStr);
+      // Adjust for timezone to avoid off-by-one day errors
+      date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    };
+    return `${format(startDate)} - ${format(endDate)}`;
+  };
+
+  useEffect(() => {
+    const pathKey = generateNavigationPathKey(navigationPath, modifierValues);
+    dispatch(setCurrentNavigationPath(pathKey));
+  }, [navigationPath, modifierValues, dispatch]);
+
+  const getIcon = (level: number, iconName?: string): React.ReactNode => {
     if (iconName) {
       const iconMap: { [key: string]: React.ReactNode } = {
+        // apple: <Zap className="w-4 h-4 text-yellow-400" />,
         apple: "🌏",
-        // apple: <Zap className="w-4 h-4" />,
-        microsoft: "🖥️",
-        // microsoft: <Zap className="w-4 h-4" />,
-        // amazon: "🛒",
-        amazon: <IoLogoAmazon className="w-4 h-4 text-yellow-300" />,
-        google: "🕵",
-        // google: <Zap className="w-4 h-4" />,
-        "flag-us": <Flag className="w-4 h-4" />,
-        "flag-cn": <Flag className="w-4 h-4" />,
-        "flag-eu": <Flag className="w-4 h-4" />,
-        store: <Store className="w-4 h-4 b" />,
-        "shopping-cart": <ShoppingCart className="w-4 h-4" />,
+        microsoft: <Zap className="w-4 h-4 text-blue-400" />,
+        amazon: <IoLogoAmazon className="w-4 h-4 text-orange-400" />,
+        google: <Zap className="w-4 h-4 text-red-400" />,
+        "flag-us": <Flag className="w-4 h-4 text-[#b22335]" />,
+        "flag-cn": <Flag className="w-4 h-4 text-[#de2911]" />,
+        "flag-eu": <Flag className="w-4 h-4 text-[#dade89]" />,
+        "flag-jp": <Flag className="w-4 h-4" />,
+        "flag-in": <Flag className="w-4 h-4 text-[#ff9933]" />,
+        "flag-de": <Flag className="w-4 h-4 text-black" />,
+        "flag-gb": <Flag className="w-4 h-4" />,
+        "flag-br": <Flag className="w-4 h-4" />,
+        "flag-au": <Flag className="w-4 h-4" />,
+        "flag-ie": <Flag className="w-4 h-4" />,
+        "flag-sg": <Flag className="w-4 h-4" />,
+        store: <Store className="w-4 h-4 text-blue-500" />,
+        "shopping-cart": <ShoppingCart className="w-4 h-4 text-amber-300" />,
         "building-2": <Building2 className="w-4 h-4" />,
-        "graduation-cap": <GraduationCap className="w-4 h-4" />,
+        "graduation-cap": <GraduationCap className="w-4 h-4 text-black" />,
         factory: <Factory className="w-4 h-4" />,
         cloud: <Cloud className="w-4 h-4" />,
         monitor: <Monitor className="w-4 h-4" />,
@@ -344,15 +673,25 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
         map: <Map className="w-4 h-4" />,
         phone: <Phone className="w-4 h-4" />,
       };
-
       return iconMap[iconName] || <Package className="w-4 h-4" />;
     }
-
-    return <Package className="w-4 h-4" />;
+    switch (level) {
+      case 0:
+        return <Package className="w-5 h-5" />;
+      case 1:
+        return <Tag className="w-5 h-5" />;
+      case 2:
+        return <Folder className="w-5 h-5" />;
+      default:
+        return <Folder className="w-4 h-4" />;
+    }
   };
 
   const handleItemSelect = (item: DimensionItem, level: number): void => {
-    const newPath = navigationPath.slice(0, level + 1);
+    if (navigationPath[level]?.code === item.code) {
+      return;
+    }
+    const newPath = navigationPath.slice(0, level);
     newPath[level] = item;
     setNavigationPath(newPath);
 
@@ -369,65 +708,210 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
       delete newModifierValues[i];
     }
     setModifierValues(newModifierValues);
+
+    const pathKey = generateNavigationPathKey(newPath, newModifierValues);
+    dispatch(setCurrentNavigationPath(pathKey));
+  };
+
+  const handleModifierChange = (
+    level: number,
+    modifierCode: string,
+    value: string | number | { startDate: string; endDate: string }
+  ): void => {
+    setModifierValues((prev) => ({
+      ...prev,
+      [level]: {
+        ...prev[level],
+        [modifierCode]: value,
+      },
+    }));
+  };
+
+  const clearModifier = (level: number, modifierCode: string): void => {
+    setModifierValues((prev) => {
+      const newValues = { ...prev };
+      if (newValues[level]) {
+        delete newValues[level][modifierCode];
+        if (Object.keys(newValues[level]).length === 0) {
+          delete newValues[level];
+        }
+      }
+      return newValues;
+    });
+  };
+
+  const renderModifier = (
+    modifier: Modifier,
+    level: number
+  ): React.ReactNode => {
+    const currentValue = modifierValues[level]?.[modifier.code];
+
+    switch (modifier.code) {
+      case "DATE_RANGE":
+        return (
+          <DateRangeFilter
+            key={modifier.code}
+            onDateChange={(startDate, endDate) =>
+              handleModifierChange(level, modifier.code, { startDate, endDate })
+            }
+            startDate={
+              (currentValue as { startDate: string; endDate: string })
+                ?.startDate || ""
+            }
+            endDate={
+              (currentValue as { startDate: string; endDate: string })
+                ?.endDate || ""
+            }
+          />
+        );
+      default:
+        return (
+          <GenericFilter
+            key={modifier.code}
+            modifier={modifier}
+            onFilterChange={(value) =>
+              handleModifierChange(level, modifier.code, value)
+            }
+            value={(currentValue as string) || ""}
+          />
+        );
+    }
   };
 
   const getItemsForLevel = (level: number): DimensionItem[] => {
     if (level === 0) {
       return data;
     }
-
     const parentItem = navigationPath[level - 1];
     return parentItem?.children || [];
   };
 
   const maxLevel = Math.min(navigationPath.length + 1, 5);
-  console.log("maxLevelnavigationPath", navigationPath);
   console.log("maxLevel", maxLevel);
+
   return (
-    <div className="w-full bg-white border-b border-gray- mt-1">
-      {/* Navigation Pills */}
-      <div className="px-6 py-3">
-        {Array.from({ length: maxLevel }, (_, level) => {
-          const items = getItemsForLevel(level);
-          if (items.length === 0) return null;
+    <div className="w-full bg-white mt-1">
+      {/* New Navigation Area */}
+      <div className=" ">
+        {/* Always-visible Brand List */}
+        <div className="flex items-center gap-2 py-3 px-6">
+          {getItemsForLevel(0).map((brand) => {
+            const isSelected = selectedItems[0] === brand.code;
+            return (
+              <button
+                key={brand.code}
+                onClick={() => handleItemSelect(brand, 0)}
+                className={`
+                  flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all font-bold 
+                  ${
+                    isSelected
+                      ? "bg-gray-200 text-gray-600 shadow-sm border border-gray-300"
+                      : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
+                  }
+                `}
+              >
+                {getIcon(0, brand.icon)}
+                <span>{brand.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Render deeper levels based on the navigation path */}
+        {navigationPath.map((selectedItem, level) => {
+          const children = getItemsForLevel(level + 1);
 
           return (
-            <div key={level} className="flex items-center gap-2 mb-3">
-              {items.map((item: DimensionItem, index: number) => {
-                const isSelected = selectedItems[level] === item.code;
-                const isFirstInLevel = index === 0 && level === 0;
+            <div key={selectedItem.code} className="">
+              {/* Filters for the selected item */}
+              {selectedItem.modifiers && selectedItem.modifiers.length > 0 && (
+                <div className="flex items-center flex-wrap gap-2 border-t border-gray-100 px-6 bg-[#f3f4f6] py-2 justify-between">
+                  <span className="text-base font-medium text-gray-500 pr-8">
+                    {selectedItem.name} Filters:
+                  </span>
 
-                return (
-                  <button
-                    key={item.code}
-                    onClick={() => handleItemSelect(item, level)}
-                    className={`
-                      flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all
-                      ${
-                        isSelected
-                          ? "bg-gray-200 text-gray-600 shadow-sm border border-gray-300"
-                          : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
-                      }
-                    `}
-                  >
-                    {isFirstInLevel && level === 0 && (
-                      //   <Globe className="w-5 h-5" />
-                      <span className="text-[20px] leading-none">🌏</span>
-                    )}
-                    {!isFirstInLevel && (
-                      <span className="text-[20px] leading-none">
-                        {getIcon(item.icon)}
-                      </span>
-                    )}
-                    <span>{item.name}</span>
-                  </button>
-                );
-              })}
-              {/* {level === 0 && JSON.stringify(`jjj${items.length}`)} */}
-              {level === 0 && items.length > 6 && (
-                <button className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white text-gray-400 hover:bg-gray-50 border border-gray-200">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
+                  <div className="flex items-center gap-3 ">
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenDatePopup(
+                            openDatePopup === level ? null : level
+                          )
+                        }
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        <span className="font-medium">
+                          {formatDateRangeForDisplay(
+                            dateRange.startDate,
+                            dateRange.endDate
+                          )}
+                        </span>
+                      </button>
+                      {openDatePopup === level && (
+                        <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-semibold text-gray-800">
+                              Select Date Range
+                            </h4>
+                            <button
+                              onClick={() => setOpenDatePopup(null)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <DateRangeFilter
+                            startDate={dateRange.startDate}
+                            endDate={dateRange.endDate}
+                            onDateChange={(startDate, endDate) =>
+                              setDateRange({ startDate, endDate })
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <span>Comparison:</span>
+                      <span className="font-medium">{comparisonDate}</span>
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                      <Coins className="w-4 h-4" />
+                      <span className="font-medium">Thousands</span>
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+                      <span>+</span>
+                      <span>Filter</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Children of the selected item */}
+              {children.length > 0 && (
+                <div className="flex items-center gap-2 mb-3 bg-white mt-3 px-6">
+                  {children.map((childItem) => {
+                    const isChildSelected =
+                      selectedItems[level + 1] === childItem.code;
+                    return (
+                      <button
+                        key={childItem.code}
+                        onClick={() => handleItemSelect(childItem, level + 1)}
+                        className={`
+                          flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all font-bold
+                          ${
+                            isChildSelected
+                              ? "bg-gray-200 text-gray-600 shadow-sm border border-gray-300"
+                              : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
+                          }
+                        `}
+                      >
+                        {getIcon(level + 1, childItem.icon)}
+                        <span>{childItem.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
           );
@@ -435,85 +919,61 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
       </div>
 
       {/* Dashboard Title and Controls */}
-      <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
+      {/* <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100">
         <h1 className="text-2xl font-semibold text-gray-900">
           Finance Dashboard
         </h1>
-
         <div className="flex items-center gap-3">
-          {/* Filter Icon */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <Filter className="w-5 h-5" />
-          </button>
-
-          {/* Date Picker */}
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-            <Calendar className="w-4 h-4" />
-            <span className="font-medium">{selectedDate}</span>
-          </button>
-
-          {/* Comparison */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDatePopupOpen(!isDatePopupOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              <Calendar className="w-4 h-4" />
+              <span className="font-medium">
+                {formatDateRangeForDisplay(
+                  dateRange.startDate,
+                  dateRange.endDate
+                )}
+              </span>
+            </button>
+            {isDatePopupOpen && (
+              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-semibold text-gray-800">
+                    Select Date Range
+                  </h4>
+                  <button
+                    onClick={() => setIsDatePopupOpen(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <DateRangeFilter
+                  startDate={dateRange.startDate}
+                  endDate={dateRange.endDate}
+                  onDateChange={(startDate, endDate) =>
+                    setDateRange({ startDate, endDate })
+                  }
+                />
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span>Comparison:</span>
             <span className="font-medium">{comparisonDate}</span>
           </div>
-
-          {/* Currency/Unit Selector */}
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
             <Coins className="w-4 h-4" />
             <span className="font-medium">Thousands</span>
           </button>
-
-          {/* Additional Filter Button */}
           <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
             <span>+</span>
             <span>Filter</span>
           </button>
         </div>
-      </div>
-
-      {/* Filter Panel (collapsible) */}
-      {showFilters && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-gray-700">
-              Active Filters
-            </h3>
-            {navigationPath.length > 0 ? (
-              <div className="flex items-center flex-wrap gap-2">
-                {navigationPath.map((item: DimensionItem, index: number) => (
-                  <div
-                    key={item.code}
-                    className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200"
-                  >
-                    {getIcon(item.icon)}
-                    <span className="text-sm text-gray-700">{item.name}</span>
-                    <button
-                      onClick={() => {
-                        const newPath = navigationPath.slice(0, index);
-                        setNavigationPath(newPath);
-                        const newSelected = { ...selectedItems };
-                        for (let i = index; i < 10; i++) {
-                          delete newSelected[i];
-                        }
-                        setSelectedItems(newSelected);
-                      }}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No filters applied</p>
-            )}
-          </div>
-        </div>
-      )}
+      </div> */}
     </div>
   );
 };

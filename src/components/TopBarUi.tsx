@@ -787,21 +787,24 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
   };
 
   const maxLevel = Math.min(navigationPath.length + 1, 5);
-  console.log("maxLevel", maxLevel);
-
+  console.log("maxLevel", selectedItems, getItemsForLevel(0));
+  const initialSelected = getItemsForLevel(0).find(
+    (item) => item.code === selectedItems[0]
+  );
   return (
     <div className="w-full bg-white mt-1">
       {/* New Navigation Area */}
       <div className=" ">
         {/* Always-visible Brand List */}
-        <div className="flex items-center gap-2 py-3 px-6">
-          {getItemsForLevel(0).map((brand) => {
-            const isSelected = selectedItems[0] === brand.code;
-            return (
-              <button
-                key={brand.code}
-                onClick={() => handleItemSelect(brand, 0)}
-                className={`
+        <div className="flex justify-between items-center gap-2 py-3 px-6">
+          <div className="flex items-center gap-2">
+            {getItemsForLevel(0).map((brand) => {
+              const isSelected = selectedItems[0] === brand.code;
+              return (
+                <button
+                  key={brand.code}
+                  onClick={() => handleItemSelect(brand, 0)}
+                  className={`
                   flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all font-bold 
                   ${
                     isSelected
@@ -809,23 +812,82 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                       : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
                   }
                 `}
-              >
-                {getIcon(0, brand.icon)}
-                <span>{brand.name}</span>
+                >
+                  {getIcon(0, brand.icon)}
+                  <span>{brand.name}</span>
+                </button>
+              );
+            })}
+          </div>
+          {initialSelected && (
+            <div className="flex items-center gap-3 ">
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setOpenDatePopup(openDatePopup === 0 ? null : 0)
+                  }
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span className="font-medium">
+                    {formatDateRangeForDisplay(
+                      dateRange.startDate,
+                      dateRange.endDate
+                    )}
+                  </span>
+                </button>
+                {openDatePopup === 0 && (
+                  <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-semibold text-gray-800">
+                        Select Date Range
+                      </h4>
+                      <button
+                        onClick={() => setOpenDatePopup(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <DateRangeFilter
+                      startDate={dateRange.startDate}
+                      endDate={dateRange.endDate}
+                      onDateChange={(startDate, endDate) =>
+                        setDateRange({ startDate, endDate })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Comparison:</span>
+                <span className="font-medium">{comparisonDate}</span>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <Coins className="w-4 h-4" />
+                <span className="font-medium">Thousands</span>
               </button>
-            );
-          })}
+              <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+                <span>+</span>
+                <span>Filter</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Render deeper levels based on the navigation path */}
         {navigationPath.map((selectedItem, level) => {
           const children = getItemsForLevel(level + 1);
+          const isChildSelected = children.some(
+            (childItem) => childItem.code === selectedItems[level + 1]
+          );
 
+          console.log("isChildSelected", isChildSelected);
           return (
             <div key={selectedItem.code} className="">
               {/* Filters for the selected item */}
-              {selectedItem.modifiers && selectedItem.modifiers.length > 0 && (
-                <div className="flex items-center flex-wrap gap-2 border-t border-gray-100 px-6 bg-[#f3f4f6] py-2 justify-between">
+              {/* {selectedItem.modifiers && selectedItem.modifiers.length > 0 && (
+                <div className="flex items-center flex-wrap gap-2 border-t border-gray-100 px-6 bg-white py-2 justify-between">
                   <span className="text-base font-medium text-gray-500 pr-8">
                     {selectedItem.name} Filters:
                   </span>
@@ -885,19 +947,24 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                     </button>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Children of the selected item */}
               {children.length > 0 && (
-                <div className="flex items-center gap-2 mb-3 bg-white mt-3 px-6">
-                  {children.map((childItem) => {
-                    const isChildSelected =
-                      selectedItems[level + 1] === childItem.code;
-                    return (
-                      <button
-                        key={childItem.code}
-                        onClick={() => handleItemSelect(childItem, level + 1)}
-                        className={`
+                <div
+                  className={`flex justify-between items-center gap-2 bg-white px-6 ${
+                    isChildSelected ? "border-t border-gray-100" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {children.map((childItem) => {
+                      const isChildSelected =
+                        selectedItems[level + 1] === childItem.code;
+                      return (
+                        <button
+                          key={childItem.code}
+                          onClick={() => handleItemSelect(childItem, level + 1)}
+                          className={`
                           flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all font-bold
                           ${
                             isChildSelected
@@ -905,12 +972,72 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                               : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
                           }
                         `}
-                      >
-                        {getIcon(level + 1, childItem.icon)}
-                        <span>{childItem.name}</span>
-                      </button>
-                    );
-                  })}
+                        >
+                          {getIcon(level + 1, childItem.icon)}
+                          <span>{childItem.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {console.log("selectedItem", selectedItem)}
+                  {children.length > 0 && isChildSelected && (
+                    <div className="flex items-center flex-wrap gap-2  bg-white py-2 justify-between">
+                      <div className="flex items-center gap-3 ">
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setOpenDatePopup(
+                                openDatePopup === level + 1 ? null : level + 1
+                              )
+                            }
+                            className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                          >
+                            <Calendar className="w-4 h-4" />
+                            <span className="font-medium">
+                              {formatDateRangeForDisplay(
+                                dateRange.startDate,
+                                dateRange.endDate
+                              )}
+                            </span>
+                          </button>
+                          {openDatePopup === level + 1 && (
+                            <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                              <div className="flex justify-between items-center mb-3">
+                                <h4 className="font-semibold text-gray-800">
+                                  Select Date Range
+                                </h4>
+                                <button
+                                  onClick={() => setOpenDatePopup(null)}
+                                  className="text-gray-400 hover:text-gray-600"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <DateRangeFilter
+                                startDate={dateRange.startDate}
+                                endDate={dateRange.endDate}
+                                onDateChange={(startDate, endDate) =>
+                                  setDateRange({ startDate, endDate })
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span>Comparison:</span>
+                          <span className="font-medium">{comparisonDate}</span>
+                        </div>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                          <Coins className="w-4 h-4" />
+                          <span className="font-medium">Thousands</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+                          <span>+</span>
+                          <span>Filter</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

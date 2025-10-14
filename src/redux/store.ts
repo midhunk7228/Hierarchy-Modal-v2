@@ -4,6 +4,7 @@ import naviagtionPathReducer from "./navigationPathSlice";
 import layoutReducer from "./layoutSlice";
 import notificationsReducer from "./notificationsSlice";
 import dashboardsReducer from "./dashboardsSlice";
+import editModeReducer from "./editModeSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     layout: layoutReducer,
     notifications: notificationsReducer,
     dashboards: dashboardsReducer,
+    editMode: editModeReducer,
   },
 });
 

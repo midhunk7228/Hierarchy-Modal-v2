@@ -726,10 +726,10 @@ const JsonDrivenDashboard: React.FC = () => {
   const dashboards = useSelector(
     (state: RootState) => state.dashboards.dashboards
   );
+  const { isEditMode } = useSelector((state: RootState) => state.editMode);
 
   const [currentDashboard, setCurrentDashboard] =
     useState<DashboardLayout>(DEFAULT_DASHBOARD);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [editingWidget, setEditingWidget] = useState<DashboardWidget | null>(
     null
   );
@@ -968,12 +968,6 @@ const JsonDrivenDashboard: React.FC = () => {
 
   //   loadLayoutForPath();
   // }, [currentNavigationPath, dispatch, isInitialized]);
-
-  const handleItemClick = (): void => {
-    if (!isEditMode) {
-      // Handle item click logic
-    }
-  };
 
   const handleEditWidget = (widgetId: string): void => {
     const widget = currentDashboard.widgets.find((w) => w.id === widgetId);
@@ -1328,27 +1322,16 @@ const JsonDrivenDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       <div className="flex-1">
-        <div className="bg-gray-100 px-6 py-4">
+        <div className="bg-white px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Grid className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Dashboard
-                  </h1>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {currentDashboard.description}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Navigation Path:{" "}
-                    {currentNavigationPath
-                      .replace("->", " → ")
-                      .replace("#", " | Filters: ")}
-                  </p>
-                </div>
+                <p className="text-sm text-gray-500 mt-1 ">
+                  <span className="font-bold">Navigation Path: </span>
+                  {currentNavigationPath
+                    .replace("->", " → ")
+                    .replace("#", " | Filters: ")}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -1370,29 +1353,6 @@ const JsonDrivenDashboard: React.FC = () => {
                   );
                 }}
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsWidgetPanelOpen(true)}
-                  // disabled={!isEditMode}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Widget
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEditMode(!isEditMode);
-                  }}
-                  className={`px-4 py-2 rounded-md transition-colors flex items-center gap-1 ${
-                    isEditMode
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  {isEditMode ? "Exit Edit" : "Edit Mode"}
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -1425,7 +1385,7 @@ const JsonDrivenDashboard: React.FC = () => {
                   refreshInterval={widget.refreshInterval}
                   additionalInfo={widget.additionalInfo}
                   customStyles={widget.customStyles}
-                  onItemClick={handleItemClick}
+                  onItemClick={() => {}}
                   isDragging={false}
                   onEdit={handleEditWidget}
                   onDelete={handleDeleteWidget}

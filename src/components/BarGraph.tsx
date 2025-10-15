@@ -89,7 +89,7 @@ const BarGraph = () => {
               borderColor: "#e0bfc6",
               backgroundColor: "transparent",
               borderWidth: 2,
-              borderDash: [4, 4],
+              borderDash: [3, 3],
               pointBackgroundColor: "#e0bfc6",
               pointBorderColor: "#e0bfc6",
               pointRadius: 0,
@@ -134,26 +134,28 @@ const BarGraph = () => {
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    let label, x, y, bgColor, borderColor, padding;
+                    let label, x, y, bgColor, borderColor, padding, textColor;
 
                     if (i <= 1) {
                       // Bar labels
                       label = "KD " + (value as number).toLocaleString("en-US");
                       x = element.x;
                       y = element.y - 18;
-                      bgColor = i === 0 ? "#a6a6a6" : "#007acb";
+                      bgColor = i === 0 ? "#ececec" : "#007acb";
+                      textColor = i === 0 ? "#676767" : "#bdf1ff";
                       borderColor = "transparent";
                       padding = { top: 6, bottom: 6, left: 10, right: 10 };
-                      ctx.fillStyle = "white";
                     } else {
                       // Line labels
                       label = "KD " + (value as number).toFixed(1);
                       x = element.x;
                       y = element.y - 25;
-                      bgColor = i === 2 ? "#7b60c7" : "#e0bfc6";
-                      borderColor = i === 2 ? "#7b60c7" : "#e0bfc6";
+                      bgColor = i === 2 ? "#7b60c7" : "#c6a4ab";
+                      textColor = i === 2 ? "#d2cff9" : "#4b363a";
+
+                      borderColor = "transparent";
+                      // borderColor = i === 2 ? "#7b60c7" : "#c6a4ab";
                       padding = { top: 5, bottom: 5, left: 10, right: 10 };
-                      ctx.fillStyle = "white";
                     }
 
                     // Measure text
@@ -163,6 +165,7 @@ const BarGraph = () => {
 
                     // Draw background
                     ctx.fillStyle = bgColor;
+                    ctx.globalAlpha = i === 2 ? 1 : 0.85; // 15% transparency
                     const radius = 4;
                     const boxX = x - boxWidth / 2;
                     const boxY = y - boxHeight / 2;
@@ -194,16 +197,16 @@ const BarGraph = () => {
                     ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
                     ctx.closePath();
                     ctx.fill();
-
+                    // debugger;
                     // Draw border for line labels
-                    if (i > 1 && borderColor !== "transparent") {
-                      ctx.strokeStyle = borderColor;
-                      ctx.lineWidth = 1;
-                      ctx.stroke();
-                    }
+                    // if (i > 1 && borderColor !== "transparent") {
+                    ctx.strokeStyle = borderColor;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    // }
 
                     // Draw text
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = textColor;
                     ctx.fillText(label, x, y);
 
                     ctx.restore();
@@ -351,7 +354,8 @@ const BarGraph = () => {
                     const label = value.toString();
                     const x = element.x;
                     const y = element.y - 18;
-                    const bgColor = i === 0 ? "#a6a6a6" : "#007acb";
+                    const bgColor = i === 0 ? "#e0e0e0" : "#50a4db";
+                    const textColor = i === 0 ? "#4f4f4f" : "#d1ffff";
                     const padding = { top: 5, bottom: 5, left: 10, right: 10 };
 
                     // Measure text
@@ -394,7 +398,7 @@ const BarGraph = () => {
                     ctx.fill();
 
                     // Draw text
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = textColor;
                     ctx.fillText(label, x, y);
 
                     ctx.restore();

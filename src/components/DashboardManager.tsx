@@ -126,11 +126,14 @@ const DashboardManager: React.FC<{
         }
         return;
       }
-      const selected = dashboards.find((d) => d.id === value);
-      if (selected) {
+      const defaultLayout = await dashboardStorage.getDashboard(
+        `${value}:default`
+      );
+      // const selected = dashboards.find((d) => d.id === value);
+      if (defaultLayout) {
         onSelectDashboard(value);
         // debugger;;
-        onLoadDashboard(JSON.stringify(selected));
+        onLoadDashboard(JSON.stringify(defaultLayout));
       }
     }
   };

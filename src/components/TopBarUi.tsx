@@ -32,6 +32,7 @@ import {
   Filter,
   X,
   Coins,
+  Ellipsis,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setCurrentNavigationPath } from "../redux/layoutSlice";
@@ -826,15 +827,15 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                   onClick={() =>
                     setOpenDatePopup(openDatePopup === 0 ? null : 0)
                   }
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="flex items-center gap-2 px-2 py-1 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                 >
-                  <Calendar className="w-4 h-4" />
-                  <span className="font-medium">
+                  <Ellipsis className="w-6 h-6 cursor-pointer" />
+                  {/* <span className="font-medium">
                     {formatDateRangeForDisplay(
                       dateRange.startDate,
                       dateRange.endDate
                     )}
-                  </span>
+                  </span> */}
                 </button>
                 {openDatePopup === 0 && (
                   <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
@@ -856,10 +857,13 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                         setDateRange({ startDate, endDate })
                       }
                     />
+                    <div className="mt-2 flex justify-end">
+                    <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Save</button>
+                    </div>
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Comparison:</span>
                 <span className="font-medium">{comparisonDate}</span>
               </div>
@@ -870,7 +874,7 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
               <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
                 <span>+</span>
                 <span>Filter</span>
-              </button>
+              </button> */}
             </div>
           )}
         </div>
@@ -979,7 +983,6 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                       );
                     })}
                   </div>
-                  {console.log("selectedItem", selectedItem)}
                   {children.length > 0 && isChildSelected && (
                     <div className="flex items-center flex-wrap gap-2  bg-white py-2 justify-between">
                       <div className="flex items-center gap-3 ">

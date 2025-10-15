@@ -858,7 +858,9 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                       }
                     />
                     <div className="mt-2 flex justify-end">
-                    <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Save</button>
+                      <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Save
+                      </button>
                     </div>
                   </div>
                 )}
@@ -993,15 +995,15 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                                 openDatePopup === level + 1 ? null : level + 1
                               )
                             }
-                            className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="flex items-center gap-2 px-2 py-1 bg-white border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                           >
-                            <Calendar className="w-4 h-4" />
-                            <span className="font-medium">
+                            <Ellipsis className="w-6 h-6 cursor-pointer" />
+                            {/* <span className="font-medium">
                               {formatDateRangeForDisplay(
                                 dateRange.startDate,
                                 dateRange.endDate
                               )}
-                            </span>
+                            </span> */}
                           </button>
                           {openDatePopup === level + 1 && (
                             <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
@@ -1023,10 +1025,15 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                                   setDateRange({ startDate, endDate })
                                 }
                               />
+                              <div className="mt-2 flex justify-end">
+                                <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                  Save
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                           <span>Comparison:</span>
                           <span className="font-medium">{comparisonDate}</span>
                         </div>
@@ -1037,7 +1044,7 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
                         <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
                           <span>+</span>
                           <span>Filter</span>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   )}

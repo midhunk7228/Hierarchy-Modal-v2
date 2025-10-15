@@ -29,9 +29,9 @@ import {
   TrendingUp,
   Map,
   Calendar,
-  Filter,
+  // Filter,
   X,
-  Coins,
+  // Coins,
   Ellipsis,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -41,7 +41,7 @@ import { IoLogoAmazon } from "react-icons/io5";
 
 import type {
   DimensionItem,
-  Modifier,
+  // Modifier,
   ModifierValues,
   SelectedItems,
 } from "../types";
@@ -88,24 +88,24 @@ const DateRangeFilter: React.FC<{
 };
 
 // Improved Generic Filter Component (from NavigationBar)
-const GenericFilter: React.FC<{
-  modifier: Modifier;
-  onFilterChange: (value: string) => void;
-  value?: string;
-}> = ({ modifier, onFilterChange, value = "" }) => {
-  return (
-    <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
-      <Filter className="w-4 h-4 text-slate-500" />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onFilterChange(e.target.value)}
-        placeholder={modifier.displayText}
-        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-36"
-      />
-    </div>
-  );
-};
+// const GenericFilter: React.FC<{
+//   modifier: Modifier;
+//   onFilterChange: (value: string) => void;
+//   value?: string;
+// }> = ({ modifier, onFilterChange, value = "" }) => {
+//   return (
+//     <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+//       <Filter className="w-4 h-4 text-slate-500" />
+//       <input
+//         type="text"
+//         value={value}
+//         onChange={(e) => onFilterChange(e.target.value)}
+//         placeholder={modifier.displayText}
+//         className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-36"
+//       />
+//     </div>
+//   );
+// };
 
 interface DimensionProps {
   data?: DimensionItem[];
@@ -606,24 +606,24 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
     endDate: "2025-03-31",
   });
   const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
-  const [comparisonDate] = useState("Feb, 2025");
+  // const [comparisonDate] = useState("Feb, 2025");
 
-  const formatDateRangeForDisplay = (
-    startDate: string,
-    endDate: string
-  ): string => {
-    const format = (dateStr: string) => {
-      if (!dateStr) return "?";
-      const date = new Date(dateStr);
-      // Adjust for timezone to avoid off-by-one day errors
-      date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-    };
-    return `${format(startDate)} - ${format(endDate)}`;
-  };
+  // const formatDateRangeForDisplay = (
+  //   startDate: string,
+  //   endDate: string
+  // ): string => {
+  //   const format = (dateStr: string) => {
+  //     if (!dateStr) return "?";
+  //     const date = new Date(dateStr);
+  //     // Adjust for timezone to avoid off-by-one day errors
+  //     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+  //     return date.toLocaleDateString("en-US", {
+  //       month: "short",
+  //       day: "numeric",
+  //     });
+  //   };
+  //   return `${format(startDate)} - ${format(endDate)}`;
+  // };
 
   useEffect(() => {
     const pathKey = generateNavigationPathKey(navigationPath, modifierValues);
@@ -714,70 +714,70 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
     dispatch(setCurrentNavigationPath(pathKey));
   };
 
-  const handleModifierChange = (
-    level: number,
-    modifierCode: string,
-    value: string | number | { startDate: string; endDate: string }
-  ): void => {
-    setModifierValues((prev) => ({
-      ...prev,
-      [level]: {
-        ...prev[level],
-        [modifierCode]: value,
-      },
-    }));
-  };
+  // const handleModifierChange = (
+  //   level: number,
+  //   modifierCode: string,
+  //   value: string | number | { startDate: string; endDate: string }
+  // ): void => {
+  //   setModifierValues((prev) => ({
+  //     ...prev,
+  //     [level]: {
+  //       ...prev[level],
+  //       [modifierCode]: value,
+  //     },
+  //   }));
+  // };
 
-  const clearModifier = (level: number, modifierCode: string): void => {
-    setModifierValues((prev) => {
-      const newValues = { ...prev };
-      if (newValues[level]) {
-        delete newValues[level][modifierCode];
-        if (Object.keys(newValues[level]).length === 0) {
-          delete newValues[level];
-        }
-      }
-      return newValues;
-    });
-  };
+  // const clearModifier = (level: number, modifierCode: string): void => {
+  //   setModifierValues((prev) => {
+  //     const newValues = { ...prev };
+  //     if (newValues[level]) {
+  //       delete newValues[level][modifierCode];
+  //       if (Object.keys(newValues[level]).length === 0) {
+  //         delete newValues[level];
+  //       }
+  //     }
+  //     return newValues;
+  //   });
+  // };
 
-  const renderModifier = (
-    modifier: Modifier,
-    level: number
-  ): React.ReactNode => {
-    const currentValue = modifierValues[level]?.[modifier.code];
+  // const renderModifier = (
+  //   modifier: Modifier,
+  //   level: number
+  // ): React.ReactNode => {
+  //   const currentValue = modifierValues[level]?.[modifier.code];
 
-    switch (modifier.code) {
-      case "DATE_RANGE":
-        return (
-          <DateRangeFilter
-            key={modifier.code}
-            onDateChange={(startDate, endDate) =>
-              handleModifierChange(level, modifier.code, { startDate, endDate })
-            }
-            startDate={
-              (currentValue as { startDate: string; endDate: string })
-                ?.startDate || ""
-            }
-            endDate={
-              (currentValue as { startDate: string; endDate: string })
-                ?.endDate || ""
-            }
-          />
-        );
-      default:
-        return (
-          <GenericFilter
-            key={modifier.code}
-            modifier={modifier}
-            onFilterChange={(value) =>
-              handleModifierChange(level, modifier.code, value)
-            }
-            value={(currentValue as string) || ""}
-          />
-        );
-    }
-  };
+  //   switch (modifier.code) {
+  //     case "DATE_RANGE":
+  //       return (
+  //         <DateRangeFilter
+  //           key={modifier.code}
+  //           onDateChange={(startDate, endDate) =>
+  //             handleModifierChange(level, modifier.code, { startDate, endDate })
+  //           }
+  //           startDate={
+  //             (currentValue as { startDate: string; endDate: string })
+  //               ?.startDate || ""
+  //           }
+  //           endDate={
+  //             (currentValue as { startDate: string; endDate: string })
+  //               ?.endDate || ""
+  //           }
+  //         />
+  //       );
+  //     default:
+  //       return (
+  //         <GenericFilter
+  //           key={modifier.code}
+  //           modifier={modifier}
+  //           onFilterChange={(value) =>
+  //             handleModifierChange(level, modifier.code, value)
+  //           }
+  //           value={(currentValue as string) || ""}
+  //         />
+  //       );
+  //   }
+  // };
 
   const getItemsForLevel = (level: number): DimensionItem[] => {
     if (level === 0) {
@@ -787,7 +787,7 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
     return parentItem?.children || [];
   };
 
-  const maxLevel = Math.min(navigationPath.length + 1, 5);
+  // const maxLevel = Math.min(navigationPath.length + 1, 5);
   console.log("maxLevel", selectedItems, getItemsForLevel(0));
   const initialSelected = getItemsForLevel(0).find(
     (item) => item.code === selectedItems[0]

@@ -137,6 +137,7 @@ interface DashboardLayout {
   id: string;
   name: string;
   description?: string;
+  logos?: string[];
   dashboardName?: string;
   grid: {
     columns: number;

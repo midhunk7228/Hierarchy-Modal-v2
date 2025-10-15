@@ -1317,7 +1317,6 @@ const JsonDrivenDashboard: React.FC = () => {
   //     </div>
   //   );
   // }
-  console.log("currentDashboardNew", currentDashboard);
 
   return (
     <div className="min-h-screen bg-gray-100 flex">

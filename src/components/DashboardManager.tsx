@@ -6,6 +6,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
+import Select from "react-select";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
@@ -53,6 +54,14 @@ const DashboardManager: React.FC<{
   const [, setEditingWidget] = useState<DashboardWidget | null>(null);
   const [, setIsWidgetEditorOpen] = useState(false);
   const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
+
+  const dashboardOptions = [
+    ...dashboards.map((dashboard) => ({
+      value: dashboard.id,
+      label: dashboard.name,
+    })),
+    { value: "create-new", label: "+ Create New" },
+  ];
 
   const { saveData, getData } = useIndexedDB();
 
@@ -115,10 +124,10 @@ const DashboardManager: React.FC<{
     setNewDashboardName("");
   };
 
-  const handleDashboardChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const { value } = e.target;
+  const handleDashboardChange = async (selectedOption: any) => {
+    const value = selectedOption?.value;
+    if (!value) return;
+
     if (value === "create-new") {
       setIsCreateModalOpen(true);
     } else {
@@ -142,7 +151,6 @@ const DashboardManager: React.FC<{
       const defaultLayout = await dashboardStorage.getDashboard(
         `${value}:default`
       );
-      // const selected = dashboards.find((d) => d.id === value);
       if (defaultLayout) {
         onSelectDashboard(value);
         onLoadDashboard(JSON.stringify(defaultLayout));
@@ -197,22 +205,65 @@ const DashboardManager: React.FC<{
     setIsWidgetEditorOpen(true);
   };
 
+  // Custom styles for react-select
+  const customStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      backgroundColor: "white",
+      borderColor: "#e5e7eb",
+      borderRadius: "0.5rem",
+      padding: "0.125rem",
+      minHeight: "auto",
+      fontSize: "0.875rem",
+      fontWeight: "500",
+      color: "#374151",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#e5e7eb",
+      },
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      borderRadius: "0.5rem",
+      overflow: "hidden",
+      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      fontSize: "0.875rem",
+      backgroundColor: state.isSelected
+        ? "#3b82f6"
+        : state.isFocused
+        ? "#f3f4f6"
+        : "white",
+      color: state.isSelected ? "white" : "#374151",
+      "&:active": {
+        backgroundColor: "#3b82f6",
+      },
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: "#374151",
+      fontSize: "0.875rem",
+      fontWeight: "500",
+    }),
+  };
+
   console.log("dashboardsNew", dashboards);
   return (
     <>
       <div className="flex gap-2 ">
-        <select
-          value={selectedDashboard}
-          onChange={handleDashboardChange}
-          className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none bg-white border border-gray-200 rounded-lg p-2 "
-        >
-          {dashboards.map((dashboard) => (
-            <option key={dashboard.id} value={dashboard.id}>
-              {dashboard.name}
-            </option>
-          ))}
-          <option value="create-new">+ Create New</option>
-        </select>
+        <div style={{ minWidth: "200px" }}>
+          <Select
+            value={dashboardOptions.find(
+              (option) => option.value === selectedDashboard
+            )}
+            onChange={handleDashboardChange}
+            options={dashboardOptions}
+            styles={customStyles}
+            isSearchable={false}
+          />
+        </div>
         {/* <button
           onClick={exportConfig}
           className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
@@ -296,26 +347,28 @@ const DashboardManager: React.FC<{
       </div>
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h3 className="text-lg font-semibold mb-4">Create New Dashboard</h3>
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Create New Dashboard
+            </h3>
             <input
               type="text"
               value={newDashboardName}
               onChange={(e) => setNewDashboardName(e.target.value)}
               placeholder="Enter dashboard name"
-              className="w-full p-2 border border-gray-300 rounded-md mb-4"
+              className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateNewDashboard}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
               >
                 Create
               </button>

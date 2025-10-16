@@ -639,8 +639,8 @@ export default function BrandDashboardHeader() {
                             (c) => c.code === selectedCurrencies[0]
                           )?.flag || ""
                         }`
-                      : `${selectedCurrencies.length} Currencies`
-                    : "Select Currency"}
+                      : `${selectedCurrencies.length} Countries`
+                    : "Select Country"}
                 </span>
               </button>
 
@@ -689,12 +689,12 @@ export default function BrandDashboardHeader() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+            {/* <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
               <MapPin className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">
                 29 Outlets
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

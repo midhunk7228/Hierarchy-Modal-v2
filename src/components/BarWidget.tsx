@@ -160,7 +160,7 @@ interface RevenueChartProps {
 }
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("hour");
+  const [activeTab, setActiveTab] = useState("brand");
 
   const tabs = [
     "Hour",
@@ -256,14 +256,14 @@ const Index = () => {
       value: "48,720",
       change: "+3.5%",
       data: [
-        { category: "Brand 1", actual: 5200, previous: 4800, target: 5000, flagged: true },
-        { category: "Brand 2", actual: 6800, previous: 6400, target: 6600 },
-        { category: "Brand 3", actual: 8200, previous: 7900, target: 8000 },
-        { category: "Brand 4", actual: 7100, previous: 6800, target: 6900 },
-        { category: "Brand 5", actual: 6400, previous: 6200, target: 6300 },
-        { category: "Brand 6", actual: 5800, previous: 5600, target: 5700 },
-        { category: "Brand 7", actual: 4900, previous: 4700, target: 4800 },
-        { category: "Brand 8", actual: 4320, previous: 4200, target: 4260 },
+        { category: "Brand1", actual: 5500, previous: 5000, target: 6500 },
+        { category: "Brand2", actual: 6500, previous: 7000, target: 7500 },
+        { category: "Brand3", actual: 5300, previous: 6200, target: 6000, flagged: true },
+        { category: "Brand4", actual: 4900, previous: 4500, target: 5000 },
+        { category: "Brand5", actual: 7000, previous: 7600, target: 8000 },
+        { category: "Brand6", actual: 5300, previous: 5000, target: 4700 },
+        { category: "Brand7", actual: 5900, previous: 6500, target: 6700 },
+        { category: "Brand8", actual: 4800, previous: 5100, target: 5000 },
       ],
     },
     outlet: {

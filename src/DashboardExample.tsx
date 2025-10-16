@@ -242,16 +242,23 @@ const predefinedWidgets = [
       row: 12,
       col: 0,
       width: 12,
+      height: 6,
+    },
+    additionalInfo: { outcome: true },
+  },
+  {
+    id: "bar-graph-widget-two",
+    title: "Revenue Graph",
+    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
+    defaultLayout: { w: 12, h: 4, minW: 6, minH: 3 },
+    displayType: "details",
+    viewType: "bar-two",
+    apiEndpoint: "/api/metrics",
+    position: {
+      row: 12,
+      col: 0,
+      width: 12,
       height: 8,
-
-      //       col: 0
-      // h: 4
-      // height: 4
-      // row: 4
-      // w: 12
-      // width: 12
-      // x: 0
-      // y: 4
     },
     additionalInfo: { outcome: true },
   },

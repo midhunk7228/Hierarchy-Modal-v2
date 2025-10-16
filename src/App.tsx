@@ -5,6 +5,9 @@ import JsonDrivenDashboard from "./DashboardExample";
 // import BrandFilter from "./components/BrandFilter";
 import Header from "./components/Header";
 import TopBar from "./components/TopBarUi";
+// import BrandHeader from "./components/BrandHeader";
+import BrandHeaderTailwind from "./components/BrandHeaderTailwind";
+import BrandDashboardHeader from "./components/BrandDashboardHeader";
 // import TopBar from "./components/TopBarUi";
 
 function App() {
@@ -58,8 +61,10 @@ function App() {
 
   return (
     <>
-      <Header />
-      <TopBar />
+      <BrandDashboardHeader />
+      {/* <BrandHeaderTailwind /> */}
+      {/* <Header /> */}
+      {/* <TopBar /> */}
       {/* <BrandFilter /> */}
       <JsonDrivenDashboard />
     </>

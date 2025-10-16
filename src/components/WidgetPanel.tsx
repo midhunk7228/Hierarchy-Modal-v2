@@ -76,6 +76,15 @@ const predefinedWidgets = [
     viewType: "bar-graph",
     apiEndpoint: "/api/metrics",
   },
+  {
+    id: "bar-graph-widget-two",
+    title: "Revenue Graph",
+    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
+    defaultLayout: { w: 10, h: 5, minW: 10, minH: 5 },
+    displayType: "details",
+    viewType: "bar-two",
+    apiEndpoint: "/api/metrics",
+  },
 ];
 
 interface WidgetPanelProps {

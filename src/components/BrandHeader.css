@@ -1,0 +1,48 @@
+.brand-header {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 10px;
+}
+
+.brand-logo {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.brand-logo:hover {
+  background-color: #f0f0f0;
+}
+
+.brand-logo.expanded {
+  background-color: #e0e0e0;
+}
+
+.brand-logo img {
+  height: 40px;
+  max-width: 100px;
+}
+
+.sub-nav {
+  display: flex;
+  gap: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+
+.sub-nav-item {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+.sub-nav-item:hover {
+  text-decoration: underline;
+}

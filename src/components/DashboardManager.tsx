@@ -1,12 +1,24 @@
-import { Download, Upload, RotateCcw, Bell } from "lucide-react";
+import {
+  Download,
+  Upload,
+  RotateCcw,
+  Bell,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
-import type { DashboardLayout } from "../DashbiardExampleProps";
+import type {
+  DashboardLayout,
+  DashboardWidget,
+} from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
 import { setDashboards } from "../redux/dashboardsSlice";
 import { mergeDashboard } from "../helper";
 import { dashboardStorage } from "../utils/dashboardStorage";
+import { toggleEditMode } from "../redux/editModeSlice";
+import WidgetPanel from "./WidgetPanel";
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -36,6 +48,11 @@ const DashboardManager: React.FC<{
   );
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState("");
+
+  const { isEditMode } = useSelector((state: RootState) => state.editMode);
+  const [, setEditingWidget] = useState<DashboardWidget | null>(null);
+  const [, setIsWidgetEditorOpen] = useState(false);
+  const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
 
   const { saveData, getData } = useIndexedDB();
 
@@ -173,6 +190,19 @@ const DashboardManager: React.FC<{
     URL.revokeObjectURL(url);
   };
 
+  const handleAddCustomWidget = () => {
+    const newWidget: DashboardWidget = {
+      id: `widget-${Date.now()}`,
+      title: "New Widget",
+      displayType: "summary",
+      viewType: "single-value",
+      position: { row: 0, col: 0, width: 3, height: 2 },
+      filters: [],
+    };
+    setEditingWidget(newWidget);
+    setIsWidgetEditorOpen(true);
+  };
+
   console.log("dashboardsNew", dashboards);
   return (
     <>
@@ -189,7 +219,7 @@ const DashboardManager: React.FC<{
           ))}
           <option value="create-new">+ Create New</option>
         </select>
-        <button
+        {/* <button
           onClick={exportConfig}
           className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
           title="Export Configuration"
@@ -235,7 +265,40 @@ const DashboardManager: React.FC<{
               {unreadCount}
             </span>
           )}
-        </button>
+        </button> */}
+        <div className="flex gap-2 w-full xl:w-auto">
+          <button
+            onClick={() => setIsWidgetPanelOpen(true)}
+            // disabled={!isEditMode}
+            className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-[#73bda5] hover:bg-[#4f967f] text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 text-sm sm:text-base cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add Widget</span>
+            <span className="sm:hidden">Add</span>
+          </button>
+          <button
+            onClick={() => {
+              dispatch(toggleEditMode());
+            }}
+            className={`flex-1 lg:flex-none px-3 sm:px-4 py-2 rounded-md transition-colors flex items-center justify-center gap-1 text-sm sm:text-base cursor-pointer ${
+              isEditMode
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "bg-[#7d85df] hover:bg-[#626ac2] text-white "
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {isEditMode ? "Exit Edit" : "Edit Mode"}
+            </span>
+            <span className="sm:hidden">{isEditMode ? "Exit" : "Edit"}</span>
+          </button>
+        </div>
+
+        <WidgetPanel
+          isOpen={isWidgetPanelOpen}
+          onClose={() => setIsWidgetPanelOpen(false)}
+          onAddCustomWidget={handleAddCustomWidget}
+        />
       </div>
 
       {isCreateModalOpen && (

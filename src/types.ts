@@ -23,3 +23,14 @@ export interface ModifierValues {
       | { startDate: string; endDate: string };
   };
 }
+
+export interface SubNavItem {
+  name: string;
+  path: string;
+}
+
+export interface Brand {
+  name: string;
+  logo: string;
+  subItems: SubNavItem[];
+}

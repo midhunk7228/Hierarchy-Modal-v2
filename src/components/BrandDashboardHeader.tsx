@@ -111,6 +111,8 @@ export default function BrandDashboardHeader() {
       { name: "Saudi", flag: "🇸🇦", code: "sa" },
       { name: "UAE", flag: "🇦🇪", code: "ae" },
       { name: "Bahrain", flag: "🇧🇭", code: "bh" },
+      { name: "UK", flag: "🇬🇧", code: "uk" },
+      { name: "Germany", flag: "🇩🇪", code: "de" },
     ],
     "Burger-Boutique": [
       { name: "All", flag: "🌍", code: "all" },

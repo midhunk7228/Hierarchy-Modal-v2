@@ -320,17 +320,26 @@ export const RevenueChart = ({
         dx: offset,
       });
 
+      
       series.columns.template.events.on("pointerover", function (ev) {
         const dataItem = ev.target.dataItem;
         if (dataItem && chartRef.current) {
           const rect = chartRef.current.getBoundingClientRect();
           const column = ev.target;
           const x = column.x() + column.width() / 2;
-
+          
+          const dataContext = dataItem.dataContext as ChartData;
+          const actualValue = dataContext.actual;
+          const previousValue = dataContext.previous;
+          const changePercent = previousValue !== 0 
+            ? (((actualValue - previousValue) / previousValue) * 100).toFixed(1)
+            : "0.0";
+          const changeSign = parseFloat(changePercent) >= 0 ? "+" : "";
+      
           setHoveredData({
-            location,
-            value,
-            change,
+            location: dataContext.category,
+            value: actualValue.toLocaleString(),
+            change: `${changeSign}${changePercent}%`,
             x: x,
           });
         }

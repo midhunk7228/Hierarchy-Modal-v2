@@ -788,7 +788,6 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
   };
 
   // const maxLevel = Math.min(navigationPath.length + 1, 5);
-  console.log("maxLevel", selectedItems, getItemsForLevel(0));
   const initialSelected = getItemsForLevel(0).find(
     (item) => item.code === selectedItems[0]
   );
@@ -888,7 +887,6 @@ const TopBar: React.FC<DimensionProps> = ({ data: propData }) => {
             (childItem) => childItem.code === selectedItems[level + 1]
           );
 
-          console.log("isChildSelected", isChildSelected);
           return (
             <div key={selectedItem.code} className="">
               {/* Filters for the selected item */}

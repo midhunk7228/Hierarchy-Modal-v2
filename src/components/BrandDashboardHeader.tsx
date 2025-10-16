@@ -36,21 +36,36 @@ export default function BrandDashboardHeader() {
     "KWD",
   ]);
   const brandScrollRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const existFilter = localAppliedFilters.find(
       (f) => f.filterId === "region-filter"
     );
     if (existFilter) {
-      //   debugger;
-      setSelectedCountries(existFilter?.value);
+      setSelectedCountries(
+        existFilter.value.length > 1 && existFilter.value.includes("All")
+          ? ["All"]
+          : existFilter?.value
+      );
     }
     if (existFilter === undefined && localAppliedFilters?.length === 0) {
       setSelectedCountries(["All"]);
     }
   }, [localAppliedFilters]);
 
-  console.log("localAppliedFiltersKKJ", localAppliedFilters, selectedCountries);
+  const validRegionFilter = () => {
+    const availabelCountries = getAvailableCountries();
+    countryFilterApply(
+      availabelCountries.map(
+        (val: { name: string; flag: string; code: string }) => val.name
+      ),
+      true
+    );
+  };
+
+  useEffect(() => {
+    validRegionFilter();
+  }, [selectedAdditionalBrand, clickedBrandIndex]);
+
   const brands = [
     { name: "All", logo: "/all.png" },
     { name: "Burger-Boutique", logo: "/Burger_Boutique.png" },
@@ -294,7 +309,6 @@ export default function BrandDashboardHeader() {
 
     // Reset country selection and additional brand selection
     setSelectedCountries(["All"]);
-    countryFilterApply([], true);
     setSelectedAdditionalBrand(null);
   };
 
@@ -305,7 +319,6 @@ export default function BrandDashboardHeader() {
     e.stopPropagation();
     setSelectedAdditionalBrand(brandName);
     setSelectedCountries(["All"]);
-    countryFilterApply([], true);
   };
 
   // Handle country selection with multi-select logic
@@ -313,7 +326,8 @@ export default function BrandDashboardHeader() {
     if (countryName === "All") {
       // If "All" is clicked, select only "All"
       setSelectedCountries(["All"]);
-      countryFilterApply([], true);
+      //   countryFilterApply([], true);
+      validRegionFilter();
     } else {
       // If a specific country is clicked
       if (selectedCountries.includes("All")) {
@@ -324,13 +338,16 @@ export default function BrandDashboardHeader() {
       } else if (selectedCountries.includes(countryName)) {
         // If country is already selected, deselect it
         const newSelection = selectedCountries.filter((c) => c !== countryName);
-        countryFilterApply(newSelection.length > 0 ? newSelection : [], true);
+        if (newSelection.length > 0) {
+          countryFilterApply(newSelection, true);
+        } else {
+          validRegionFilter();
+        }
 
         // If no countries left, default to "All"
         setSelectedCountries(newSelection.length > 0 ? newSelection : ["All"]);
       } else {
         countryFilterApply([...selectedCountries, countryName], true);
-
         // Add the country to selection
         setSelectedCountries([...selectedCountries, countryName]);
       }
@@ -484,7 +501,6 @@ export default function BrandDashboardHeader() {
       }
     });
   };
-
 
   return (
     <div className="w-full bg-white">

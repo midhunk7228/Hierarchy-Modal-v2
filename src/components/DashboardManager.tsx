@@ -70,7 +70,6 @@ const DashboardManager: React.FC<{
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
-      console.log("selectedDashboard", selectedDashboard);
       const savedLayout = await dashboardStorage.getDashboard(
         `${selectedDashboard}:${currentNavigationPath}`
       );
@@ -100,7 +99,6 @@ const DashboardManager: React.FC<{
     };
     loadDashboards();
   }, [currentNavigationPath, currentDashboard]);
-  console.log("setDashboards", dashboards);
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
       alert("Dashboard name cannot be empty");
@@ -249,7 +247,6 @@ const DashboardManager: React.FC<{
     }),
   };
 
-  console.log("dashboardsNew", dashboards);
   return (
     <>
       <div className="flex gap-2 ">

@@ -81,6 +81,8 @@ const predefinedWidgets = [
         label: "Regions",
         field: "name",
         options: [
+          { label: "Kuwait", value: "Kuwait" },
+          { label: "Saudi", value: "Saudi" },
           { label: "UK", value: "UK" },
           { label: "Germany", value: "Germany" },
           { label: "France", value: "France" },
@@ -114,6 +116,8 @@ const predefinedWidgets = [
         label: "Regions",
         field: "name",
         options: [
+          { label: "Kuwait", value: "Kuwait" },
+          { label: "Saudi", value: "Saudi" },
           { label: "UK", value: "UK" },
           { label: "Germany", value: "Germany" },
           { label: "France", value: "France" },
@@ -178,6 +182,8 @@ const predefinedWidgets = [
         label: "Regions",
         field: "name",
         options: [
+          { label: "Kuwait", value: "Kuwait" },
+          { label: "Saudi", value: "Saudi" },
           { label: "UK", value: "UK" },
           { label: "Germany", value: "Germany" },
           { label: "France", value: "France" },
@@ -211,6 +217,8 @@ const predefinedWidgets = [
         label: "Regions",
         field: "name",
         options: [
+          { label: "Kuwait", value: "Kuwait" },
+          { label: "Saudi", value: "Saudi" },
           { label: "UK", value: "UK" },
           { label: "Germany", value: "Germany" },
           { label: "France", value: "France" },
@@ -305,6 +313,21 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           field: "name",
           placeholder: "Search by name...",
         },
+        {
+          id: "region-filter",
+          type: "multi-select",
+          label: "Regions",
+          field: "name",
+          options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
+            { label: "UK", value: "UK" },
+            { label: "Germany", value: "Germany" },
+            { label: "France", value: "France" },
+            { label: "Spain", value: "Spain" },
+            { label: "Poland", value: "Poland" },
+          ],
+        },
       ],
     },
     {
@@ -322,6 +345,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -355,6 +380,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -461,6 +488,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -501,6 +530,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Region",
           field: "region",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -532,6 +563,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Region",
           field: "region",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -812,10 +845,7 @@ const JsonDrivenDashboard: React.FC = () => {
           //   dashboardsObj[`${selectedDashboard}:${currentNavigationPath}`] ===
           //   undefined
           // ) {
-          //   debugger;
           // }
-          // debugger;
-
           //later remove this condition
           if (
             dashboardsObj[
@@ -831,14 +861,11 @@ const JsonDrivenDashboard: React.FC = () => {
                 ]
             );
           }
-
-          // debugger;
           // dispatch(setDashboards(dashboardsObj));
           // dispatch(setSelectedDashboard(storedDashboards[0].dashboard.name));
         } else {
           // dispatch(setDashboards({ "My Dashboard": DEFAULT_DASHBOARD }));
           // dispatch(setSelectedDashboard("My Dashboard"));
-          // debugger;
           await dashboardStorage.saveDashboard(
             `${selectedDashboard}:${currentNavigationPath}`,
             DEFAULT_DASHBOARD
@@ -1015,7 +1042,6 @@ const JsonDrivenDashboard: React.FC = () => {
       };
       console.log("setCurrentDashboard3", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
-      // debugger;
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
         updatedDashboard
@@ -1027,7 +1053,6 @@ const JsonDrivenDashboard: React.FC = () => {
       };
       console.log("setCurrentDashboard4", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
-      // debugger;
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
         updatedDashboard
@@ -1062,7 +1087,6 @@ const JsonDrivenDashboard: React.FC = () => {
   ) => {
     const widgetId = e.dataTransfer?.getData("text/plain");
     const predefinedWidget = predefinedWidgets.find((p) => p.id === widgetId);
-    // debugger;
     if (predefinedWidget) {
       const newWidgetId = `widget-${Date.now()}`;
       const newWidget: DashboardWidget = {
@@ -1103,7 +1127,6 @@ const JsonDrivenDashboard: React.FC = () => {
           )
         )
       );
-      // debugger;;
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
         updatedDashboard
@@ -1148,7 +1171,6 @@ const JsonDrivenDashboard: React.FC = () => {
         ...prevDashboard,
         ...config,
       }));
-      // debugger;;
       dashboardStorage.saveDashboard(
         `${config.name}:${currentNavigationPath}`,
         config
@@ -1182,7 +1204,6 @@ const JsonDrivenDashboard: React.FC = () => {
       .catch((error) => {
         console.error("Failed to save layout to IndexedDB:", error);
       });
-    // debugger;
     const updatedWidgets = currentDashboard.widgets.map((widget) => {
       const layoutItem = layoutData.find(
         (item: { i: string }) => item.i === widget.id
@@ -1204,13 +1225,10 @@ const JsonDrivenDashboard: React.FC = () => {
       return widget;
     });
     // if (!isInitialized) return;
-    // debugger;
-
     if (currentDashboard?.id !== selectedDashboard) {
       return;
     }
 
-    // debugger;
     if (
       `${selectedDashboard}:${currentNavigationPath}` !==
       currentDashboard?.dashboardName
@@ -1233,7 +1251,6 @@ const JsonDrivenDashboard: React.FC = () => {
       ...currentDashboard,
       widgets: updatedWidgets,
     });
-    // debugger;;
     dashboardStorage.saveDashboard(
       `${selectedDashboard}:${currentNavigationPath}`,
       {
@@ -1350,7 +1367,6 @@ const JsonDrivenDashboard: React.FC = () => {
                 onCreateDashboard={handleCreateDashboard}
                 onClearLayout={() => {
                   layoutStorage.deleteLayout(currentNavigationPath);
-                  // debugger;
                   dispatch(
                     setLayoutForPath({
                       path: currentNavigationPath,

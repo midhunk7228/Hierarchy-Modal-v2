@@ -45,7 +45,6 @@ class DashboardStorage {
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.storeName], "readwrite");
       const store = transaction.objectStore(this.storeName);
-      // debugger;
       const dashboardData: StoredDashboard = {
         dashboardName,
         dashboard: { ...dashboard, dashboardName },

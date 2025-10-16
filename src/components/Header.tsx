@@ -86,6 +86,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -119,6 +121,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -225,6 +229,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Regions",
           field: "name",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -265,6 +271,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Region",
           field: "region",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },
@@ -296,6 +304,8 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
           label: "Region",
           field: "region",
           options: [
+            { label: "Kuwait", value: "Kuwait" },
+            { label: "Saudi", value: "Saudi" },
             { label: "UK", value: "UK" },
             { label: "Germany", value: "Germany" },
             { label: "France", value: "France" },

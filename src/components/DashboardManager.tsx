@@ -61,7 +61,6 @@ const DashboardManager: React.FC<{
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
-      // debugger;
       console.log("selectedDashboard", selectedDashboard);
       const savedLayout = await dashboardStorage.getDashboard(
         `${selectedDashboard}:${currentNavigationPath}`
@@ -105,7 +104,6 @@ const DashboardManager: React.FC<{
       grid: { columns: 12, rows: 8, gap: 16 },
       widgets: [],
     };
-    // debugger;
     const newDashboards = [...dashboards, newDashboard];
     dispatch(setDashboards(newDashboards));
     await saveData("dashboards", newDashboards);
@@ -124,7 +122,6 @@ const DashboardManager: React.FC<{
     if (value === "create-new") {
       setIsCreateModalOpen(true);
     } else {
-      // debugger;
       const savedLayout = await dashboardStorage.getDashboard(
         `${value}:${currentNavigationPath}`
       );
@@ -138,7 +135,6 @@ const DashboardManager: React.FC<{
         const selected = newDashboards.find((d) => d.id === value);
         if (selected) {
           onSelectDashboard(value);
-          // debugger;;
           onLoadDashboard(JSON.stringify(selected));
         }
         return;
@@ -149,7 +145,6 @@ const DashboardManager: React.FC<{
       // const selected = dashboards.find((d) => d.id === value);
       if (defaultLayout) {
         onSelectDashboard(value);
-        // debugger;;
         onLoadDashboard(JSON.stringify(defaultLayout));
       }
     }
@@ -165,7 +160,6 @@ const DashboardManager: React.FC<{
     try {
       const newDashboard: DashboardLayout = JSON.parse(configText);
       const newDashboards = [...dashboards, newDashboard];
-      // debugger;
       dispatch(setDashboards(newDashboards));
       await saveData("dashboards", newDashboards);
 

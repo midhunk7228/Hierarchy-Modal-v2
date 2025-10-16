@@ -27,12 +27,15 @@ const FilterPanel: React.FC<{
 }> = ({ filters, appliedFilters, onFiltersChange, onClose }) => {
   const [localFilters, setLocalFilters] =
     useState<AppliedFilter[]>(appliedFilters);
-
+  console.log(" appliedFilters@!@", appliedFilters);
   useEffect(() => {
     setLocalFilters(appliedFilters);
   }, [appliedFilters]);
 
-  const handleFilterChange = (filterId: string, value: AppliedFilter["value"]) => {
+  const handleFilterChange = (
+    filterId: string,
+    value: AppliedFilter["value"]
+  ) => {
     setLocalFilters((prev) => {
       const existing = prev.find((f) => f.filterId === filterId);
       if (existing) {

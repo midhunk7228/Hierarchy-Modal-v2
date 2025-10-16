@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, use, useEffect } from "react";
 import {
   MapPin,
   Globe,
@@ -7,9 +7,16 @@ import {
   Menu,
   User,
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
+import { setLocalAppliedFilters } from "../redux/filtersSlice";
 
 export default function BrandDashboardHeader() {
-  const [selectedCountry, setSelectedCountry] = useState("All");
+  const dispatch = useDispatch();
+  const localAppliedFilters = useSelector(
+    (state: RootState) => state.filters.localAppliedFilters
+  );
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [clickedBrandIndex, setClickedBrandIndex] = useState(0);
@@ -17,7 +24,21 @@ export default function BrandDashboardHeader() {
     string | null
   >(null);
   const brandScrollRef = useRef<HTMLDivElement>(null);
-  console.log("clickedBrandIndex", clickedBrandIndex);
+
+  useEffect(() => {
+    const existFilter = localAppliedFilters.find(
+      (f) => f.filterId === "region-filter"
+    );
+    if (existFilter) {
+      //   debugger;
+      setSelectedCountries(existFilter?.value);
+    }
+    if (existFilter === undefined && localAppliedFilters?.length === 0) {
+      setSelectedCountries(["All"]);
+    }
+  }, [localAppliedFilters]);
+
+  console.log("localAppliedFiltersKKJ", localAppliedFilters, selectedCountries);
   const brands = [
     { name: "All", logo: "/all.png" },
     { name: "Burger-Boutique", logo: "/Burger_Boutique.png" },
@@ -210,7 +231,8 @@ export default function BrandDashboardHeader() {
     setShowBrandArrows(!showBrandArrows);
 
     // Reset country selection and additional brand selection
-    setSelectedCountry("All");
+    setSelectedCountries(["All"]);
+    countryFilterApply([], true);
     setSelectedAdditionalBrand(null);
   };
 
@@ -220,9 +242,66 @@ export default function BrandDashboardHeader() {
   ) => {
     e.stopPropagation();
     setSelectedAdditionalBrand(brandName);
-    setSelectedCountry("All");
+    setSelectedCountries(["All"]);
+    countryFilterApply([], true);
   };
 
+  // Handle country selection with multi-select logic
+  const handleCountryClick = (countryName: string) => {
+    if (countryName === "All") {
+      // If "All" is clicked, select only "All"
+      setSelectedCountries(["All"]);
+      countryFilterApply([], true);
+    } else {
+      // If a specific country is clicked
+      if (selectedCountries.includes("All")) {
+        countryFilterApply([countryName], true);
+        // If "All" was selected, replace it with the new country
+        setSelectedCountries([countryName]);
+        // dispatch(setLocalAppliedFilters(newFilters));
+      } else if (selectedCountries.includes(countryName)) {
+        // If country is already selected, deselect it
+        const newSelection = selectedCountries.filter((c) => c !== countryName);
+        countryFilterApply(newSelection.length > 0 ? newSelection : [], true);
+
+        // If no countries left, default to "All"
+        setSelectedCountries(newSelection.length > 0 ? newSelection : ["All"]);
+      } else {
+        countryFilterApply([...selectedCountries, countryName], true);
+
+        // Add the country to selection
+        setSelectedCountries([...selectedCountries, countryName]);
+      }
+    }
+  };
+
+  const countryFilterApply = (country: string[], add: boolean) => {
+    let existingFilter = localAppliedFilters;
+    // if (localAppliedFilters?.length === 0) {
+    //   const regionFilter = {
+    //     filterId: "region-filter",
+    //     value: country,
+    //   };
+    //   dispatch(setLocalAppliedFilters([regionFilter]));
+    //   return;
+    // }
+    // const finalFilter = [];
+    const existing = existingFilter.find((f) => f.filterId === "region-filter");
+    if (existing) {
+      existingFilter = existingFilter.map((f) =>
+        f.filterId === "region-filter" ? { ...f, value: country } : f
+      );
+    } else {
+      existingFilter = [
+        ...existingFilter,
+        {
+          filterId: "region-filter",
+          value: country,
+        },
+      ];
+    }
+    dispatch(setLocalAppliedFilters(existingFilter));
+  };
   // Get countries for the currently selected brand or additional brand
   const getAvailableCountries = () => {
     // If an additional brand is selected, show its countries
@@ -303,7 +382,6 @@ export default function BrandDashboardHeader() {
           }`}
           onDoubleClick={(e) => {
             if (originalIndex !== -1) {
-              //   debugger;
               handleBrandDoubleClick(originalIndex, e, true);
             }
           }}
@@ -389,9 +467,9 @@ export default function BrandDashboardHeader() {
             {getAvailableCountries().map((country) => (
               <button
                 key={country.code}
-                onClick={() => setSelectedCountry(country.name)}
+                onClick={() => handleCountryClick(country.name)}
                 className={`flex items-center gap-2 px-4 py-1 rounded-full text-sm font-medium transition-all ${
-                  selectedCountry === country.name
+                  selectedCountries.includes(country.name)
                     ? "bg-blue-50 text-blue-600 border border-blue-200"
                     : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
                 }`}

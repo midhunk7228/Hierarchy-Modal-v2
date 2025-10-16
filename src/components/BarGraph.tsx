@@ -197,7 +197,6 @@ const BarGraph = () => {
                     ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
                     ctx.closePath();
                     ctx.fill();
-                    // debugger;
                     // Draw border for line labels
                     // if (i > 1 && borderColor !== "transparent") {
                     ctx.strokeStyle = borderColor;

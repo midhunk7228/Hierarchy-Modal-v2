@@ -115,6 +115,7 @@ const MatrixDisplay: React.FC<
 
       const filterData = (items: (SummaryItem | DetailItem)[]) => {
         return items.filter((item) => {
+          console.log("applyFiltersToData", appliedFilters);
           return appliedFilters.every((appliedFilter) => {
             const filter = filters.find((f) => f.id === appliedFilter.filterId);
             if (!filter || !appliedFilter.value) return true;
@@ -258,7 +259,6 @@ const MatrixDisplay: React.FC<
       }
       const result: MatrixData = await response.json();
       setData(result);
-      // debugger;
       await saveData(apiEndpoint, result);
     } catch (err) {
       if (!cachedData) {

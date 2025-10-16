@@ -516,7 +516,7 @@ const DEFAULT_DASHBOARD: DashboardLayout = {
       title: "Regional Metrics",
       displayType: "summary",
       viewType: "comparison",
-      position: { row: 2, col: 0, width: 6, height: 2 },
+      position: { row: 2, col: 0, width: 6, height: 3 },
       additionalInfo: { outcome: true },
       apiEndpoint: "/api/regions",
       filters: [

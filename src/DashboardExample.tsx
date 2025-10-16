@@ -1380,7 +1380,7 @@ const JsonDrivenDashboard: React.FC = () => {
             {currentDashboard.widgets.map((widget) => (
               <div
                 key={widget.id}
-                className="bg-white rounded-lg shadow-md border"
+                className="bg-white rounded-lg shadow-md border border-gray-300"
               >
                 <MatrixDisplay
                   widget={widget}

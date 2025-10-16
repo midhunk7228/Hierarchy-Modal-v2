@@ -121,11 +121,11 @@ const WidgetPanel: React.FC<WidgetPanelProps> = ({
             draggable
             onDragStart={(e) => onDragStart(e, widget.id)}
             onDragEnd={onClose}
-            className="p-4 border rounded-lg cursor-grab flex items-center gap-4 hover:bg-gray-50"
+            className="p-4 border border-gray-300 rounded-lg shadow-md cursor-grab flex items-center gap-4 hover:bg-gray-50"
           >
-            <div className="flex-shrink-0">{widget.icon}</div>
-            <div>
-              <p className="font-semibold">{widget.title}</p>
+            <div className="flex">{widget.icon}</div>
+            <div className="">
+              <p className="font-medium">{widget.title}</p>
               <p className="text-sm text-gray-500">{widget.viewType}</p>
             </div>
           </div>

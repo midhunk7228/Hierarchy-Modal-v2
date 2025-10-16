@@ -169,7 +169,6 @@ const MatrixDisplay: React.FC<
                   .includes(String(filterValue).toLowerCase());
 
               case "number-range": {
-                debugger;
                 if (
                   typeof filterValue !== "object" ||
                   filterValue === null ||

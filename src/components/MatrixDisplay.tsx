@@ -514,9 +514,10 @@ const MatrixDisplay: React.FC<
 
         const createRegionFilter = (localAppliedFilters: AppliedFilter[]) => {
           return (item: SummaryItem | DetailItem) => {
-            if (
-              localAppliedFilters?.find((el) => el.filterId === "region-filter")
-            ) {
+            const existFilter = localAppliedFilters?.find(
+              (el) => el.filterId === "region-filter"
+            );
+            if (existFilter && existFilter?.value?.length !== 0) {
               return localAppliedFilters?.some(
                 (region: AppliedFilter) =>
                   region.filterId === "region-filter" &&
@@ -546,6 +547,7 @@ const MatrixDisplay: React.FC<
           "filterpppOne",
           chartData.filter(createRegionFilter(localAppliedFilters))
         );
+
         console.log(
           "filterpppTwo",
           chartData
@@ -795,7 +797,6 @@ const MatrixDisplay: React.FC<
 
   // Tabular View
   const renderTabular = (): JSX.Element => {
-    console.log("displayType", displayType);
     const tableData: SummaryItem[] | DetailItem[] = (
       displayType === "summary"
         ? filteredData.summary.regions

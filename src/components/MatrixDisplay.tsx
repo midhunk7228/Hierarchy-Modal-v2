@@ -91,8 +91,6 @@ const MatrixDisplay: React.FC<
   // );
   // Refs for amCharts
 
-  console.log("localAppliedFiltersWhyyytt", localAppliedFilters);
-
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<am5.Root | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -115,14 +113,12 @@ const MatrixDisplay: React.FC<
 
       const filterData = (items: (SummaryItem | DetailItem)[]) => {
         return items.filter((item) => {
-          console.log("applyFiltersToData", appliedFilters);
           return appliedFilters.every((appliedFilter) => {
             const filter = filters.find((f) => f.id === appliedFilter.filterId);
             if (!filter || !appliedFilter.value) return true;
 
             const fieldValue = item[filter.field as keyof typeof item];
             const filterValue = appliedFilter.value;
-            console.log("filter.type", filter.type);
 
             switch (filter.type) {
               case "date-range": {
@@ -169,7 +165,6 @@ const MatrixDisplay: React.FC<
                   .includes(String(filterValue).toLowerCase());
 
               case "number-range": {
-                debugger;
                 if (
                   typeof filterValue !== "object" ||
                   filterValue === null ||
@@ -239,7 +234,6 @@ const MatrixDisplay: React.FC<
       inVisibleFilters,
     ]
   );
-  console.log("localAppliedFilters!@!", localAppliedFilters, filters);
   // Fetch data from API
   const fetchData = useCallback(async (): Promise<void> => {
     if (!apiEndpoint) return;
@@ -328,7 +322,6 @@ const MatrixDisplay: React.FC<
       root.setThemes([am5themes_Animated.new(root)]);
 
       if (chartType === "pie") {
-        // debugger;
         const chart = root.container.children.push(
           am5percent.PieChart.new(root, {
             layout: root.verticalLayout,
@@ -353,8 +346,6 @@ const MatrixDisplay: React.FC<
         // Add click event
         series.slices.template.events.on("click", (ev) => {
           const dataContext = ev.target.dataItem?.dataContext as BaseItem;
-          console.log("chartType", chartType);
-          // debugger;
           if (dataContext) {
             handleItemClick(dataContext, "pie-segment");
           }
@@ -436,7 +427,6 @@ const MatrixDisplay: React.FC<
 
         // Add click event
         series.columns.template.events.on("click", (ev) => {
-          // debugger;
           const dataContext = ev.target.dataItem?.dataContext as BaseItem;
           if (dataContext) {
             handleItemClick(dataContext, "column");
@@ -517,7 +507,11 @@ const MatrixDisplay: React.FC<
             const existFilter = localAppliedFilters?.find(
               (el) => el.filterId === "region-filter"
             );
-            if (existFilter && existFilter?.value?.length !== 0) {
+            if (
+              existFilter &&
+              Array.isArray(existFilter.value) &&
+              existFilter.value.length !== 0
+            ) {
               return localAppliedFilters?.some(
                 (region: AppliedFilter) =>
                   region.filterId === "region-filter" &&
@@ -543,17 +537,7 @@ const MatrixDisplay: React.FC<
             return true;
           };
         };
-        console.log(
-          "filterpppOne",
-          chartData.filter(createRegionFilter(localAppliedFilters))
-        );
 
-        console.log(
-          "filterpppTwo",
-          chartData
-            .filter(createRegionFilter(localAppliedFilters))
-            .filter(createCategoryFilter(localAppliedFilters))
-        );
         const scaledData = chartData
           .filter(createRegionFilter(localAppliedFilters))
           .filter(createCategoryFilter(localAppliedFilters))
@@ -561,7 +545,6 @@ const MatrixDisplay: React.FC<
             ...item,
             ordersScaled: (item.orders || 0) * 100, // Scale orders for visibility
           }));
-        console.log("scaledData", scaledData);
         revenueSeries.columns.template.setAll({
           cornerRadiusTL: 5,
           cornerRadiusTR: 5,
@@ -576,7 +559,6 @@ const MatrixDisplay: React.FC<
         // Add click events
         revenueSeries.columns.template.events.on("click", (ev) => {
           const dataContext = ev.target.dataItem?.dataContext as BaseItem;
-          // debugger;
           if (dataContext) {
             handleItemClick(dataContext, "revenue-column");
           }
@@ -584,7 +566,6 @@ const MatrixDisplay: React.FC<
 
         ordersSeries.columns.template.events.on("click", (ev) => {
           const dataContext = ev.target.dataItem?.dataContext as BaseItem;
-          // debugger;
           if (dataContext) {
             handleItemClick(dataContext, "orders-column");
           }
@@ -692,7 +673,6 @@ const MatrixDisplay: React.FC<
           ) || 0
         : (currentData as DetailItem)?.revenue;
     const label = displayType === "summary" ? "Total Revenue" : "Revenue";
-    console.log("filteredData", displayType, filteredData);
 
     return (
       <div className="bg-white rounded-lg p-6 text-center ">
@@ -756,9 +736,8 @@ const MatrixDisplay: React.FC<
       displayType === "summary"
         ? filteredData.summary.regions
         : filteredData.details;
-    console.log("renderComparison", displayType, filteredData);
     return (
-      <div className="bg-white rounded-lg p-6 h-fit flex-shrink-0">
+      <div className="bg-white rounded-lg p-4 h-fit flex-shrink-0">
         <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
           <Users className="w-5 h-5 mr-2" />
           Comparison View

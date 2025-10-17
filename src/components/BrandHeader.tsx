@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import './BrandHeader.css';
-import { Brand, SubNavItem } from '../types';
+import React, { useState } from "react";
+import "./BrandHeader.css";
+import type { Brand, SubNavItem } from "../types";
 
 interface BrandHeaderProps {
   brands: Brand[];
@@ -23,7 +23,9 @@ const BrandHeader: React.FC<BrandHeaderProps> = ({ brands }) => {
         {brands.map((brand) => (
           <div
             key={brand.name}
-            className={`brand-logo ${expandedBrand?.name === brand.name ? 'expanded' : ''}`}
+            className={`brand-logo ${
+              expandedBrand?.name === brand.name ? "expanded" : ""
+            }`}
             onDoubleClick={() => handleDoubleClick(brand)}
           >
             <img src={brand.logo} alt={brand.name} />

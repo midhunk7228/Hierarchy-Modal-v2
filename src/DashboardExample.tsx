@@ -889,12 +889,7 @@ const JsonDrivenDashboard: React.FC = () => {
             }),
             {}
           );
-          console.log(
-            "setCurrentDashboard1",
-            dashboardsObj[
-              `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
-            ]
-          );
+
           // if (
           //   dashboardsObj[`${selectedDashboard}:${currentNavigationPath}`] ===
           //   undefined
@@ -915,11 +910,7 @@ const JsonDrivenDashboard: React.FC = () => {
                 ]
             );
           }
-          // dispatch(setDashboards(dashboardsObj));
-          // dispatch(setSelectedDashboard(storedDashboards[0].dashboard.name));
         } else {
-          // dispatch(setDashboards({ "My Dashboard": DEFAULT_DASHBOARD }));
-          // dispatch(setSelectedDashboard("My Dashboard"));
           await dashboardStorage.saveDashboard(
             `${selectedDashboard}:${currentNavigationPath}`,
             DEFAULT_DASHBOARD
@@ -950,6 +941,7 @@ const JsonDrivenDashboard: React.FC = () => {
     initializeLayout();
   }, [selectedDashboard, dispatch]);
 
+  // commented for test purpose
   // Load layout when navigation path changes
   useEffect(() => {
     if (!isInitialized) return;
@@ -1071,7 +1063,6 @@ const JsonDrivenDashboard: React.FC = () => {
         ...currentDashboard,
         widgets: currentDashboard.widgets.filter((w) => w.id !== widgetId),
       };
-      console.log("setCurrentDashboard2", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
@@ -1094,7 +1085,6 @@ const JsonDrivenDashboard: React.FC = () => {
           w.id === updatedWidget.id ? updatedWidget : w
         ),
       };
-      console.log("setCurrentDashboard3", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
@@ -1105,7 +1095,6 @@ const JsonDrivenDashboard: React.FC = () => {
         ...currentDashboard,
         widgets: [...currentDashboard.widgets, updatedWidget],
       };
-      console.log("setCurrentDashboard4", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
@@ -1164,9 +1153,7 @@ const JsonDrivenDashboard: React.FC = () => {
         ...currentDashboard,
         widgets: [...currentDashboard.widgets, newWidget],
       };
-      console.log("setCurrentDashboard5", updatedDashboard);
       setCurrentDashboard(updatedDashboard);
-      console.log("dashboards", dashboards);
       widgetStorage.saveWidget(
         `${selectedDashboard}:${currentNavigationPath}`,
         updatedDashboard,
@@ -1220,7 +1207,6 @@ const JsonDrivenDashboard: React.FC = () => {
   const handleLoadDashboard = (configText: string): void => {
     try {
       const config: DashboardLayout = JSON.parse(configText);
-      console.log("setCurrentDashboard6", config);
       setCurrentDashboard((prevDashboard) => ({
         ...prevDashboard,
         ...config,
@@ -1262,7 +1248,6 @@ const JsonDrivenDashboard: React.FC = () => {
       const layoutItem = layoutData.find(
         (item: { i: string }) => item.i === widget.id
       );
-      console.log("layoutItem", layoutItem);
       if (layoutItem) {
         return {
           ...widget,
@@ -1297,10 +1282,7 @@ const JsonDrivenDashboard: React.FC = () => {
         widgets: updatedWidgets,
       }
     );
-    console.log("setCurrentDashboard7", {
-      ...currentDashboard,
-      widgets: updatedWidgets,
-    });
+
     setCurrentDashboard({
       ...currentDashboard,
       widgets: updatedWidgets,
@@ -1342,10 +1324,7 @@ const JsonDrivenDashboard: React.FC = () => {
             }
           : w
       );
-      console.log("setCurrentDashboard8", {
-        ...currentDashboard,
-        widgets: updatedWidgets,
-      });
+
       setCurrentDashboard({ ...currentDashboard, widgets: updatedWidgets });
       dashboardStorage.saveDashboard(
         `${selectedDashboard}:${currentNavigationPath}`,
@@ -1381,8 +1360,6 @@ const JsonDrivenDashboard: React.FC = () => {
   };
 
   const layout = getCurrentLayout();
-  console.log("layout", layout);
-  console.log("currentDashboard", currentDashboard);
 
   // Show loading state while initializing
   // if (!isInitialized || isLayoutLoading) {

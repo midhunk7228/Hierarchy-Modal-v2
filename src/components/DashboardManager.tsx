@@ -1,8 +1,8 @@
 import {
-  Download,
-  Upload,
-  RotateCcw,
-  Bell,
+  // Download,
+  // Upload,
+  // RotateCcw,
+  // Bell,
   Plus,
   Settings,
   X,
@@ -37,14 +37,14 @@ const DashboardManager: React.FC<{
   onSelectDashboard,
   onCreateDashboard,
   currentNavigationPath,
-  onClearLayout,
+  // onClearLayout,
   selectedDashboard,
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
-  const { unreadCount } = useSelector(
-    (state: RootState) => state.notifications
-  );
+  // const { unreadCount } = useSelector(
+  //   (state: RootState) => state.notifications
+  // );
   const dispatch = useDispatch();
   const dashboards = useSelector(
     (state: RootState) => state.dashboards.dashboards
@@ -73,7 +73,6 @@ const DashboardManager: React.FC<{
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
-      console.log("selectedDashboard", selectedDashboard);
       const savedLayout = await dashboardStorage.getDashboard(
         `${selectedDashboard}:${currentNavigationPath}`
       );
@@ -103,7 +102,6 @@ const DashboardManager: React.FC<{
     };
     loadDashboards();
   }, [currentNavigationPath, currentDashboard]);
-  console.log("setDashboards", dashboards);
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
       alert("Dashboard name cannot be empty");
@@ -161,11 +159,11 @@ const DashboardManager: React.FC<{
     }
   };
 
-  const exportConfig = () => {
-    const config = JSON.stringify(currentDashboard, null, 2);
-    setConfigText(config);
-    setIsConfigModalOpen(true);
-  };
+  // const exportConfig = () => {
+  //   const config = JSON.stringify(currentDashboard, null, 2);
+  //   setConfigText(config);
+  //   setIsConfigModalOpen(true);
+  // };
 
   const importConfig = async () => {
     try {
@@ -184,16 +182,16 @@ const DashboardManager: React.FC<{
     }
   };
 
-  const downloadConfig = () => {
-    const config = JSON.stringify(currentDashboard, null, 2);
-    const blob = new Blob([config], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${currentDashboard.name}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // const downloadConfig = () => {
+  //   const config = JSON.stringify(currentDashboard, null, 2);
+  //   const blob = new Blob([config], { type: "application/json" });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${currentDashboard.name}.json`;
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   const handleAddCustomWidget = () => {
     const newWidget: DashboardWidget = {
@@ -252,7 +250,6 @@ const DashboardManager: React.FC<{
     }),
   };
 
-  console.log("dashboardsNew", dashboards);
   return (
     <>
       <div className="flex gap-2 ">

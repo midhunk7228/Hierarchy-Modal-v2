@@ -457,7 +457,7 @@ export default function BrandDashboardHeader() {
           key={`expanded-brand-${index}`}
           className={`flex-shrink-0 cursor-pointer ${
             isClicked
-              ? "border-2 border-blue-400 rounded-lg p-1"
+              ? "rounded-lg p-1"
               : "grayscale-0 transition-opacity opacity-70 hover:opacity-100"
           } ${
             isSelectedAdditional

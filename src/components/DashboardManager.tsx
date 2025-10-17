@@ -1,14 +1,11 @@
 import {
-  Download,
-  Upload,
-  RotateCcw,
-  Bell,
   Plus,
   Settings,
   Pencil,
   Coins,
   Ellipsis,
   Calendar,
+  X,
 } from "lucide-react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
@@ -80,15 +77,11 @@ const DashboardManager: React.FC<{
   onSelectDashboard,
   onCreateDashboard,
   currentNavigationPath,
-  onClearLayout,
   selectedDashboard,
   onAddCustomWidget,
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
-  const { unreadCount } = useSelector(
-    (state: RootState) => state.notifications
-  );
   const dispatch = useDispatch();
   const dashboards = useSelector(
     (state: RootState) => state.dashboards.dashboards
@@ -211,11 +204,11 @@ const DashboardManager: React.FC<{
     }
   };
 
-  const exportConfig = () => {
-    const config = JSON.stringify(currentDashboard, null, 2);
-    setConfigText(config);
-    setIsConfigModalOpen(true);
-  };
+  // const exportConfig = () => {
+  //   const config = JSON.stringify(currentDashboard, null, 2);
+  //   setConfigText(config);
+  //   setIsConfigModalOpen(true);
+  // };
 
   const importConfig = async () => {
     try {
@@ -234,30 +227,30 @@ const DashboardManager: React.FC<{
     }
   };
 
-  const downloadConfig = () => {
-    const config = JSON.stringify(currentDashboard, null, 2);
-    const blob = new Blob([config], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${currentDashboard.name}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // const downloadConfig = () => {
+  //   const config = JSON.stringify(currentDashboard, null, 2);
+  //   const blob = new Blob([config], { type: "application/json" });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${currentDashboard.name}.json`;
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
-  const handleAddCustomWidget = () => {
-    const newWidget: DashboardWidget = {
-      id: `widget-${Date.now()}`,
-      title: "New Widget",
-      displayType: "summary",
-      viewType: "single-value",
-      position: { row: 0, col: 0, width: 3, height: 2 },
-      filters: [],
-    };
-    setEditingWidget(newWidget);
-    setIsWidgetEditorOpen(true);
-    setIsWidgetPanelOpen(false); // Close the panel when opening the editor
-  };
+  // const handleAddCustomWidget = () => {
+  //   const newWidget: DashboardWidget = {
+  //     id: `widget-${Date.now()}`,
+  //     title: "New Widget",
+  //     displayType: "summary",
+  //     viewType: "single-value",
+  //     position: { row: 0, col: 0, width: 3, height: 2 },
+  //     filters: [],
+  //   };
+  //   setEditingWidget(newWidget);
+  //   setIsWidgetEditorOpen(true);
+  //   setIsWidgetPanelOpen(false); // Close the panel when opening the editor
+  // };
 
   // Custom styles for react-select
   const customStyles = {

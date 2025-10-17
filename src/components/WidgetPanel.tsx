@@ -5,7 +5,6 @@ import {
   Table,
   DollarSign,
   ChartBarBig,
-  ChartColumnDecreasing,
 } from "lucide-react";
 
 const predefinedWidgets = [
@@ -80,7 +79,7 @@ const predefinedWidgets = [
   {
     id: "bar-graph-widget-two",
     title: "Revenue Graph",
-    icon: <ChartColumnDecreasing className="w-8 h-8 text-blue-500" />,
+    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
     defaultLayout: { w: 6, h: 5, minW: 10, minH: 5 },
     displayType: "details",
     viewType: "bar-two",
@@ -107,55 +106,40 @@ const WidgetPanel: React.FC<WidgetPanelProps> = ({
     e.dataTransfer.setData("text/plain", widgetId);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    <>
-      {/* Backdrop with blur effect */}
-      <div 
-        className="fixed inset-0  bg-opacity-30 backdrop-blur-sm z-30 "
-        onClick={handleBackdropClick}
-      />
-      
-      {/* Panel */}
-      <div className="fixed top-0 right-0 h-full w-[20%] bg-white shadow-lg z-40 py-4 px-6 overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Add a Widget</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            &times;
-          </button>
-        </div>
-        <div className="space-y-4">
-          {predefinedWidgets.map((widget) => (
-            <div
-              key={widget.id}
-              draggable
-              onDragStart={(e) => onDragStart(e, widget.id)}
-              onDragEnd={onClose}
-              className="p-4 border border-gray-300 rounded-lg shadow-md cursor-grab flex items-center gap-4 hover:bg-gray-50"
-            >
-              <div className="flex">{widget.icon}</div>
-              <div className="">
-                <p className="font-medium">{widget.title}</p>
-                <p className="text-sm text-gray-500">{widget.viewType}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4">
-          <button
-            onClick={onAddCustomWidget}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Add Custom Widget
-          </button>
-        </div>
+    <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-lg z-40 p-4 overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Add a Widget</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          &times;
+        </button>
       </div>
-    </>
+      <div className="space-y-4">
+        {predefinedWidgets.map((widget) => (
+          <div
+            key={widget.id}
+            draggable
+            onDragStart={(e) => onDragStart(e, widget.id)}
+            onDragEnd={onClose}
+            className="p-4 border border-gray-300 rounded-lg shadow-md cursor-grab flex items-center gap-4 hover:bg-gray-50"
+          >
+            <div className="flex">{widget.icon}</div>
+            <div className="">
+              <p className="font-medium">{widget.title}</p>
+              <p className="text-sm text-gray-500">{widget.viewType}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4">
+        <button
+          onClick={onAddCustomWidget}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Add Custom Widget
+        </button>
+      </div>
+    </div>
   );
 };
 

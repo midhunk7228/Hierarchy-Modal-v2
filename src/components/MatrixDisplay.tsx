@@ -731,6 +731,29 @@ const MatrixDisplay: React.FC<
     );
   };
 
+  const outcomeFilter = (outcome: string) => {
+    let existingFilter = localAppliedFilters;
+
+    const existing = existingFilter.find(
+      (f) => f.filterId === "outcome-filter"
+    );
+    if (existing) {
+      existingFilter = existingFilter.map((f) =>
+        f.filterId === "outcome-filter" ? { ...f, value: outcome } : f
+      );
+    } else {
+      if (outcome !== "") {
+        existingFilter = [
+          ...existingFilter,
+          {
+            filterId: "outcome-filter",
+            value: outcome,
+          },
+        ];
+      }
+    }
+    dispatch(setLocalAppliedFilters(existingFilter));
+  };
   const renderComparison = (): JSX.Element => {
     const items =
       displayType === "summary"
@@ -748,7 +771,10 @@ const MatrixDisplay: React.FC<
               key={index}
               className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors flex-1"
               // style={{ minWidth: "200px" }}
-              onClick={() => handleItemClick(item, "comparison-item")}
+              onClick={() => {
+                outcomeFilter(item?.outcome || "");
+                handleItemClick(item, "comparison-item");
+              }}
             >
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-gray-900">
@@ -828,7 +854,11 @@ const MatrixDisplay: React.FC<
                 <tr
                   key={index}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleItemClick(row, "table-row")}
+                  onClick={() => {
+                    // debugger;
+                    countryFilterApply([row.region || ""]);
+                    handleItemClick(row, "table-row");
+                  }}
                 >
                   {columns.map((column) => (
                     <td
@@ -902,6 +932,26 @@ const MatrixDisplay: React.FC<
       default:
         return renderTabular();
     }
+  };
+
+  const countryFilterApply = (country: string[]) => {
+    let existingFilter = localAppliedFilters;
+
+    const existing = existingFilter.find((f) => f.filterId === "region-filter");
+    if (existing) {
+      existingFilter = existingFilter.map((f) =>
+        f.filterId === "region-filter" ? { ...f, value: country } : f
+      );
+    } else {
+      existingFilter = [
+        ...existingFilter,
+        {
+          filterId: "region-filter",
+          value: country,
+        },
+      ];
+    }
+    dispatch(setLocalAppliedFilters(existingFilter));
   };
 
   // Get active filter count

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Chart,
   CategoryScale,
@@ -20,6 +20,74 @@ const BarGraph = () => {
   const salesChartInstance = useRef<Chart | null>(null);
   const guestChartInstance = useRef<Chart | null>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
+
+  // State for editable data
+  const [salesData, setSalesData] = useState({
+    salesLY: [114457, 119376, 61567, 105565, 128115, 131910, 120780, 107802],
+    sales: [88964, 94289, 40670, 94645, 108264, 105190, 89983, 81978],
+    apgLY: [16.7, 15.8, 16.6, 15.7, 18.1, 15, 14.9, 15.5],
+    apg: [16.4, 17.3, 17.3, 16.9, 15.3, 14.2, 14.3, 14.3],
+  });
+
+  const [guestData, setGuestData] = useState({
+    avgDailyGuestLY: [225, 269, 120, 209, 229, 294, 261, 224],
+    avgDailyGuest: [172, 195, 76, 201, 228, 246, 203, 185],
+  });
+
+  // Generate random value within a range
+  const randomInRange = (min: number, max: number, decimals: number = 0) => {
+    const value = Math.random() * (max - min) + min;
+    return decimals > 0
+      ? parseFloat(value.toFixed(decimals))
+      : Math.round(value);
+  };
+
+  const handleChartClick = (
+    chart: Chart,
+    event: any,
+    chartType: "sales" | "guest"
+  ) => {
+    const points = chart.getElementsAtEventForMode(
+      event.native,
+      "nearest",
+      { intersect: true },
+      false
+    );
+
+    if (points.length > 0) {
+      const point = points[0];
+      const datasetIndex = point.datasetIndex;
+      const index = point.index;
+
+      if (chartType === "sales") {
+        const newData = { ...salesData };
+        if (datasetIndex === 0) {
+          // Sales LY - random between 50k and 140k
+          newData.salesLY[index] = randomInRange(50000, 140000);
+        } else if (datasetIndex === 1) {
+          // Sales - random between 40k and 120k
+          newData.sales[index] = randomInRange(40000, 120000);
+        } else if (datasetIndex === 2) {
+          // APG LY - random between 14 and 19
+          newData.apgLY[index] = randomInRange(14, 19, 1);
+        } else if (datasetIndex === 3) {
+          // APG - random between 14 and 19
+          newData.apg[index] = randomInRange(14, 19, 1);
+        }
+        setSalesData(newData);
+      } else {
+        const newData = { ...guestData };
+        if (datasetIndex === 0) {
+          // Avg Daily Guest LY - random between 100 and 300
+          newData.avgDailyGuestLY[index] = randomInRange(100, 300);
+        } else if (datasetIndex === 1) {
+          // Avg Daily Guest - random between 80 and 280
+          newData.avgDailyGuest[index] = randomInRange(80, 280);
+        }
+        setGuestData(newData);
+      }
+    }
+  };
 
   useEffect(() => {
     // Register all Chart.js components
@@ -65,9 +133,7 @@ const BarGraph = () => {
             {
               type: "bar",
               label: "Sales LY",
-              data: [
-                114457, 119376, 61567, 105565, 128115, 131910, 120780, 107802,
-              ],
+              data: salesData.salesLY,
               backgroundColor: "#a6a6a6",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -76,7 +142,7 @@ const BarGraph = () => {
             {
               type: "bar",
               label: "Sales",
-              data: [88964, 94289, 40670, 94645, 108264, 105190, 89983, 81978],
+              data: salesData.sales,
               backgroundColor: "#007acb",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -85,7 +151,7 @@ const BarGraph = () => {
             {
               type: "line",
               label: "APG LY",
-              data: [16.7, 15.8, 16.6, 15.7, 18.1, 15, 14.9, 15.5],
+              data: salesData.apgLY,
               borderColor: "#e0bfc6",
               backgroundColor: "transparent",
               borderWidth: 2,
@@ -102,7 +168,7 @@ const BarGraph = () => {
             {
               type: "line",
               label: "APG",
-              data: [16.4, 17.3, 17.3, 16.9, 15.3, 14.2, 14.3, 14.3],
+              data: salesData.apg,
               borderColor: "#7b60c7",
               backgroundColor: "transparent",
               borderWidth: 2.5,
@@ -154,7 +220,6 @@ const BarGraph = () => {
                       textColor = i === 2 ? "#d2cff9" : "#4b363a";
 
                       borderColor = "transparent";
-                      // borderColor = i === 2 ? "#7b60c7" : "#c6a4ab";
                       padding = { top: 5, bottom: 5, left: 10, right: 10 };
                     }
 
@@ -165,7 +230,7 @@ const BarGraph = () => {
 
                     // Draw background
                     ctx.fillStyle = bgColor;
-                    ctx.globalAlpha = i === 2 ? 1 : 0.85; // 15% transparency
+                    ctx.globalAlpha = i === 2 ? 1 : 0.85;
                     const radius = 4;
                     const boxX = x - boxWidth / 2;
                     const boxY = y - boxHeight / 2;
@@ -197,12 +262,10 @@ const BarGraph = () => {
                     ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
                     ctx.closePath();
                     ctx.fill();
-                    // Draw border for line labels
-                    // if (i > 1 && borderColor !== "transparent") {
+
                     ctx.strokeStyle = borderColor;
                     ctx.lineWidth = 1;
                     ctx.stroke();
-                    // }
 
                     // Draw text
                     ctx.fillStyle = textColor;
@@ -218,6 +281,9 @@ const BarGraph = () => {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          onClick: (event: any, _activeElements: any, chart: Chart) => {
+            handleChartClick(chart, event, "sales");
+          },
           interaction: {
             mode: "index",
             intersect: false,
@@ -247,7 +313,6 @@ const BarGraph = () => {
               position: "left",
               grid: {
                 color: "#e5e5e5",
-
                 lineWidth: 1,
               },
               border: {
@@ -319,14 +384,14 @@ const BarGraph = () => {
           datasets: [
             {
               label: "Avg Daily Guest LY",
-              data: [225, 269, 120, 209, 229, 294, 261, 224],
+              data: guestData.avgDailyGuestLY,
               backgroundColor: "#a6a6a6",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
             },
             {
               label: "Avg Daily Guest",
-              data: [172, 195, 76, 201, 228, 246, 203, 185],
+              data: guestData.avgDailyGuest,
               backgroundColor: "#007acb",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -410,6 +475,9 @@ const BarGraph = () => {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          onClick: (event: any, _activeElements: any, chart: Chart) => {
+            handleChartClick(chart, event, "guest");
+          },
           plugins: {
             legend: {
               position: "bottom",
@@ -442,21 +510,11 @@ const BarGraph = () => {
                 padding: 5,
               },
             },
-            // y: {
-            //   display: false,
-            //   min: 0,
-            //   max: 350,
-            // position: "left",
-            // padding: 8,
-            // },
             y: {
               display: false,
-              //   min: 0,
-              //   max: 350,
               position: "left",
               grid: {
                 color: "#e5e5e5",
-
                 lineWidth: 1,
               },
               border: {
@@ -489,7 +547,7 @@ const BarGraph = () => {
         guestChartInstance.current.destroy();
       }
     };
-  }, []);
+  }, [salesData, guestData]);
 
   const exportToImage = () => {
     try {
@@ -609,7 +667,7 @@ const BarGraph = () => {
   };
 
   return (
-    <div className=" bg-white">
+    <div className="bg-white">
       <button
         onClick={exportToImage}
         className="fixed top-8 right-8 px-6 py-3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 z-50 cursor-pointer"
@@ -617,7 +675,7 @@ const BarGraph = () => {
         📸 Export as Image
       </button>
 
-      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white  p-6">
+      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           {/* Logo Section */}
@@ -642,7 +700,7 @@ const BarGraph = () => {
           </div>
 
           {/* Brand Name */}
-          <div className="text-6xl text-pink-600 font-light tracking-wider">
+          <div className="text-6xl text-[#dd4e51] font-serif tracking-wider">
             NEJOUD
           </div>
         </div>
@@ -668,12 +726,12 @@ const BarGraph = () => {
         </div>
 
         {/* Sales Chart */}
-        <div className="relative h-96 mb-5">
+        <div className="relative h-96 mb-5 cursor-pointer hover:opacity-90 transition-opacity">
           <canvas ref={salesChartRef}></canvas>
         </div>
 
         {/* Guest Chart */}
-        <div className="relative h-56 border px-10">
+        <div className="relative h-56 border px-10 cursor-pointer hover:opacity-90 transition-opacity">
           <canvas ref={guestChartRef}></canvas>
         </div>
       </div>

@@ -29,9 +29,7 @@ export default function BrandDashboardHeader() {
     endDate: "2025-03-31",
   });
   const [openCurrencyPopup, setOpenCurrencyPopup] = useState(false);
-  const [selectedCurrencies, setSelectedCurrencies] = useState<string[]>([
-    "KWD",
-  ]);
+  const [selectedCurrencies] = useState<string[]>(["KWD"]);
   const brandScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const existFilter = localAppliedFilters.find(
@@ -499,14 +497,17 @@ export default function BrandDashboardHeader() {
     });
   };
 
-  const handleCurrencyToggle = (currencyCode: string) => {
-    setSelectedCurrencies((prev) => {
-      if (prev.includes(currencyCode)) {
-        return prev.filter((c) => c !== currencyCode);
-      } else {
-        return [...prev, currencyCode];
-      }
-    });
+  const handleCurrencyToggle = (currency: { code: string; name: string }) => {
+    // const currencyCode = currency?.code;
+    // debugger;
+    handleCountryClick(currency.name);
+    // setSelectedCurrencies((prev) => {
+    //   if (prev.includes(currencyCode)) {
+    //     return prev.filter((c) => c !== currencyCode);
+    //   } else {
+    //     return [...prev, currencyCode];
+    //   }
+    // });
   };
 
   return (
@@ -708,12 +709,10 @@ export default function BrandDashboardHeader() {
                               </div>
                               <input
                                 type="checkbox"
-                                checked={selectedCurrencies.includes(
-                                  currency.code
+                                checked={selectedCountries.includes(
+                                  country.name
                                 )}
-                                onChange={() =>
-                                  handleCurrencyToggle(currency.code)
-                                }
+                                onChange={() => handleCurrencyToggle(country)}
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                               />
                             </label>

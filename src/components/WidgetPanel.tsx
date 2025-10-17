@@ -5,6 +5,7 @@ import {
   Table,
   DollarSign,
   ChartBarBig,
+  ChartColumnDecreasing,
 } from "lucide-react";
 
 const predefinedWidgets = [
@@ -79,7 +80,7 @@ const predefinedWidgets = [
   {
     id: "bar-graph-widget-two",
     title: "Revenue Graph",
-    icon: <ChartBarBig className="w-8 h-8 text-blue-500" />,
+    icon: <ChartColumnDecreasing className="w-8 h-8 text-blue-500" />,
     defaultLayout: { w: 6, h: 5, minW: 10, minH: 5 },
     displayType: "details",
     viewType: "bar-two",
@@ -105,6 +106,7 @@ const WidgetPanel: React.FC<WidgetPanelProps> = ({
   const onDragStart = (e: React.DragEvent, widgetId: string) => {
     e.dataTransfer.setData("text/plain", widgetId);
   };
+
 
   return (
     <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-lg z-40 p-4 overflow-y-auto">
@@ -133,7 +135,10 @@ const WidgetPanel: React.FC<WidgetPanelProps> = ({
       </div>
       <div className="mt-4">
         <button
-          onClick={onAddCustomWidget}
+          onClick={() => {
+            onAddCustomWidget();
+            onClose(); // Close the panel after triggering
+          }}
           className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Add Custom Widget

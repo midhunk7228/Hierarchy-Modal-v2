@@ -13,6 +13,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { Download, Flower } from "lucide-react";
 
 const BarGraph = () => {
   const salesChartRef = useRef<HTMLCanvasElement>(null);
@@ -667,17 +668,22 @@ const BarGraph = () => {
   };
 
   return (
-    <div className="bg-white">
-      <button
-        onClick={exportToImage}
-        className="fixed top-8 right-8 px-6 py-3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 z-50 cursor-pointer"
-      >
-        📸 Export as Image
-      </button>
+    <div className=" bg-white">
+      
 
-      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white p-6">
+      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white  p-6">
+        <div className="flex justify-end pb-3">
+        <button
+        onClick={exportToImage}
+        className="flex items-center gap-1 px-3 py-2 bg-white border-2 border-gray-300 text-gray-500 rounded-lg text-xs font-medium  z-50 cursor-pointer"
+      >
+        Export as Image <Download className="h-4 w-4"/>
+      </button>
+        </div>
+      
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
+          
           {/* Logo Section */}
           <div className="flex items-center gap-1">
             <span
@@ -686,7 +692,7 @@ const BarGraph = () => {
             >
               Giulia
             </span>
-            <span className="text-3xl text-red-500">🍁</span>
+            <span className=" text-red-500"><Flower className="h-10 w-10"/></span>
           </div>
 
           {/* Title Section */}
@@ -700,7 +706,7 @@ const BarGraph = () => {
           </div>
 
           {/* Brand Name */}
-          <div className="text-6xl text-[#dd4e51] font-serif tracking-wider">
+          <div className="text-6xl text-red-400 font-extra-light tracking-wider font-serif">
             NEJOUD
           </div>
         </div>

@@ -5,7 +5,6 @@ import {
   Bell,
   Plus,
   Settings,
-  X,
   Pencil,
   Coins,
   Ellipsis,

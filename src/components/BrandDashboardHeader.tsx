@@ -29,9 +29,7 @@ export default function BrandDashboardHeader() {
     endDate: "2025-03-31",
   });
   const [openCurrencyPopup, setOpenCurrencyPopup] = useState(false);
-  const [selectedCurrencies, setSelectedCurrencies] = useState<string[]>([
-    "KWD",
-  ]);
+  const [selectedCurrencies] = useState<string[]>(["KWD"]);
   const brandScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const existFilter = localAppliedFilters.find(
@@ -499,38 +497,41 @@ export default function BrandDashboardHeader() {
     });
   };
 
-  const handleCurrencyToggle = (currencyCode: string) => {
-    setSelectedCurrencies((prev) => {
-      if (prev.includes(currencyCode)) {
-        return prev.filter((c) => c !== currencyCode);
-      } else {
-        return [...prev, currencyCode];
-      }
-    });
+  const handleCurrencyToggle = (currency: { code: string; name: string }) => {
+    // const currencyCode = currency?.code;
+    // debugger;
+    handleCountryClick(currency.name);
+    // setSelectedCurrencies((prev) => {
+    //   if (prev.includes(currencyCode)) {
+    //     return prev.filter((c) => c !== currencyCode);
+    //   } else {
+    //     return [...prev, currencyCode];
+    //   }
+    // });
   };
 
   return (
     <div className="w-full bg-white">
       {/* Top Brand Bar */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-200 px-4 py-4 md:px-6">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           {/* Brand Logos with Navigation */}
-          <div className="relative flex items-center flex-1 mx-6">
+          <div className="relative flex flex-1 items-center md:w-auto md:mx-6">
             {/* Left Arrow */}
             {showBrandArrows && (
               <button
                 onClick={() => scrollBrands("left")}
-                className="absolute left-0 z-10 -ml-4 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-all"
+                className="absolute left-0 z-10 -ml-4 rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gray-50"
                 style={{ transform: "translateX(-50%)" }}
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="h-5 w-5 text-gray-600" />
               </button>
             )}
 
             {/* Scrollable Brand Container */}
             <div
               ref={brandScrollRef}
-              className="flex items-center gap-8 overflow-x-auto scrollbar-hide"
+              className="scrollbar-hide flex items-center gap-8 overflow-x-auto"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {renderBrandLogos()}
@@ -540,26 +541,26 @@ export default function BrandDashboardHeader() {
             {showBrandArrows && (
               <button
                 onClick={() => scrollBrands("right")}
-                className="absolute right-0 z-10 -mr-4 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-all"
+                className="absolute right-0 z-10 -mr-4 rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gray-50"
                 style={{ transform: "translateX(50%)" }}
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="h-5 w-5 text-gray-600" />
               </button>
             )}
           </div>
 
           {/* Right Side Icons */}
-          <div className="flex items-center gap-4 relative">
+          <div className="relative flex items-center gap-4 self-end md:self-center">
             {/* <User className="w-6 h-6 text-gray-500 cursor-pointer hover:text-gray-700" /> */}
             <button
               onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-              className="flex items-center gap-2 bg-white  text-gray-600 rounded-lg transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-white text-gray-600 transition-colors"
             >
-              <Ellipsis className="w-6 h-6 cursor-pointer" />
+              <Ellipsis className="h-6 w-6 cursor-pointer" />
             </button>
             {openDatePopup === 0 && (
-              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
-                <div className="flex justify-between items-center mb-3">
+              <div className="absolute top-full right-0 z-10 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
+                <div className="mb-3 flex items-center justify-between">
                   <h4 className="font-semibold text-gray-800">
                     Select Date Range
                   </h4>
@@ -567,7 +568,7 @@ export default function BrandDashboardHeader() {
                     onClick={() => setOpenDatePopup(null)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
                 <DateRangeFilter
@@ -578,7 +579,7 @@ export default function BrandDashboardHeader() {
                   }
                 />
                 <div className="mt-2 flex justify-end">
-                  <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <button className=" rounded-lg bg-blue-600 px-4 py-1 text-white transition-colors hover:bg-blue-700">
                     Save
                   </button>
                 </div>
@@ -589,79 +590,42 @@ export default function BrandDashboardHeader() {
       </div>
 
       {/* Country Filter Bar */}
-      <div className="border-b border-gray-200 px-6 py-3">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-200 px-4 py-3 md:px-6">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           {/* Country Filters */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {getAvailableCountries().map(
               (country: { name: string; flag: string; code: string }) => (
                 <button
                   key={country.code}
                   onClick={() => handleCountryClick(country.name)}
-                  className={`flex items-center gap-2 px-4 py-1 rounded-full text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 rounded-full px-4 py-1 text-sm font-medium transition-all ${
                     selectedCountries.includes(country.name)
-                      ? "bg-blue-50 text-blue-600 border border-blue-200"
-                      : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                      ? "border border-blue-200 bg-blue-50 text-blue-600"
+                      : "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <span className="text-lg">{country.flag}</span>
                   <span>{country.name}</span>
                 </button>
-              )
+              ),
             )}
           </div>
 
           {/* Right Side Info */}
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-              className="flex items-center gap-2 bg-white  text-gray-600 rounded-lg transition-colors"
-            >
-              <Ellipsis className="w-6 h-6 cursor-pointer" />
-            </button>
-            {openDatePopup === 0 && (
-              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold text-gray-800">
-                    Select Date Range
-                  </h4>
-                  <button
-                    onClick={() => setOpenDatePopup(null)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <DateRangeFilter
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                  onDateChange={(startDate, endDate) =>
-                    setDateRange({ startDate, endDate })
-                  }
-                />
-                <div className="mt-2 flex justify-end">
-                  <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
-            {/* <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-              <Globe className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">KWD 🇰🇼</span>
-            </div> */}
+          <div className="flex items-center gap-4 self-end md:self-center">
             <div className="relative">
               <button
                 onClick={() => setOpenCurrencyPopup(!openCurrencyPopup)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 transition-colors hover:bg-gray-100"
               >
-                <Globe className="w-4 h-4 text-gray-600" />
+                <Globe className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">
                   {selectedCurrencies.length > 0
                     ? selectedCurrencies.length === 1
                       ? `${selectedCurrencies[0]} ${
                           Object.values(currencyMapping).find(
-                            (c) => c.code === selectedCurrencies[0]
+                            (c) => c.code === selectedCurrencies[0],
                           )?.flag || ""
                         }`
                       : `${selectedCurrencies.length} Countries`
@@ -670,19 +634,19 @@ export default function BrandDashboardHeader() {
               </button>
 
               {openCurrencyPopup && (
-                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 min-w-54  ">
-                  <div className="flex justify-end items-center mb-3">
+                <div className="absolute top-full right-0 z-10 mt-2 min-w-54 rounded-lg border border-gray-200 bg-white p-4 shadow-xl  ">
+                  <div className="mb-3 flex items-center justify-end">
                     <button
                       onClick={() => setOpenCurrencyPopup(false)}
                       className="text-gray-400 hover:text-gray-600"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="max-h-64 space-y-2 overflow-y-auto">
                     {getAvailableCountries()
                       .filter(
-                        (country: { name: string }) => country.name !== "All"
+                        (country: { name: string }) => country.name !== "All",
                       )
                       .map(
                         (country: {
@@ -698,7 +662,7 @@ export default function BrandDashboardHeader() {
                           return (
                             <label
                               key={country.code}
-                              className="flex items-center justify-between py-1 px-1 hover:bg-gray-50 rounded-lg cursor-pointer"
+                              className="flex cursor-pointer items-center justify-between rounded-lg py-1 px-1 hover:bg-gray-50"
                             >
                               <div className="flex items-center gap-1">
                                 <span className="text-lg">{currency.flag}</span>
@@ -708,28 +672,20 @@ export default function BrandDashboardHeader() {
                               </div>
                               <input
                                 type="checkbox"
-                                checked={selectedCurrencies.includes(
-                                  currency.code
+                                checked={selectedCountries.includes(
+                                  country.name,
                                 )}
-                                onChange={() =>
-                                  handleCurrencyToggle(currency.code)
-                                }
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                onChange={() => handleCurrencyToggle(country)}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             </label>
                           );
-                        }
+                        },
                       )}
                   </div>
                 </div>
               )}
             </div>
-            {/* <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-              <MapPin className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">
-                29 Outlets
-              </span>
-            </div> */}
           </div>
         </div>
       </div>

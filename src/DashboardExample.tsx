@@ -1391,7 +1391,7 @@ const JsonDrivenDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <DashboardManager
                 currentDashboard={currentDashboard}
-                setCurrentDashboard={setCurrentDashboard}
+                // setCurrentDashboard={setCurrentDashboard}
                 onLoadDashboard={handleLoadDashboard}
                 currentNavigationPath={currentNavigationPath}
                 selectedDashboard={selectedDashboard}

@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import type {
   DashboardLayout,
-  DashboardWidget,
+  // DashboardWidget,
 } from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
 import { setDashboards } from "../redux/dashboardsSlice";
@@ -90,8 +90,8 @@ const DashboardManager: React.FC<{
   const [newDashboardName, setNewDashboardName] = useState("");
 
   const { isEditMode } = useSelector((state: RootState) => state.editMode);
-  const [, setEditingWidget] = useState<DashboardWidget | null>(null);
-  const [, setIsWidgetEditorOpen] = useState(false);
+  // const [, setEditingWidget] = useState<DashboardWidget | null>(null);
+  // const [, setIsWidgetEditorOpen] = useState(false);
   const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
   const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
   const [dateRange, setDateRange] = useState({
@@ -299,20 +299,20 @@ const DashboardManager: React.FC<{
   console.log("dashboardsNew", dashboards);
   return (
     <>
-    <div className="flex flex-col items-end gap-4">
-      <div className="flex gap-2 ">
-        <div style={{ minWidth: "200px" }}>
-          <Select
-            value={dashboardOptions.find(
-              (option) => option.value === selectedDashboard
-            )}
-            onChange={handleDashboardChange}
-            options={dashboardOptions}
-            styles={customStyles}
-            isSearchable={false}
-          />
-        </div>
-        {/* <button
+      <div className="flex flex-col items-end gap-4">
+        <div className="flex gap-2 ">
+          <div style={{ minWidth: "200px" }}>
+            <Select
+              value={dashboardOptions.find(
+                (option) => option.value === selectedDashboard
+              )}
+              onChange={handleDashboardChange}
+              options={dashboardOptions}
+              styles={customStyles}
+              isSearchable={false}
+            />
+          </div>
+          {/* <button
           onClick={exportConfig}
           className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
           title="Export Configuration"
@@ -359,7 +359,7 @@ const DashboardManager: React.FC<{
             </span>
           )}
         </button> */}
-        {/* <div className="flex gap-2 w-full xl:w-auto">
+          {/* <div className="flex gap-2 w-full xl:w-auto">
           <button
             onClick={() => setIsWidgetPanelOpen(true)}
             // disabled={!isEditMode}
@@ -386,17 +386,17 @@ const DashboardManager: React.FC<{
             <span className="sm:hidden">{isEditMode ? "Exit" : "Edit"}</span>
           </button>
         </div> */}
-        <div className="relative">
-          <button
-            onClick={() => setIsOptionsPopupOpen(!isOptionsPopupOpen)}
-            className="px-3 sm:px-4 py-3 bg-gray-50 text-gray-700 cursor-pointer rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1 border border-gray-200"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsOptionsPopupOpen(!isOptionsPopupOpen)}
+              className="px-3 sm:px-4 py-3 bg-gray-50 text-gray-700 cursor-pointer rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1 border border-gray-200"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
 
-          {isOptionsPopupOpen && (
-            <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-3 min-w-48">
-              {/* <div className="flex justify-end items-center mb-3">
+            {isOptionsPopupOpen && (
+              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-3 min-w-48">
+                {/* <div className="flex justify-end items-center mb-3">
                 <button
                   onClick={() => setIsOptionsPopupOpen(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -404,129 +404,129 @@ const DashboardManager: React.FC<{
                   <X className="w-4 h-4" />
                 </button>
               </div> */}
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setIsWidgetPanelOpen(true);
-                    setIsOptionsPopupOpen(false);
-                  }}
-                  className="w-full px-3 py-2 bg-green-700 hover:bg-[#4f967f] cursor-pointer text-white rounded-md transition-colors flex items-center justify-center gap-2 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Widget</span>
-                </button>
-                <button
-                  onClick={() => {
-                    dispatch(toggleEditMode());
-                    setIsOptionsPopupOpen(false);
-                  }}
-                  className={`w-full px-3 py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm ${
-                    isEditMode
-                      ? "bg-red-700 text-white hover:bg-red-900"
-                      : "bg-blue-700 hover:bg-[#626ac2] text-white"
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>{isEditMode ? "Exit Edit Mode" : "Edit Mode"}</span>
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setIsWidgetPanelOpen(true);
+                      setIsOptionsPopupOpen(false);
+                    }}
+                    className="w-full px-3 py-2 bg-green-700 hover:bg-[#4f967f] cursor-pointer text-white rounded-md transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Widget</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      dispatch(toggleEditMode());
+                      setIsOptionsPopupOpen(false);
+                    }}
+                    className={`w-full px-3 py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm ${
+                      isEditMode
+                        ? "bg-red-700 text-white hover:bg-red-900"
+                        : "bg-blue-700 hover:bg-[#626ac2] text-white"
+                    }`}
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>{isEditMode ? "Exit Edit Mode" : "Edit Mode"}</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          <WidgetPanel
+            isOpen={isWidgetPanelOpen}
+            onClose={() => setIsWidgetPanelOpen(false)}
+            onAddCustomWidget={onAddCustomWidget}
+          />
         </div>
 
-        <WidgetPanel
-          isOpen={isWidgetPanelOpen}
-          onClose={() => setIsWidgetPanelOpen(false)}
-          onAddCustomWidget={onAddCustomWidget}
-        />
-      </div>
-
-      <div className="flex items-center gap-3 ">
-        <div className="relative">
-          <button
-            onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-            className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
-          >
-            <Ellipsis className="w-6 h-6 cursor-pointer" />
-            {/* <span className="font-medium">
+        <div className="flex items-center gap-3 ">
+          <div className="relative">
+            <button
+              onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
+              className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              <Ellipsis className="w-6 h-6 cursor-pointer" />
+              {/* <span className="font-medium">
                     {formatDateRangeForDisplay(
                       dateRange.startDate,
                       dateRange.endDate
                     )}
                   </span> */}
+            </button>
+            {openDatePopup === 0 && (
+              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-semibold text-gray-800">
+                    Select Date Range
+                  </h4>
+                  <button
+                    onClick={() => setOpenDatePopup(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <DateRangeFilter
+                  startDate={dateRange.startDate}
+                  endDate={dateRange.endDate}
+                  onDateChange={(startDate, endDate) =>
+                    setDateRange({ startDate, endDate })
+                  }
+                />
+                <div className="mt-2 flex justify-end">
+                  <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Comparison:</span>
+            <span className="font-medium">{comparisonDate}</span>
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <Coins className="w-4 h-4" />
+            <span className="font-medium">Thousands</span>
           </button>
-          {openDatePopup === 0 && (
-            <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-semibold text-gray-800">
-                  Select Date Range
-                </h4>
-                <button
-                  onClick={() => setOpenDatePopup(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <DateRangeFilter
-                startDate={dateRange.startDate}
-                endDate={dateRange.endDate}
-                onDateChange={(startDate, endDate) =>
-                  setDateRange({ startDate, endDate })
-                }
+          <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+            <span>+</span>
+            <span>Filter</span>
+          </button>
+        </div>
+        {isCreateModalOpen && (
+          <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-800">
+                Create New Dashboard
+              </h3>
+              <input
+                type="text"
+                value={newDashboardName}
+                onChange={(e) => setNewDashboardName(e.target.value)}
+                placeholder="Enter dashboard name"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              <div className="mt-2 flex justify-end">
-                <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Save
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateNewDashboard}
+                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                >
+                  Create
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Comparison:</span>
-          <span className="font-medium">{comparisonDate}</span>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-          <Coins className="w-4 h-4" />
-          <span className="font-medium">Thousands</span>
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-          <span>+</span>
-          <span>Filter</span>
-        </button>
-      </div>
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">
-              Create New Dashboard
-            </h3>
-            <input
-              type="text"
-              value={newDashboardName}
-              onChange={(e) => setNewDashboardName(e.target.value)}
-              placeholder="Enter dashboard name"
-              className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateNewDashboard}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-              >
-                Create
-              </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
       {/* Configuration Modal */}
       {isConfigModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

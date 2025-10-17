@@ -209,6 +209,12 @@ interface RevenueChartProps {
   location: string;
   value: string;
   change: string;
+  onClick: (payload: {
+    category: string;
+    actual: number;
+    previous: number;
+    target: number;
+  }) => void;
 }
 
 export const RevenueChart = ({
@@ -216,6 +222,7 @@ export const RevenueChart = ({
   location,
   value,
   change,
+  onClick,
 }: RevenueChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const [hoveredData, setHoveredData] = useState<{
@@ -347,6 +354,18 @@ export const RevenueChart = ({
 
       series.columns.template.events.on("pointerout", function () {
         setHoveredData(null);
+      });
+
+      // 👇 New click handler
+      series.columns.template.events.on("pointerdown", function (ev) {
+        const dataItem = ev.target.dataItem;
+        if (dataItem) {
+          const dataContext = dataItem.dataContext as ChartData;
+          console.log("Clicked:", dataContext);
+          onClick(dataContext);
+          // You can perform any action here, like opening a modal,
+          // navigating, or updating state.
+        }
       });
 
       series.data.setAll(data);

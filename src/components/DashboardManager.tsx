@@ -1,12 +1,15 @@
 import {
-  // Download,
-  // Upload,
-  // RotateCcw,
-  // Bell,
+  Download,
+  Upload,
+  RotateCcw,
+  Bell,
   Plus,
   Settings,
   X,
   Pencil,
+  Coins,
+  Ellipsis,
+  Calendar,
 } from "lucide-react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
@@ -23,6 +26,46 @@ import { dashboardStorage } from "../utils/dashboardStorage";
 import { toggleEditMode } from "../redux/editModeSlice";
 import WidgetPanel from "./WidgetPanel";
 
+const DateRangeFilter: React.FC<{
+  onDateChange: (startDate: string, endDate: string) => void;
+  startDate?: string;
+  endDate?: string;
+}> = ({ onDateChange, startDate = "", endDate = "" }) => {
+  const [localStartDate, setLocalStartDate] = useState(startDate);
+  const [localEndDate, setLocalEndDate] = useState(endDate);
+
+  const handleStartDateChange = (date: string) => {
+    setLocalStartDate(date);
+    onDateChange(date, localEndDate);
+  };
+
+  const handleEndDateChange = (date: string) => {
+    setLocalEndDate(date);
+    onDateChange(localStartDate, date);
+  };
+
+  return (
+    <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+      <Calendar className="w-4 h-4 text-slate-500" />
+      <input
+        type="date"
+        value={localStartDate}
+        onChange={(e) => handleStartDateChange(e.target.value)}
+        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+        placeholder="Start Date"
+      />
+      <span className="text-slate-400">-</span>
+      <input
+        type="date"
+        value={localEndDate}
+        onChange={(e) => handleEndDateChange(e.target.value)}
+        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+        placeholder="End Date"
+      />
+    </div>
+  );
+};
+
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
   onLoadDashboard: (config: string) => void;
@@ -31,20 +74,22 @@ const DashboardManager: React.FC<{
   currentNavigationPath: string;
   onClearLayout: () => void;
   selectedDashboard: string;
+  onAddCustomWidget: () => void;
 }> = ({
   currentDashboard,
   onLoadDashboard,
   onSelectDashboard,
   onCreateDashboard,
   currentNavigationPath,
-  // onClearLayout,
+  onClearLayout,
   selectedDashboard,
+  onAddCustomWidget,
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
-  // const { unreadCount } = useSelector(
-  //   (state: RootState) => state.notifications
-  // );
+  const { unreadCount } = useSelector(
+    (state: RootState) => state.notifications
+  );
   const dispatch = useDispatch();
   const dashboards = useSelector(
     (state: RootState) => state.dashboards.dashboards
@@ -57,6 +102,12 @@ const DashboardManager: React.FC<{
   const [, setIsWidgetEditorOpen] = useState(false);
   const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
   const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
+  const [dateRange, setDateRange] = useState({
+    startDate: "2025-03-01",
+    endDate: "2025-03-31",
+  });
+  const [comparisonDate] = useState("Feb, 2025");
+  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
 
   const dashboardOptions = [
     ...dashboards.map((dashboard) => ({
@@ -73,6 +124,7 @@ const DashboardManager: React.FC<{
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
+      console.log("selectedDashboard", selectedDashboard);
       const savedLayout = await dashboardStorage.getDashboard(
         `${selectedDashboard}:${currentNavigationPath}`
       );
@@ -102,6 +154,7 @@ const DashboardManager: React.FC<{
     };
     loadDashboards();
   }, [currentNavigationPath, currentDashboard]);
+  console.log("setDashboards", dashboards);
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
       alert("Dashboard name cannot be empty");
@@ -159,11 +212,11 @@ const DashboardManager: React.FC<{
     }
   };
 
-  // const exportConfig = () => {
-  //   const config = JSON.stringify(currentDashboard, null, 2);
-  //   setConfigText(config);
-  //   setIsConfigModalOpen(true);
-  // };
+  const exportConfig = () => {
+    const config = JSON.stringify(currentDashboard, null, 2);
+    setConfigText(config);
+    setIsConfigModalOpen(true);
+  };
 
   const importConfig = async () => {
     try {
@@ -182,16 +235,16 @@ const DashboardManager: React.FC<{
     }
   };
 
-  // const downloadConfig = () => {
-  //   const config = JSON.stringify(currentDashboard, null, 2);
-  //   const blob = new Blob([config], { type: "application/json" });
-  //   const url = URL.createObjectURL(blob);
-  //   const a = document.createElement("a");
-  //   a.href = url;
-  //   a.download = `${currentDashboard.name}.json`;
-  //   a.click();
-  //   URL.revokeObjectURL(url);
-  // };
+  const downloadConfig = () => {
+    const config = JSON.stringify(currentDashboard, null, 2);
+    const blob = new Blob([config], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentDashboard.name}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleAddCustomWidget = () => {
     const newWidget: DashboardWidget = {
@@ -204,6 +257,7 @@ const DashboardManager: React.FC<{
     };
     setEditingWidget(newWidget);
     setIsWidgetEditorOpen(true);
+    setIsWidgetPanelOpen(false); // Close the panel when opening the editor
   };
 
   // Custom styles for react-select
@@ -250,8 +304,10 @@ const DashboardManager: React.FC<{
     }),
   };
 
+  console.log("dashboardsNew", dashboards);
   return (
     <>
+    <div className="flex flex-col items-end gap-4">
       <div className="flex gap-2 ">
         <div style={{ minWidth: "200px" }}>
           <Select
@@ -389,10 +445,65 @@ const DashboardManager: React.FC<{
         <WidgetPanel
           isOpen={isWidgetPanelOpen}
           onClose={() => setIsWidgetPanelOpen(false)}
-          onAddCustomWidget={handleAddCustomWidget}
+          onAddCustomWidget={onAddCustomWidget}
         />
       </div>
 
+      <div className="flex items-center gap-3 ">
+        <div className="relative">
+          <button
+            onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
+            className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            <Ellipsis className="w-6 h-6 cursor-pointer" />
+            {/* <span className="font-medium">
+                    {formatDateRangeForDisplay(
+                      dateRange.startDate,
+                      dateRange.endDate
+                    )}
+                  </span> */}
+          </button>
+          {openDatePopup === 0 && (
+            <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-semibold text-gray-800">
+                  Select Date Range
+                </h4>
+                <button
+                  onClick={() => setOpenDatePopup(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <DateRangeFilter
+                startDate={dateRange.startDate}
+                endDate={dateRange.endDate}
+                onDateChange={(startDate, endDate) =>
+                  setDateRange({ startDate, endDate })
+                }
+              />
+              <div className="mt-2 flex justify-end">
+                <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Comparison:</span>
+          <span className="font-medium">{comparisonDate}</span>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+          <Coins className="w-4 h-4" />
+          <span className="font-medium">Thousands</span>
+        </button>
+        <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+          <span>+</span>
+          <span>Filter</span>
+        </button>
+      </div>
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
@@ -423,6 +534,7 @@ const DashboardManager: React.FC<{
           </div>
         </div>
       )}
+    </div>
       {/* Configuration Modal */}
       {isConfigModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -1391,11 +1391,13 @@ const JsonDrivenDashboard: React.FC = () => {
             <div className="flex items-center gap-4">
               <DashboardManager
                 currentDashboard={currentDashboard}
+                setCurrentDashboard={setCurrentDashboard}
                 onLoadDashboard={handleLoadDashboard}
                 currentNavigationPath={currentNavigationPath}
                 selectedDashboard={selectedDashboard}
                 onSelectDashboard={handleSelectDashboard}
                 onCreateDashboard={handleCreateDashboard}
+                onAddCustomWidget={handleAddCustomWidget}
                 onClearLayout={() => {
                   layoutStorage.deleteLayout(currentNavigationPath);
                   dispatch(

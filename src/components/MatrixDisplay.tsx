@@ -507,7 +507,11 @@ const MatrixDisplay: React.FC<
             const existFilter = localAppliedFilters?.find(
               (el) => el.filterId === "region-filter"
             );
-            if (existFilter && existFilter?.value?.length !== 0) {
+            if (
+              existFilter &&
+              Array.isArray(existFilter.value) &&
+              existFilter.value.length !== 0
+            ) {
               return localAppliedFilters?.some(
                 (region: AppliedFilter) =>
                   region.filterId === "region-filter" &&

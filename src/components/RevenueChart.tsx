@@ -194,9 +194,7 @@ import { useState, useEffect, useRef } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import {
-  Target,
-} from "lucide-react";
+import { Target } from "lucide-react";
 
 interface ChartData {
   category: string;
@@ -320,22 +318,24 @@ export const RevenueChart = ({
         dx: offset,
       });
 
-      
       series.columns.template.events.on("pointerover", function (ev) {
         const dataItem = ev.target.dataItem;
         if (dataItem && chartRef.current) {
-          const rect = chartRef.current.getBoundingClientRect();
+          // const rect = chartRef.current.getBoundingClientRect();
           const column = ev.target;
           const x = column.x() + column.width() / 2;
-          
+
           const dataContext = dataItem.dataContext as ChartData;
           const actualValue = dataContext.actual;
           const previousValue = dataContext.previous;
-          const changePercent = previousValue !== 0 
-            ? (((actualValue - previousValue) / previousValue) * 100).toFixed(1)
-            : "0.0";
+          const changePercent =
+            previousValue !== 0
+              ? (((actualValue - previousValue) / previousValue) * 100).toFixed(
+                  1
+                )
+              : "0.0";
           const changeSign = parseFloat(changePercent) >= 0 ? "+" : "";
-      
+
           setHoveredData({
             location: dataContext.category,
             value: actualValue.toLocaleString(),
@@ -416,7 +416,7 @@ export const RevenueChart = ({
           marginRight: 20,
         })
       );
-    
+
       container.children.push(
         am5.Rectangle.new(root, {
           width: 14,
@@ -426,19 +426,19 @@ export const RevenueChart = ({
             : am5.color(color),
           stroke: am5.color(color),
           strokeWidth: isOutline ? 1.5 : 0,
-          centerY: am5.p50,  // ADDED: Vertically center the rectangle
-          y: am5.p50,        // ADDED: Position at 50% of container height
+          centerY: am5.p50, // ADDED: Vertically center the rectangle
+          y: am5.p50, // ADDED: Position at 50% of container height
         })
       );
-    
+
       container.children.push(
         am5.Label.new(root, {
           text: name,
           fontSize: 12,
           fill: am5.color("#6B7280"),
           marginLeft: 6,
-          centerY: am5.p50,  // ADDED: Vertically center the label
-          y: am5.p50,        // ADDED: Position at 50% of container height
+          centerY: am5.p50, // ADDED: Vertically center the label
+          y: am5.p50, // ADDED: Position at 50% of container height
         })
       );
     };

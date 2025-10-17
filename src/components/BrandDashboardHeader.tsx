@@ -1,11 +1,8 @@
-import { useState, useRef, use, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
-  MapPin,
   Globe,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  User,
   Ellipsis,
   X,
   Calendar,
@@ -42,9 +39,11 @@ export default function BrandDashboardHeader() {
     );
     if (existFilter) {
       setSelectedCountries(
-        existFilter.value.length > 1 && existFilter.value.includes("All")
+        Array.isArray(existFilter.value) &&
+          existFilter.value.length > 1 &&
+          existFilter.value.includes("All")
           ? ["All"]
-          : existFilter?.value
+          : (existFilter?.value as string[])
       );
     }
     if (existFilter === undefined && localAppliedFilters?.length === 0) {
@@ -57,8 +56,7 @@ export default function BrandDashboardHeader() {
     countryFilterApply(
       availabelCountries.map(
         (val: { name: string; flag: string; code: string }) => val.name
-      ),
-      true
+      )
     );
   };
 
@@ -331,7 +329,7 @@ export default function BrandDashboardHeader() {
     } else {
       // If a specific country is clicked
       if (selectedCountries.includes("All")) {
-        countryFilterApply([countryName], true);
+        countryFilterApply([countryName]);
         // If "All" was selected, replace it with the new country
         setSelectedCountries([countryName]);
         // dispatch(setLocalAppliedFilters(newFilters));
@@ -339,7 +337,7 @@ export default function BrandDashboardHeader() {
         // If country is already selected, deselect it
         const newSelection = selectedCountries.filter((c) => c !== countryName);
         if (newSelection.length > 0) {
-          countryFilterApply(newSelection, true);
+          countryFilterApply(newSelection);
         } else {
           validRegionFilter();
         }
@@ -347,14 +345,14 @@ export default function BrandDashboardHeader() {
         // If no countries left, default to "All"
         setSelectedCountries(newSelection.length > 0 ? newSelection : ["All"]);
       } else {
-        countryFilterApply([...selectedCountries, countryName], true);
+        countryFilterApply([...selectedCountries, countryName]);
         // Add the country to selection
         setSelectedCountries([...selectedCountries, countryName]);
       }
     }
   };
 
-  const countryFilterApply = (country: string[], add: boolean) => {
+  const countryFilterApply = (country: string[]) => {
     let existingFilter = localAppliedFilters;
     // if (localAppliedFilters?.length === 0) {
     //   const regionFilter = {
@@ -385,12 +383,20 @@ export default function BrandDashboardHeader() {
   const getAvailableCountries = () => {
     // If an additional brand is selected, show its countries
     if (selectedAdditionalBrand) {
-      return brandCountries[selectedAdditionalBrand] || brandCountries.All;
+      return (
+        (brandCountries as Record<string, typeof brandCountries.All>)[
+          selectedAdditionalBrand
+        ] || brandCountries.All
+      );
     }
 
     // Otherwise, show the main brand's countries
     const currentBrand = brands[clickedBrandIndex]?.name || "All";
-    return brandCountries[currentBrand] || brandCountries.All;
+    return (
+      (brandCountries as Record<string, typeof brandCountries.All>)[
+        currentBrand
+      ] || brandCountries.All
+    );
   };
 
   const scrollBrands = (direction: "left" | "right") => {
@@ -426,10 +432,12 @@ export default function BrandDashboardHeader() {
     // Get the additional brands specific to the clicked brand
     const clickedBrand = brands[clickedBrandIndex];
     const additionalBrandNames =
-      brandSpecificAdditionals[clickedBrand.name] || [];
+      (brandSpecificAdditionals as Record<string, string[]>)[
+        clickedBrand.name
+      ] || [];
 
     // Convert additional brand names to objects for consistent structure
-    const additionalBrands = additionalBrandNames.map((name) => ({
+    const additionalBrands = additionalBrandNames.map((name: string) => ({
       name,
       logo: null,
     }));
@@ -442,11 +450,10 @@ export default function BrandDashboardHeader() {
     ];
 
     return expandedList.map((brand, index) => {
-      const originalIndex = brands.indexOf(brand);
+      const originalIndex = brands.findIndex((b) => b.name === brand.name);
       const isClicked = originalIndex === clickedBrandIndex;
       const isAdditionalBrand = brand.logo === null;
       const isSelectedAdditional = selectedAdditionalBrand === brand.name;
-
       return (
         <div
           key={`expanded-brand-${index}`}
@@ -586,20 +593,22 @@ export default function BrandDashboardHeader() {
         <div className="flex items-center justify-between">
           {/* Country Filters */}
           <div className="flex items-center gap-3">
-            {getAvailableCountries().map((country) => (
-              <button
-                key={country.code}
-                onClick={() => handleCountryClick(country.name)}
-                className={`flex items-center gap-2 px-4 py-1 rounded-full text-sm font-medium transition-all ${
-                  selectedCountries.includes(country.name)
-                    ? "bg-blue-50 text-blue-600 border border-blue-200"
-                    : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
-                }`}
-              >
-                <span className="text-lg">{country.flag}</span>
-                <span>{country.name}</span>
-              </button>
-            ))}
+            {getAvailableCountries().map(
+              (country: { name: string; flag: string; code: string }) => (
+                <button
+                  key={country.code}
+                  onClick={() => handleCountryClick(country.name)}
+                  className={`flex items-center gap-2 px-4 py-1 rounded-full text-sm font-medium transition-all ${
+                    selectedCountries.includes(country.name)
+                      ? "bg-blue-50 text-blue-600 border border-blue-200"
+                      : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="text-lg">{country.flag}</span>
+                  <span>{country.name}</span>
+                </button>
+              )
+            )}
           </div>
 
           {/* Right Side Info */}
@@ -672,35 +681,45 @@ export default function BrandDashboardHeader() {
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {getAvailableCountries()
-                      .filter((country) => country.name !== "All")
-                      .map((country) => {
-                        const currency = currencyMapping[country.name];
-                        if (!currency) return null;
-
-                        return (
-                          <label
-                            key={country.code}
-                            className="flex items-center justify-between py-1 px-1 hover:bg-gray-50 rounded-lg cursor-pointer"
-                          >
-                            <div className="flex items-center gap-1">
-                              <span className="text-lg">{currency.flag}</span>
-                              <span className="text-sm font-medium text-gray-700">
-                                {country.name} - {currency.code}
-                              </span>
-                            </div>
-                            <input
-                              type="checkbox"
-                              checked={selectedCurrencies.includes(
-                                currency.code
-                              )}
-                              onChange={() =>
-                                handleCurrencyToggle(currency.code)
-                              }
-                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                          </label>
-                        );
-                      })}
+                      .filter(
+                        (country: { name: string }) => country.name !== "All"
+                      )
+                      .map(
+                        (country: {
+                          name: string;
+                          flag: string;
+                          code: string;
+                        }) => {
+                          const currency =
+                            currencyMapping[
+                              country.name as keyof typeof currencyMapping
+                            ];
+                          if (!currency) return null;
+                          return (
+                            <label
+                              key={country.code}
+                              className="flex items-center justify-between py-1 px-1 hover:bg-gray-50 rounded-lg cursor-pointer"
+                            >
+                              <div className="flex items-center gap-1">
+                                <span className="text-lg">{currency.flag}</span>
+                                <span className="text-sm font-medium text-gray-700">
+                                  {country.name} - {currency.code}
+                                </span>
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={selectedCurrencies.includes(
+                                  currency.code
+                                )}
+                                onChange={() =>
+                                  handleCurrencyToggle(currency.code)
+                                }
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                            </label>
+                          );
+                        }
+                      )}
                   </div>
                 </div>
               )}

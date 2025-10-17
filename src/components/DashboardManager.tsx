@@ -5,6 +5,8 @@ import {
   // Bell,
   Plus,
   Settings,
+  X,
+  Pencil,
 } from "lucide-react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
@@ -54,6 +56,7 @@ const DashboardManager: React.FC<{
   const [, setEditingWidget] = useState<DashboardWidget | null>(null);
   const [, setIsWidgetEditorOpen] = useState(false);
   const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
+  const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
 
   const dashboardOptions = [
     ...dashboards.map((dashboard) => ({
@@ -308,7 +311,7 @@ const DashboardManager: React.FC<{
             </span>
           )}
         </button> */}
-        <div className="flex gap-2 w-full xl:w-auto">
+        {/* <div className="flex gap-2 w-full xl:w-auto">
           <button
             onClick={() => setIsWidgetPanelOpen(true)}
             // disabled={!isEditMode}
@@ -334,6 +337,53 @@ const DashboardManager: React.FC<{
             </span>
             <span className="sm:hidden">{isEditMode ? "Exit" : "Edit"}</span>
           </button>
+        </div> */}
+        <div className="relative">
+          <button
+            onClick={() => setIsOptionsPopupOpen(!isOptionsPopupOpen)}
+            className="px-3 sm:px-4 py-3 bg-gray-50 text-gray-700 cursor-pointer rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1 border border-gray-200"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+
+          {isOptionsPopupOpen && (
+            <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-3 min-w-48">
+              {/* <div className="flex justify-end items-center mb-3">
+                <button
+                  onClick={() => setIsOptionsPopupOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div> */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setIsWidgetPanelOpen(true);
+                    setIsOptionsPopupOpen(false);
+                  }}
+                  className="w-full px-3 py-2 bg-green-700 hover:bg-[#4f967f] cursor-pointer text-white rounded-md transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Widget</span>
+                </button>
+                <button
+                  onClick={() => {
+                    dispatch(toggleEditMode());
+                    setIsOptionsPopupOpen(false);
+                  }}
+                  className={`w-full px-3 py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm ${
+                    isEditMode
+                      ? "bg-red-700 text-white hover:bg-red-900"
+                      : "bg-blue-700 hover:bg-[#626ac2] text-white"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>{isEditMode ? "Exit Edit Mode" : "Edit Mode"}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <WidgetPanel

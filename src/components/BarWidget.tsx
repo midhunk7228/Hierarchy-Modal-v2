@@ -203,47 +203,53 @@ const Index = () => {
     },
   };
 
-  const countryFilterApply = (country: string[]) => {
-    let existingFilter = localAppliedFilters;
-    // if (localAppliedFilters?.length === 0) {
-    //   const regionFilter = {
-    //     filterId: "region-filter",
-    //     value: country,
-    //   };
-    //   dispatch(setLocalAppliedFilters([regionFilter]));
-    //   return;
-    // }
-    // const finalFilter = [];
-    const existing = existingFilter.find((f) => f.filterId === "region-filter");
-    if (existing) {
-      existingFilter = existingFilter.map((f) =>
-        f.filterId === "region-filter" ? { ...f, value: country } : f
-      );
-    } else {
-      existingFilter = [
-        ...existingFilter,
-        {
-          filterId: "region-filter",
-          value: country,
-        },
-      ];
-    }
-    dispatch(setLocalAppliedFilters(existingFilter));
-  };
+  // const countryFilterApply = (country: string[]) => {
+  //   let existingFilter = localAppliedFilters;
+  //   // if (localAppliedFilters?.length === 0) {
+  //   //   const regionFilter = {
+  //   //     filterId: "region-filter",
+  //   //     value: country,
+  //   //   };
+  //   //   dispatch(setLocalAppliedFilters([regionFilter]));
+  //   //   return;
+  //   // }
+  //   // const finalFilter = [];
+  //   const existing = existingFilter.find((f) => f.filterId === "region-filter");
+  //   if (existing) {
+  //     existingFilter = existingFilter.map((f) =>
+  //       f.filterId === "region-filter" ? { ...f, value: country } : f
+  //     );
+  //   } else {
+  //     existingFilter = [
+  //       ...existingFilter,
+  //       {
+  //         filterId: "region-filter",
+  //         value: country,
+  //       },
+  //     ];
+  //   }
+  //   dispatch(setLocalAppliedFilters(existingFilter));
+  // };
 
-  const filterCountryFilter = (selectedGrapgh) => {
-    let existingFilter = localAppliedFilters;
+  const filterCountryFilter = (
+    selectedGrapgh: typeof chartDataByTab.country
+  ) => {
+    const existingFilter = localAppliedFilters;
     // debugger;
     const existing = existingFilter.find((f) => f.filterId === "region-filter");
     if (existing) {
-      let graphData = selectedGrapgh;
-      let filteredData = selectedGrapgh.data.filter((cat) => {
+      const graphData = selectedGrapgh;
+      const filteredData = selectedGrapgh.data.filter((cat) => {
         // if (existing?.value?.length !== 0 && existing?.value.includes("All")) {
         //   return cat;
         // }
-        if (existing?.value?.length !== 0) {
+        if (
+          Array.isArray(existing?.value) &&
+          (existing?.value as string[]).length !== 0
+        ) {
           return existing?.value.includes(cat.category) && cat;
         }
+        return false;
       });
       return { ...graphData, data: filteredData };
     }

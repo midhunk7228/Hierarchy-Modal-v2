@@ -5,7 +5,6 @@ import {
   // Bell,
   Plus,
   Settings,
-  X,
   Pencil,
 } from "lucide-react";
 import Select from "react-select";

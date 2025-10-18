@@ -1347,17 +1347,23 @@ const JsonDrivenDashboard: React.FC = () => {
 
   // Get layout from Redux store or fallback to widget positions
   const getCurrentLayout = (): ReactGridLayout.Layout[] => {
-    const savedLayout =
-      layouts[`${selectedDashboard}:${currentNavigationPath}`];
-    if (savedLayout && savedLayout.length > 0) {
-      // Create a deep copy to avoid issues with frozen objects from Redux
-      return JSON.parse(JSON.stringify(savedLayout));
-    }
+    // const savedLayout =
+    //   layouts[`${selectedDashboard}:${currentNavigationPath}`];
+    // if (savedLayout && savedLayout.length > 0) {
+    //   console.log("currentDashboard!!?.savedLayout", savedLayout?.widgets);
 
-    const defaultLayout = layouts[`${selectedDashboard}:default`];
-    if (defaultLayout && defaultLayout.length > 0) {
-      return JSON.parse(JSON.stringify(defaultLayout));
-    }
+    //   // Create a deep copy to avoid issues with frozen objects from Redux
+    //   return JSON.parse(JSON.stringify(savedLayout));
+    // }
+
+    // const defaultLayout = layouts[`${selectedDashboard}:default`];
+    // if (defaultLayout && defaultLayout.length > 0) {
+    //   console.log("currentDashboard!!?.defaultLayout", defaultLayout?.widgets);
+
+    //   return JSON.parse(JSON.stringify(defaultLayout));
+    // }
+    // debugger;
+    // console.log("currentDashboard!!?.widgets", currentDashboard?.widgets);
     // Fallback to widget positions
     return currentDashboard?.widgets.map((w) => ({
       i: w.id,

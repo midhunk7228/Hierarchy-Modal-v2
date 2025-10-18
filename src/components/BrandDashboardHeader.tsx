@@ -10,19 +10,27 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import { setLocalAppliedFilters } from "../redux/filtersSlice";
+import {
+  setSelectedBrand,
+  setSelectedSubBrands,
+  setBrandSelection,
+} from "../redux/brandSelectionSlice";
+import {
+  saveBrandSelection,
+  loadBrandSelection,
+} from "../utils/brandSelectionStorage";
 
 export default function BrandDashboardHeader() {
   const dispatch = useDispatch();
   const localAppliedFilters = useSelector(
     (state: RootState) => state.filters.localAppliedFilters
   );
+  const { selectedBrand, selectedSubBrands } = useSelector(
+    (state: RootState) => state.brandSelection
+  );
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [clickedBrandIndex, setClickedBrandIndex] = useState(0);
-  const [selectedAdditionalBrands, setSelectedAdditionalBrands] = useState<
-    string[]
-  >([]);
   const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: "2025-03-01",
@@ -31,6 +39,28 @@ export default function BrandDashboardHeader() {
   const [openCurrencyPopup, setOpenCurrencyPopup] = useState(false);
   const [selectedCurrencies] = useState<string[]>(["KWD"]);
   const brandScrollRef = useRef<HTMLDivElement>(null);
+
+  console.log(
+    "selectedBrand, selectedSubBrands",
+    selectedBrand,
+    selectedSubBrands
+  );
+  useEffect(() => {
+    const loadState = async () => {
+      const savedSelection = await loadBrandSelection();
+      if (savedSelection) {
+        dispatch(setBrandSelection(savedSelection));
+      }
+    };
+    loadState();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (selectedBrand) {
+      saveBrandSelection({ selectedBrand, selectedSubBrands });
+    }
+  }, [selectedBrand, selectedSubBrands]);
+
   useEffect(() => {
     const existFilter = localAppliedFilters.find(
       (f) => f.filterId === "region-filter"
@@ -60,7 +90,7 @@ export default function BrandDashboardHeader() {
 
   useEffect(() => {
     validRegionFilter();
-  }, [selectedAdditionalBrands, clickedBrandIndex]);
+  }, [selectedSubBrands, selectedBrand]);
 
   const brands = [
     { name: "All", logo: "/all.png" },
@@ -74,6 +104,7 @@ export default function BrandDashboardHeader() {
     { name: "White_Robata", logo: "/White_Robata.png" },
     { name: "Slider_Station", logo: "/Slider_Station.png" },
   ];
+  const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
 
   // Define different additional brands for each main brand (name only)
   const brandSpecificAdditionals = {
@@ -449,13 +480,13 @@ export default function BrandDashboardHeader() {
     truth: boolean = false
   ) => {
     e.stopPropagation();
-    setClickedBrandIndex(truth ? 0 : index);
+    const brandName = brands[truth ? 0 : index].name;
+    dispatch(setSelectedBrand(brandName));
     setIsExpanded(!isExpanded);
     setShowBrandArrows(!showBrandArrows);
 
     // Reset country selection and additional brand selection
     setSelectedCountries(["All"]);
-    setSelectedAdditionalBrands([]);
   };
 
   const handleAdditionalBrandClick = (
@@ -463,17 +494,18 @@ export default function BrandDashboardHeader() {
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
+    let newSelection: string[];
     if (e.shiftKey) {
-      setSelectedAdditionalBrands((prev) =>
-        prev.includes(brandName)
-          ? prev.filter((b) => b !== brandName)
-          : [...prev, brandName]
-      );
+      newSelection = selectedSubBrands.includes(brandName)
+        ? selectedSubBrands.filter((b) => b !== brandName)
+        : [...selectedSubBrands, brandName];
     } else {
-      setSelectedAdditionalBrands((prev) =>
-        prev.includes(brandName) && prev.length === 1 ? [] : [brandName]
-      );
+      newSelection =
+        selectedSubBrands.includes(brandName) && selectedSubBrands.length === 1
+          ? []
+          : [brandName];
     }
+    dispatch(setSelectedSubBrands(newSelection));
     setSelectedCountries(["All"]);
   };
 
@@ -539,8 +571,8 @@ export default function BrandDashboardHeader() {
   };
   // Get countries for the currently selected brand or additional brand
   const getAvailableCountries = () => {
-    if (selectedAdditionalBrands.length > 0) {
-      const countries = selectedAdditionalBrands.flatMap(
+    if (selectedSubBrands.length > 0) {
+      const countries = selectedSubBrands.flatMap(
         (brandName) =>
           (brandCountries as Record<string, typeof brandCountries.All>)[
             brandName
@@ -618,9 +650,7 @@ export default function BrandDashboardHeader() {
       const originalIndex = brands.findIndex((b) => b.name === brand.name);
       const isClicked = originalIndex === clickedBrandIndex;
       const isAdditionalBrand = brand.logo === null;
-      const isSelectedAdditional = selectedAdditionalBrands.includes(
-        brand.name
-      );
+      const isSelectedAdditional = selectedSubBrands.includes(brand.name);
       return (
         <div
           key={`expanded-brand-${index}`}

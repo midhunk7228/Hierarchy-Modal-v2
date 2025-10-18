@@ -821,7 +821,9 @@ const JsonDrivenDashboard: React.FC = () => {
     (state: RootState) => state.dashboards.dashboards
   );
   const { isEditMode } = useSelector((state: RootState) => state.editMode);
-
+  const { selectedSubBrands } = useSelector(
+    (state: RootState) => state.brandSelection
+  );
   const [currentDashboard, setCurrentDashboard] =
     useState<DashboardLayout>(DEFAULT_DASHBOARD);
   const [editingWidget, setEditingWidget] = useState<DashboardWidget | null>(
@@ -1458,64 +1460,68 @@ const JsonDrivenDashboard: React.FC = () => {
           </div>
         </div>
         <div className="flex justify-end items-center gap-3 pt-2 px-6">
-          <div className="flex items-center gap-2 bg-white rounded-md px-2 py-1">
-            <div className="relative">
-              <button
-                onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-                className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <Ellipsis className="w-6 h-6 cursor-pointer" />
-                {/* <span className="font-medium">
+          {selectedSubBrands?.length !== 0 && (
+            <div className="flex items-center gap-2 bg-white rounded-md px-2 py-1">
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setOpenDatePopup(openDatePopup === 0 ? null : 0)
+                  }
+                  className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <Ellipsis className="w-6 h-6 cursor-pointer" />
+                  {/* <span className="font-medium">
                     {formatDateRangeForDisplay(
                       dateRange.startDate,
                       dateRange.endDate
                     )}
                   </span> */}
+                </button>
+                {openDatePopup === 0 && (
+                  <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-semibold text-gray-800">
+                        Select Date Range
+                      </h4>
+                      <button
+                        onClick={() => setOpenDatePopup(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <DateRangeFilter
+                      startDate={dateRange.startDate}
+                      endDate={dateRange.endDate}
+                      onDateChange={(startDate, endDate) =>
+                        setDateRange({ startDate, endDate })
+                      }
+                    />
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={() => setOpenDatePopup(null)}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg px-2 py-1">
+                <span>Comparison:</span>
+                <span className="font-medium">{comparisonDate}</span>
+              </div>
+              <button className="flex items-center gap-2 px-2 py-1 bg-gray-100  text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <Coins className="w-4 h-4" />
+                <span className="font-medium">Thousands</span>
               </button>
-              {openDatePopup === 0 && (
-                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-gray-800">
-                      Select Date Range
-                    </h4>
-                    <button
-                      onClick={() => setOpenDatePopup(null)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <DateRangeFilter
-                    startDate={dateRange.startDate}
-                    endDate={dateRange.endDate}
-                    onDateChange={(startDate, endDate) =>
-                      setDateRange({ startDate, endDate })
-                    }
-                  />
-                  <div className="mt-2 flex justify-end">
-                    <button
-                      className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      onClick={() => setOpenDatePopup(null)}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+                <span>+</span>
+                <span>Filter</span>
+              </button>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg px-2 py-1">
-              <span>Comparison:</span>
-              <span className="font-medium">{comparisonDate}</span>
-            </div>
-            <button className="flex items-center gap-2 px-2 py-1 bg-gray-100  text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              <Coins className="w-4 h-4" />
-              <span className="font-medium">Thousands</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
-              <span>+</span>
-              <span>Filter</span>
-            </button>
-          </div>
+          )}
         </div>
         <div className="p-6">
           <ResponsiveGridLayout

@@ -5,6 +5,7 @@ import layoutReducer from "./layoutSlice";
 import notificationsReducer from "./notificationsSlice";
 import dashboardsReducer from "./dashboardsSlice";
 import editModeReducer from "./editModeSlice";
+import brandSelectionReducer from "./brandSelectionSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     notifications: notificationsReducer,
     dashboards: dashboardsReducer,
     editMode: editModeReducer,
+    brandSelection: brandSelectionReducer,
   },
 });
 

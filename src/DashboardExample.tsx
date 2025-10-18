@@ -1493,7 +1493,10 @@ const JsonDrivenDashboard: React.FC = () => {
                     }
                   />
                   <div className="mt-2 flex justify-end">
-                    <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button
+                      className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      onClick={() => setOpenDatePopup(null)}
+                    >
                       Save
                     </button>
                   </div>

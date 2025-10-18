@@ -420,7 +420,6 @@ export default function BrandDashboardHeader() {
     }
   };
 
-  
   const renderBrandLogos = () => {
     if (!isExpanded) {
       return brands.map((brand, index) => (
@@ -444,27 +443,27 @@ export default function BrandDashboardHeader() {
         </div>
       ));
     }
-  
+
     // Get the additional brands specific to the clicked brand
     const clickedBrand = brands[clickedBrandIndex];
     const additionalBrandNames =
       (brandSpecificAdditionals as Record<string, string[]>)[
         clickedBrand.name
       ] || [];
-  
+
     // Convert additional brand names to objects for consistent structure
     const additionalBrands = additionalBrandNames.map((name: string) => ({
       name,
       logo: null,
     }));
-  
+
     const expandedList = [
       ...brands.slice(0, clickedBrandIndex),
       brands[clickedBrandIndex],
       ...additionalBrands,
       ...brands.slice(clickedBrandIndex + 1),
     ];
-  
+
     return expandedList.map((brand, index) => {
       const originalIndex = brands.findIndex((b) => b.name === brand.name);
       const isClicked = originalIndex === clickedBrandIndex;
@@ -599,7 +598,10 @@ export default function BrandDashboardHeader() {
                   }
                 />
                 <div className="mt-2 flex justify-end">
-                  <button className=" rounded-lg bg-blue-600 px-4 py-1 text-white transition-colors hover:bg-blue-700">
+                  <button
+                    className=" rounded-lg bg-blue-600 px-4 py-1 text-white transition-colors hover:bg-blue-700"
+                    onClick={() => setOpenDatePopup(null)}
+                  >
                     Save
                   </button>
                 </div>
@@ -631,9 +633,42 @@ export default function BrandDashboardHeader() {
               )
             )}
           </div>
-
           {/* Right Side Info */}
           <div className="flex items-center gap-4 self-end md:self-center">
+            <button
+              onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
+              className="flex items-center gap-2 bg-white  text-gray-600 rounded-lg transition-colors"
+            >
+              <Ellipsis className="w-6 h-6 cursor-pointer" />
+            </button>
+            {openDatePopup === 0 && (
+              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-semibold text-gray-800">
+                    Select Date Range
+                  </h4>
+                  <button
+                    onClick={() => setOpenDatePopup(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <DateRangeFilter
+                  startDate={dateRange.startDate}
+                  endDate={dateRange.endDate}
+                  onDateChange={(startDate, endDate) =>
+                    setDateRange({ startDate, endDate })
+                  }
+                />
+                <div className="mt-2 flex justify-end">
+                  <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="relative">
               <button
                 onClick={() => setOpenCurrencyPopup(!openCurrencyPopup)}

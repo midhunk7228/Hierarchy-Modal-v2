@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+/* .react-grid-item.react-resizable {
+  overflow: auto;
+  min-height: auto !important;
+} */
+
+.react-grid-item.react-resizable:has(.table-widget) {
+  overflow: auto;
+  /* min-height: auto !important; */
+}
+
+/* .react-grid-item.react-resizable:has(.comparison-widget) {
+  overflow: auto;
+  min-height: auto !important;
+} */

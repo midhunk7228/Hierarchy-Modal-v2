@@ -734,20 +734,18 @@ const MatrixDisplay: React.FC<
   const outcomeFilter = (outcome: string) => {
     let existingFilter = localAppliedFilters;
 
-    const existing = existingFilter.find(
-      (f) => f.filterId === "outcome-filter"
-    );
+    const existing = existingFilter.find((f) => f.filterId === "region-filter");
     if (existing) {
       existingFilter = existingFilter.map((f) =>
-        f.filterId === "outcome-filter" ? { ...f, value: outcome } : f
+        f.filterId === "region-filter" ? { ...f, value: [outcome] } : f
       );
     } else {
       if (outcome !== "") {
         existingFilter = [
           ...existingFilter,
           {
-            filterId: "outcome-filter",
-            value: outcome,
+            filterId: "region-filter",
+            value: [outcome],
           },
         ];
       }
@@ -760,7 +758,7 @@ const MatrixDisplay: React.FC<
         ? filteredData.summary.regions
         : filteredData.details;
     return (
-      <div className="bg-white rounded-lg p-4 h-fit flex-shrink-0">
+      <div className="bg-white rounded-lg p-4 h-fit flex-shrink-0 comparison-widget">
         <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
           <Users className="w-5 h-5 mr-2" />
           Comparison View
@@ -772,7 +770,7 @@ const MatrixDisplay: React.FC<
               className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors flex-1"
               // style={{ minWidth: "200px" }}
               onClick={() => {
-                outcomeFilter(item?.outcome || "");
+                outcomeFilter(item?.name || "");
                 handleItemClick(item, "comparison-item");
               }}
             >
@@ -823,7 +821,7 @@ const MatrixDisplay: React.FC<
             { key: "growth", label: "Growth %" },
           ];
     return (
-      <div className="bg-white rounded-lg overflow-hidden h-full flex flex-col">
+      <div className="bg-white rounded-lg overflow-hidden h-full flex flex-col table-widget">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 flex items-center">
             <List className="w-5 h-5 mr-2" />

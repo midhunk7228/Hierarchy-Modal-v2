@@ -845,16 +845,16 @@ const JsonDrivenDashboard: React.FC = () => {
   const [selectedDashboard, setSelectedDashboard] =
     useState("default-dashboard");
 
-  const { saveData, getData } = useIndexedDB();
-  useEffect(() => {
-    const loadSelected = async () => {
-      const saved = await getData("selectedDashboard");
-      if (saved) {
-        setSelectedDashboard(saved as string);
-      }
-    };
-    loadSelected();
-  }, []);
+  const { saveData } = useIndexedDB();
+  // useEffect(() => {
+  //   const loadSelected = async () => {
+  //     const saved = await getData("selectedDashboard");
+  //     if (saved) {
+  //       setSelectedDashboard(saved as string);
+  //     }
+  //   };
+  //   loadSelected();
+  // }, []);
 
   const handleSelectDashboard = (dashboardId: string) => {
     setSelectedDashboard(dashboardId);

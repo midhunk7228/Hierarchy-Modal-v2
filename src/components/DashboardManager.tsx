@@ -2,10 +2,10 @@ import {
   Plus,
   Settings,
   Pencil,
-  Coins,
-  Ellipsis,
-  Calendar,
-  X,
+  // Coins,
+  // Ellipsis,
+  // Calendar,
+  // X,
 } from "lucide-react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
@@ -22,45 +22,45 @@ import { dashboardStorage } from "../utils/dashboardStorage";
 import { toggleEditMode } from "../redux/editModeSlice";
 import WidgetPanel from "./WidgetPanel";
 
-const DateRangeFilter: React.FC<{
-  onDateChange: (startDate: string, endDate: string) => void;
-  startDate?: string;
-  endDate?: string;
-}> = ({ onDateChange, startDate = "", endDate = "" }) => {
-  const [localStartDate, setLocalStartDate] = useState(startDate);
-  const [localEndDate, setLocalEndDate] = useState(endDate);
+// const DateRangeFilter: React.FC<{
+//   onDateChange: (startDate: string, endDate: string) => void;
+//   startDate?: string;
+//   endDate?: string;
+// }> = ({ onDateChange, startDate = "", endDate = "" }) => {
+//   const [localStartDate, setLocalStartDate] = useState(startDate);
+//   const [localEndDate, setLocalEndDate] = useState(endDate);
 
-  const handleStartDateChange = (date: string) => {
-    setLocalStartDate(date);
-    onDateChange(date, localEndDate);
-  };
+//   const handleStartDateChange = (date: string) => {
+//     setLocalStartDate(date);
+//     onDateChange(date, localEndDate);
+//   };
 
-  const handleEndDateChange = (date: string) => {
-    setLocalEndDate(date);
-    onDateChange(localStartDate, date);
-  };
+//   const handleEndDateChange = (date: string) => {
+//     setLocalEndDate(date);
+//     onDateChange(localStartDate, date);
+//   };
 
-  return (
-    <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
-      <Calendar className="w-4 h-4 text-slate-500" />
-      <input
-        type="date"
-        value={localStartDate}
-        onChange={(e) => handleStartDateChange(e.target.value)}
-        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-        placeholder="Start Date"
-      />
-      <span className="text-slate-400">-</span>
-      <input
-        type="date"
-        value={localEndDate}
-        onChange={(e) => handleEndDateChange(e.target.value)}
-        className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-        placeholder="End Date"
-      />
-    </div>
-  );
-};
+//   return (
+//     <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+//       <Calendar className="w-4 h-4 text-slate-500" />
+//       <input
+//         type="date"
+//         value={localStartDate}
+//         onChange={(e) => handleStartDateChange(e.target.value)}
+//         className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+//         placeholder="Start Date"
+//       />
+//       <span className="text-slate-400">-</span>
+//       <input
+//         type="date"
+//         value={localEndDate}
+//         onChange={(e) => handleEndDateChange(e.target.value)}
+//         className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+//         placeholder="End Date"
+//       />
+//     </div>
+//   );
+// };
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -94,12 +94,12 @@ const DashboardManager: React.FC<{
   // const [, setIsWidgetEditorOpen] = useState(false);
   const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
   const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2025-03-01",
-    endDate: "2025-03-31",
-  });
-  const [comparisonDate] = useState("Feb, 2025");
-  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
+  // const [dateRange, setDateRange] = useState({
+  //   startDate: "2025-03-01",
+  //   endDate: "2025-03-31",
+  // });
+  // const [comparisonDate] = useState("Feb, 2025");
+  // const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
 
   const dashboardOptions = [
     ...dashboards.map((dashboard) => ({
@@ -441,34 +441,34 @@ const DashboardManager: React.FC<{
           />
         </div>
 
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">
-              Create New Dashboard
-            </h3>
-            <input
-              type="text"
-              value={newDashboardName}
-              onChange={(e) => setNewDashboardName(e.target.value)}
-              placeholder="Enter dashboard name"
-              className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateNewDashboard}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-              >
-                Create
-              </button>
+        {isCreateModalOpen && (
+          <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
+              <h3 className="text-xl font-semibold mb-6 text-gray-800">
+                Create New Dashboard
+              </h3>
+              <input
+                type="text"
+                value={newDashboardName}
+                onChange={(e) => setNewDashboardName(e.target.value)}
+                placeholder="Enter dashboard name"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateNewDashboard}
+                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                >
+                  Create
+                </button>
+              </div>
             </div>
-          </div>
           </div>
         )}
       </div>

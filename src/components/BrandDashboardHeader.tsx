@@ -20,9 +20,9 @@ export default function BrandDashboardHeader() {
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [clickedBrandIndex, setClickedBrandIndex] = useState(0);
-  const [selectedAdditionalBrand, setSelectedAdditionalBrand] = useState<
-    string | null
-  >(null);
+  const [selectedAdditionalBrands, setSelectedAdditionalBrands] = useState<
+    string[]
+  >([]);
   const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: "2025-03-01",
@@ -60,7 +60,7 @@ export default function BrandDashboardHeader() {
 
   useEffect(() => {
     validRegionFilter();
-  }, [selectedAdditionalBrand, clickedBrandIndex]);
+  }, [selectedAdditionalBrands, clickedBrandIndex]);
 
   const brands = [
     { name: "All", logo: "/all.png" },
@@ -305,7 +305,7 @@ export default function BrandDashboardHeader() {
 
     // Reset country selection and additional brand selection
     setSelectedCountries(["All"]);
-    setSelectedAdditionalBrand(null);
+    setSelectedAdditionalBrands([]);
   };
 
   const handleAdditionalBrandClick = (
@@ -313,7 +313,17 @@ export default function BrandDashboardHeader() {
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
-    setSelectedAdditionalBrand(brandName);
+    if (e.shiftKey) {
+      setSelectedAdditionalBrands((prev) =>
+        prev.includes(brandName)
+          ? prev.filter((b) => b !== brandName)
+          : [...prev, brandName]
+      );
+    } else {
+      setSelectedAdditionalBrands((prev) =>
+        prev.includes(brandName) && prev.length === 1 ? [] : [brandName]
+      );
+    }
     setSelectedCountries(["All"]);
   };
 
@@ -379,16 +389,19 @@ export default function BrandDashboardHeader() {
   };
   // Get countries for the currently selected brand or additional brand
   const getAvailableCountries = () => {
-    // If an additional brand is selected, show its countries
-    if (selectedAdditionalBrand) {
-      return (
-        (brandCountries as Record<string, typeof brandCountries.All>)[
-          selectedAdditionalBrand
-        ] || brandCountries.All
+    if (selectedAdditionalBrands.length > 0) {
+      const countries = selectedAdditionalBrands.flatMap(
+        (brandName) =>
+          (brandCountries as Record<string, typeof brandCountries.All>)[
+            brandName
+          ] || []
       );
+      const uniqueCountries = Array.from(
+        new Map(countries.map((c) => [c.code, c])).values()
+      );
+      return uniqueCountries;
     }
 
-    // Otherwise, show the main brand's countries
     const currentBrand = brands[clickedBrandIndex]?.name || "All";
     return (
       (brandCountries as Record<string, typeof brandCountries.All>)[
@@ -456,7 +469,9 @@ export default function BrandDashboardHeader() {
       const originalIndex = brands.findIndex((b) => b.name === brand.name);
       const isClicked = originalIndex === clickedBrandIndex;
       const isAdditionalBrand = brand.logo === null;
-      const isSelectedAdditional = selectedAdditionalBrand === brand.name;
+      const isSelectedAdditional = selectedAdditionalBrands.includes(
+        brand.name
+      );
       return (
         <div
           key={`expanded-brand-${index}`}
@@ -613,7 +628,7 @@ export default function BrandDashboardHeader() {
                   <span className="text-lg">{country.flag}</span>
                   <span>{country.name}</span>
                 </button>
-              ),
+              )
             )}
           </div>
 
@@ -630,7 +645,7 @@ export default function BrandDashboardHeader() {
                     ? selectedCurrencies.length === 1
                       ? `${selectedCurrencies[0]} ${
                           Object.values(currencyMapping).find(
-                            (c) => c.code === selectedCurrencies[0],
+                            (c) => c.code === selectedCurrencies[0]
                           )?.flag || ""
                         }`
                       : `${selectedCurrencies.length} Countries`
@@ -651,7 +666,7 @@ export default function BrandDashboardHeader() {
                   <div className="max-h-64 space-y-2 overflow-y-auto">
                     {getAvailableCountries()
                       .filter(
-                        (country: { name: string }) => country.name !== "All",
+                        (country: { name: string }) => country.name !== "All"
                       )
                       .map(
                         (country: {
@@ -678,14 +693,14 @@ export default function BrandDashboardHeader() {
                               <input
                                 type="checkbox"
                                 checked={selectedCountries.includes(
-                                  country.name,
+                                  country.name
                                 )}
                                 onChange={() => handleCurrencyToggle(country)}
                                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             </label>
                           );
-                        },
+                        }
                       )}
                   </div>
                 </div>

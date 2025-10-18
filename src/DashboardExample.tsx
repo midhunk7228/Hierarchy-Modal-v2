@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { ChartBarBig } from "lucide-react";
+import { Calendar, ChartBarBig, Coins, Ellipsis, X } from "lucide-react";
 import type {
   DashboardLayout,
   AppliedFilter,
@@ -832,6 +832,13 @@ const JsonDrivenDashboard: React.FC = () => {
   const [widgetFilters, setWidgetFilters] = useState<
     Record<string, AppliedFilter[]>
   >({});
+  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
+  const [dateRange, setDateRange] = useState({
+    startDate: "2025-03-01",
+    endDate: "2025-03-31",
+  });
+  const [comparisonDate] = useState("Feb, 2025");
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedDashboard, setSelectedDashboard] =
     useState("default-dashboard");
@@ -1372,6 +1379,45 @@ const JsonDrivenDashboard: React.FC = () => {
   //     </div>
   //   );
   // }
+  const DateRangeFilter: React.FC<{
+    onDateChange: (startDate: string, endDate: string) => void;
+    startDate?: string;
+    endDate?: string;
+  }> = ({ onDateChange, startDate = "", endDate = "" }) => {
+    const [localStartDate, setLocalStartDate] = useState(startDate);
+    const [localEndDate, setLocalEndDate] = useState(endDate);
+
+    const handleStartDateChange = (date: string) => {
+      setLocalStartDate(date);
+      onDateChange(date, localEndDate);
+    };
+
+    const handleEndDateChange = (date: string) => {
+      setLocalEndDate(date);
+      onDateChange(localStartDate, date);
+    };
+
+    return (
+      <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
+        <Calendar className="w-4 h-4 text-slate-500" />
+        <input
+          type="date"
+          value={localStartDate}
+          onChange={(e) => handleStartDateChange(e.target.value)}
+          className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+          placeholder="Start Date"
+        />
+        <span className="text-slate-400">-</span>
+        <input
+          type="date"
+          value={localEndDate}
+          onChange={(e) => handleEndDateChange(e.target.value)}
+          className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
+          placeholder="End Date"
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -1411,7 +1457,63 @@ const JsonDrivenDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
+        <div className="flex justify-end items-center gap-3 pt-2 px-6">
+          <div className="flex items-center gap-2 bg-white rounded-md px-2 py-1">
+            <div className="relative">
+              <button
+                onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
+                className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Ellipsis className="w-6 h-6 cursor-pointer" />
+                {/* <span className="font-medium">
+                    {formatDateRangeForDisplay(
+                      dateRange.startDate,
+                      dateRange.endDate
+                    )}
+                  </span> */}
+              </button>
+              {openDatePopup === 0 && (
+                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="font-semibold text-gray-800">
+                      Select Date Range
+                    </h4>
+                    <button
+                      onClick={() => setOpenDatePopup(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <DateRangeFilter
+                    startDate={dateRange.startDate}
+                    endDate={dateRange.endDate}
+                    onDateChange={(startDate, endDate) =>
+                      setDateRange({ startDate, endDate })
+                    }
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <button className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg px-2 py-1">
+              <span>Comparison:</span>
+              <span className="font-medium">{comparisonDate}</span>
+            </div>
+            <button className="flex items-center gap-2 px-2 py-1 bg-gray-100  text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              <Coins className="w-4 h-4" />
+              <span className="font-medium">Thousands</span>
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+              <span>+</span>
+              <span>Filter</span>
+            </button>
+          </div>
+        </div>
         <div className="p-6">
           <ResponsiveGridLayout
             className="layout"

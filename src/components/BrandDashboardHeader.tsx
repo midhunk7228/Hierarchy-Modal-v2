@@ -420,12 +420,17 @@ export default function BrandDashboardHeader() {
     }
   };
 
+  
   const renderBrandLogos = () => {
     if (!isExpanded) {
       return brands.map((brand, index) => (
         <div
           key={`brand-${index}`}
-          className="flex-shrink-0 cursor-pointer transition-opacity hover:opacity-70"
+          className={`flex-shrink-0 cursor-pointer transition-all ${
+            index === clickedBrandIndex
+              ? "grayscale-0 opacity-100"
+              : "grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
+          }`}
           onDoubleClick={(e) => {
             if (index === 0) return;
             handleBrandDoubleClick(index, e);
@@ -434,32 +439,32 @@ export default function BrandDashboardHeader() {
           <img
             src={brand.logo}
             alt={brand.name}
-            className="h-8 object-contain grayscale-0"
+            className="h-8 object-contain"
           />
         </div>
       ));
     }
-
+  
     // Get the additional brands specific to the clicked brand
     const clickedBrand = brands[clickedBrandIndex];
     const additionalBrandNames =
       (brandSpecificAdditionals as Record<string, string[]>)[
         clickedBrand.name
       ] || [];
-
+  
     // Convert additional brand names to objects for consistent structure
     const additionalBrands = additionalBrandNames.map((name: string) => ({
       name,
       logo: null,
     }));
-
+  
     const expandedList = [
       ...brands.slice(0, clickedBrandIndex),
       brands[clickedBrandIndex],
       ...additionalBrands,
       ...brands.slice(clickedBrandIndex + 1),
     ];
-
+  
     return expandedList.map((brand, index) => {
       const originalIndex = brands.findIndex((b) => b.name === brand.name);
       const isClicked = originalIndex === clickedBrandIndex;
@@ -472,12 +477,12 @@ export default function BrandDashboardHeader() {
           key={`expanded-brand-${index}`}
           className={`flex-shrink-0 cursor-pointer ${
             isClicked
-              ? "rounded-lg p-1"
-              : "grayscale-0 transition-opacity opacity-70 hover:opacity-100"
+              ? "rounded-lg p-1 grayscale-0 opacity-100 border border-gray-200 shadow-md py-1 px-3 rounded-4xl"
+              : "grayscale transition-all opacity-70 hover:opacity-100 hover:grayscale-0"
           } ${
             isSelectedAdditional
-              ? "border-1 border-gray-300 rounded-4xl"
-              : "grayscale-0 transition-opacity opacity-70 hover:opacity-100"
+              ? "border-1 border-gray-300 rounded-4xl grayscale-0"
+              : ""
           }`}
           onDoubleClick={(e) => {
             if (originalIndex !== -1) {

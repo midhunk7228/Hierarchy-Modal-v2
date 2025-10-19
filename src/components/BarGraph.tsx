@@ -14,6 +14,73 @@ import {
   Filler,
 } from "chart.js";
 import { Download, Flower } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "../redux/store";
+import { setLocalAppliedFilters } from "../redux/filtersSlice";
+
+// Complete dataset with country information
+const completeDataset = {
+  Kuwait: {
+    salesLY: [114457, 119376, 61567, 105565, 128115, 131910, 120780, 107802],
+    sales: [88964, 94289, 40670, 94645, 108264, 105190, 89983, 81978],
+    apgLY: [16.7, 15.8, 16.6, 15.7, 18.1, 15, 14.9, 15.5],
+    apg: [16.4, 17.3, 17.3, 16.9, 15.3, 14.2, 14.3, 14.3],
+    avgDailyGuestLY: [225, 269, 120, 209, 229, 294, 261, 224],
+    avgDailyGuest: [172, 195, 76, 201, 228, 246, 203, 185],
+  },
+  Oman: {
+    salesLY: [95420, 102345, 78900, 89560, 115670, 108900, 98450, 92340],
+    sales: [78900, 85600, 65430, 76540, 98760, 91230, 85670, 79800],
+    apgLY: [17.2, 16.5, 17.8, 16.2, 17.5, 15.8, 16.1, 16.8],
+    apg: [17.5, 18.1, 16.9, 17.3, 16.7, 15.9, 16.4, 16.2],
+    avgDailyGuestLY: [198, 245, 156, 189, 267, 278, 234, 198],
+    avgDailyGuest: [165, 178, 134, 178, 215, 221, 189, 167],
+  },
+  UK: {
+    salesLY: [132500, 128900, 145600, 138700, 151200, 149800, 142300, 135600],
+    sales: [125600, 118900, 132400, 128900, 139800, 135600, 129700, 122400],
+    apgLY: [18.5, 17.9, 19.2, 18.3, 19.5, 18.7, 18.1, 17.6],
+    apg: [19.2, 18.8, 19.7, 18.9, 19.1, 18.4, 18.6, 18.1],
+    avgDailyGuestLY: [289, 312, 276, 298, 318, 335, 302, 289],
+    avgDailyGuest: [256, 278, 245, 267, 289, 298, 276, 254],
+  },
+  USA: {
+    salesLY: [156780, 149600, 138900, 145600, 162300, 158900, 151200, 144500],
+    sales: [142300, 134500, 125600, 132800, 148900, 143700, 138400, 131200],
+    apgLY: [19.8, 18.9, 17.8, 18.5, 20.1, 19.3, 18.7, 18.2],
+    apg: [20.1, 19.5, 18.6, 19.2, 19.8, 19.1, 18.9, 18.5],
+    avgDailyGuestLY: [312, 334, 298, 312, 345, 356, 328, 312],
+    avgDailyGuest: [289, 301, 267, 289, 312, 323, 298, 278],
+  },
+  Qatar: {
+    salesLY: [108900, 112400, 98700, 102300, 121500, 118900, 110200, 104600],
+    sales: [95600, 98900, 82300, 89700, 106800, 101200, 96400, 91200],
+    apgLY: [17.8, 17.2, 18.1, 17.5, 18.4, 17.1, 17.6, 17.9],
+    apg: [18.1, 17.9, 17.4, 18.2, 17.7, 17.3, 17.8, 17.6],
+    avgDailyGuestLY: [234, 278, 198, 223, 267, 289, 256, 234],
+    avgDailyGuest: [201, 223, 167, 189, 234, 245, 212, 198],
+  },
+  UAE: {
+    salesLY: [142300, 138700, 125600, 132400, 154300, 149800, 139600, 133200],
+    sales: [128900, 122400, 109800, 118700, 138900, 132800, 125400, 119600],
+    apgLY: [18.9, 18.3, 17.6, 18.1, 19.3, 18.5, 18.2, 17.8],
+    apg: [19.4, 18.9, 18.4, 18.8, 19.1, 18.7, 18.5, 18.3],
+    avgDailyGuestLY: [278, 301, 267, 278, 312, 328, 298, 278],
+    avgDailyGuest: [245, 256, 223, 234, 278, 289, 267, 245],
+  },
+};
+
+// Map month index to country
+const monthToCountryMap: { [key: number]: string } = {
+  0: "Kuwait", // January
+  1: "Oman", // February
+  2: "UK", // March
+  3: "USA", // April
+  4: "Qatar", // May
+  5: "UAE", // June
+  6: "Kuwait", // July (cycling back)
+  7: "Oman", // August
+};
 
 const BarGraph = () => {
   const salesChartRef = useRef<HTMLCanvasElement>(null);
@@ -22,32 +89,84 @@ const BarGraph = () => {
   const guestChartInstance = useRef<Chart | null>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
 
-  // State for editable data
-  const [salesData, setSalesData] = useState({
-    salesLY: [114457, 119376, 61567, 105565, 128115, 131910, 120780, 107802],
-    sales: [88964, 94289, 40670, 94645, 108264, 105190, 89983, 81978],
-    apgLY: [16.7, 15.8, 16.6, 15.7, 18.1, 15, 14.9, 15.5],
-    apg: [16.4, 17.3, 17.3, 16.9, 15.3, 14.2, 14.3, 14.3],
-  });
+  const dispatch = useDispatch();
+  const localAppliedFilters = useSelector(
+    (state: RootState) => state.filters.localAppliedFilters
+  );
 
-  const [guestData, setGuestData] = useState({
-    avgDailyGuestLY: [225, 269, 120, 209, 229, 294, 261, 224],
-    avgDailyGuest: [172, 195, 76, 201, 228, 246, 203, 185],
-  });
-
-  // Generate random value within a range
-  const randomInRange = (min: number, max: number, decimals: number = 0) => {
-    const value = Math.random() * (max - min) + min;
-    return decimals > 0
-      ? parseFloat(value.toFixed(decimals))
-      : Math.round(value);
+  const existingRegion =
+    localAppliedFilters?.find((f) => f.filterId === "region-filter")?.value ||
+    [];
+  console.log("existingRegion", existingRegion);
+  const regionFilterApply = (country: string[]) => {
+    let existingFilter = localAppliedFilters;
+    const existing = existingFilter.find((f) => f.filterId === "region-filter");
+    if (existing) {
+      existingFilter = existingFilter.map((f) =>
+        f.filterId === "region-filter" ? { ...f, value: country } : f
+      );
+    } else {
+      existingFilter = [
+        ...existingFilter,
+        {
+          filterId: "region-filter",
+          value: country,
+        },
+      ];
+    }
+    dispatch(setLocalAppliedFilters(existingFilter));
   };
 
-  const handleChartClick = (
-    chart: Chart,
-    event: any,
-    chartType: "sales" | "guest"
-  ) => {
+  // Function to aggregate data based on selected countries
+  const getAggregatedData = (countries: string[]) => {
+    if (countries.length === 0) {
+      // If no filters, show all countries combined
+      countries = Object.keys(completeDataset);
+    }
+
+    const result = {
+      salesLY: new Array(8).fill(0),
+      sales: new Array(8).fill(0),
+      apgLY: new Array(8).fill(0),
+      apg: new Array(8).fill(0),
+      avgDailyGuestLY: new Array(8).fill(0),
+      avgDailyGuest: new Array(8).fill(0),
+    };
+    countries.forEach((country) => {
+      const data = completeDataset[country as keyof typeof completeDataset];
+      if (data) {
+        for (let i = 0; i < 8; i++) {
+          result.salesLY[i] += data.salesLY[i];
+          result.sales[i] += data.sales[i];
+          result.apgLY[i] += data.apgLY[i];
+          result.apg[i] += data.apg[i];
+          result.avgDailyGuestLY[i] += data.avgDailyGuestLY[i];
+          result.avgDailyGuest[i] += data.avgDailyGuest[i];
+        }
+      }
+    });
+
+    // Calculate average for APG values
+    if (countries.length > 0) {
+      for (let i = 0; i < 8; i++) {
+        result.apgLY[i] = parseFloat(
+          (result.apgLY[i] / countries.length).toFixed(1)
+        );
+        result.apg[i] = parseFloat(
+          (result.apg[i] / countries.length).toFixed(1)
+        );
+      }
+    }
+
+    return result;
+  };
+
+  const [displayData, setDisplayData] = useState(() =>
+    getAggregatedData(existingRegion)
+  );
+
+  // Handle chart click to toggle country filter
+  const handleChartClick = (chart: Chart, event: any) => {
     const points = chart.getElementsAtEventForMode(
       event.native,
       "nearest",
@@ -57,38 +176,40 @@ const BarGraph = () => {
 
     if (points.length > 0) {
       const point = points[0];
-      const datasetIndex = point.datasetIndex;
-      const index = point.index;
+      const monthIndex = point.index;
 
-      if (chartType === "sales") {
-        const newData = { ...salesData };
-        if (datasetIndex === 0) {
-          // Sales LY - random between 50k and 140k
-          newData.salesLY[index] = randomInRange(50000, 140000);
-        } else if (datasetIndex === 1) {
-          // Sales - random between 40k and 120k
-          newData.sales[index] = randomInRange(40000, 120000);
-        } else if (datasetIndex === 2) {
-          // APG LY - random between 14 and 19
-          newData.apgLY[index] = randomInRange(14, 19, 1);
-        } else if (datasetIndex === 3) {
-          // APG - random between 14 and 19
-          newData.apg[index] = randomInRange(14, 19, 1);
+      // Get the country associated with this month
+      const clickedCountry = monthToCountryMap[monthIndex];
+
+      if (clickedCountry) {
+        // Toggle the country in the filter
+        const currentRegions = [...existingRegion];
+        const countryIndex = currentRegions.indexOf(clickedCountry);
+
+        if (countryIndex > -1) {
+          // Country exists, remove it
+          currentRegions.splice(countryIndex, 1);
+        } else {
+          // Country doesn't exist, add it
+          currentRegions.push(clickedCountry);
         }
-        setSalesData(newData);
-      } else {
-        const newData = { ...guestData };
-        if (datasetIndex === 0) {
-          // Avg Daily Guest LY - random between 100 and 300
-          newData.avgDailyGuestLY[index] = randomInRange(100, 300);
-        } else if (datasetIndex === 1) {
-          // Avg Daily Guest - random between 80 and 280
-          newData.avgDailyGuest[index] = randomInRange(80, 280);
-        }
-        setGuestData(newData);
+        debugger;
+        // Update the filter
+        regionFilterApply(
+          existingRegion.includes(clickedCountry)
+            ? [clickedCountry]
+            : currentRegions
+        );
       }
     }
   };
+
+  // Update data when filters change
+  useEffect(() => {
+    const newData = getAggregatedData(existingRegion);
+    setDisplayData(newData);
+  }, [existingRegion]);
+  console.log("displayData", displayData);
 
   useEffect(() => {
     // Register all Chart.js components
@@ -134,7 +255,7 @@ const BarGraph = () => {
             {
               type: "bar",
               label: "Sales LY",
-              data: salesData.salesLY,
+              data: displayData.salesLY,
               backgroundColor: "#a6a6a6",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -143,7 +264,7 @@ const BarGraph = () => {
             {
               type: "bar",
               label: "Sales",
-              data: salesData.sales,
+              data: displayData.sales,
               backgroundColor: "#007acb",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -152,7 +273,7 @@ const BarGraph = () => {
             {
               type: "line",
               label: "APG LY",
-              data: salesData.apgLY,
+              data: displayData.apgLY,
               borderColor: "#e0bfc6",
               backgroundColor: "transparent",
               borderWidth: 2,
@@ -169,7 +290,7 @@ const BarGraph = () => {
             {
               type: "line",
               label: "APG",
-              data: salesData.apg,
+              data: displayData.apg,
               borderColor: "#7b60c7",
               backgroundColor: "transparent",
               borderWidth: 2.5,
@@ -283,7 +404,7 @@ const BarGraph = () => {
           responsive: true,
           maintainAspectRatio: false,
           onClick: (event: any, _activeElements: any, chart: Chart) => {
-            handleChartClick(chart, event, "sales");
+            handleChartClick(chart, event);
           },
           interaction: {
             mode: "index",
@@ -331,7 +452,7 @@ const BarGraph = () => {
                 padding: 8,
               },
               min: 0,
-              max: 140000,
+              max: 200000,
             },
             y1: {
               position: "right",
@@ -353,7 +474,7 @@ const BarGraph = () => {
                 padding: 8,
               },
               min: 14,
-              max: 19,
+              max: 21,
             },
           },
         },
@@ -385,14 +506,14 @@ const BarGraph = () => {
           datasets: [
             {
               label: "Avg Daily Guest LY",
-              data: guestData.avgDailyGuestLY,
+              data: displayData.avgDailyGuestLY,
               backgroundColor: "#a6a6a6",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
             },
             {
               label: "Avg Daily Guest",
-              data: guestData.avgDailyGuest,
+              data: displayData.avgDailyGuest,
               backgroundColor: "#007acb",
               barPercentage: 1.0,
               categoryPercentage: 0.75,
@@ -416,7 +537,7 @@ const BarGraph = () => {
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    const label = value.toString();
+                    const label = Math.round(value as number).toString();
                     const x = element.x;
                     const y = element.y - 18;
                     const bgColor = i === 0 ? "#e0e0e0" : "#50a4db";
@@ -477,7 +598,7 @@ const BarGraph = () => {
           responsive: true,
           maintainAspectRatio: false,
           onClick: (event: any, _activeElements: any, chart: Chart) => {
-            handleChartClick(chart, event, "guest");
+            handleChartClick(chart, event);
           },
           plugins: {
             legend: {
@@ -527,13 +648,13 @@ const BarGraph = () => {
                   size: 10,
                 },
                 callback: function (value: string | number) {
-                  return "KD " + Number(value) / 1000 + ",000";
+                  return Number(value).toString();
                 },
-                stepSize: 20000,
+                stepSize: 50,
                 padding: 8,
               },
               min: 0,
-              max: 400,
+              max: 500,
             },
           },
         },
@@ -548,7 +669,7 @@ const BarGraph = () => {
         guestChartInstance.current.destroy();
       }
     };
-  }, [salesData, guestData]);
+  }, [displayData, existingRegion]);
 
   const exportToImage = () => {
     try {
@@ -668,22 +789,19 @@ const BarGraph = () => {
   };
 
   return (
-    <div className=" bg-white">
-      
-
-      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white  p-6">
+    <div className="bg-white">
+      <div ref={dashboardRef} className="max-w-7xl mx-auto bg-white p-6">
         <div className="flex justify-end pb-3">
-        <button
-        onClick={exportToImage}
-        className="flex items-center gap-1 px-3 py-2 bg-white border-2 border-gray-300 text-gray-500 rounded-lg text-xs font-medium  z-50 cursor-pointer"
-      >
-        Export as Image <Download className="h-4 w-4"/>
-      </button>
+          <button
+            onClick={exportToImage}
+            className="flex items-center gap-1 px-3 py-2 bg-white border-2 border-gray-300 text-gray-500 rounded-lg text-xs font-medium z-50 cursor-pointer"
+          >
+            Export as Image <Download className="h-4 w-4" />
+          </button>
         </div>
-      
+
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          
           {/* Logo Section */}
           <div className="flex items-center gap-1">
             <span
@@ -692,7 +810,9 @@ const BarGraph = () => {
             >
               Giulia
             </span>
-            <span className=" text-red-500"><Flower className="h-10 w-10"/></span>
+            <span className="text-red-500">
+              <Flower className="h-10 w-10" />
+            </span>
           </div>
 
           {/* Title Section */}

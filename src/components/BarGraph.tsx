@@ -94,10 +94,14 @@ const BarGraph = () => {
     (state: RootState) => state.filters.localAppliedFilters
   );
 
-  const existingRegion =
-    localAppliedFilters?.find((f) => f.filterId === "region-filter")?.value ||
-    [];
+  const existingRegionFilter = localAppliedFilters?.find((f) => f.filterId === "region-filter");
+  // Ensure existingRegion is always a string array
+  const existingRegion = Array.isArray(existingRegionFilter?.value) 
+    ? existingRegionFilter.value as string[]
+    : [];
+  
   console.log("existingRegion", existingRegion);
+  
   const regionFilterApply = (country: string[]) => {
     let existingFilter = localAppliedFilters;
     const existing = existingFilter.find((f) => f.filterId === "region-filter");
@@ -193,7 +197,7 @@ const BarGraph = () => {
           // Country doesn't exist, add it
           currentRegions.push(clickedCountry);
         }
-        debugger;
+        
         // Update the filter
         regionFilterApply(
           existingRegion.includes(clickedCountry)

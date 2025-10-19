@@ -95,13 +95,6 @@ const MatrixDisplay: React.FC<
   const chartInstance = useRef<am5.Root | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const element = contentRef.current;
-    if (viewType !== "comparison" || !element || !onHeightChange) return;
-
-    onHeightChange(widget.id, element.scrollHeight);
-  }, [viewType, onHeightChange, widget.id]);
-
   const applyFiltersToData = useCallback(
     (
       data: MatrixData,
@@ -278,11 +271,17 @@ const MatrixDisplay: React.FC<
 
   useLayoutEffect(() => {
     const element = contentRef.current;
-    if (isEditMode || viewType !== "comparison" || !element || !onHeightChange)
+    if (
+      isEditMode ||
+      viewType !== "comparison" ||
+      !element ||
+      !onHeightChange
+    ) {
       return;
+    }
 
     onHeightChange(widget.id, element.scrollHeight);
-  }, [isEditMode, onHeightChange, viewType, widget.id]);
+  }, [isEditMode, onHeightChange, viewType, widget.id, filteredData]);
 
   // Cleanup amCharts on unmount
   useEffect(() => {
@@ -1054,7 +1053,14 @@ const MatrixDisplay: React.FC<
         )}
       </div>
 
-      {renderContent()}
+      <div
+        style={{
+          height: "100%",
+          overflowY: "auto",
+        }}
+      >
+        {renderContent()}
+      </div>
     </div>
   );
 };

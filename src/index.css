@@ -5,9 +5,9 @@
   min-height: auto !important;
 } */
 
-/* .react-grid-item.react-resizable:has(.table-widget) {
+.react-grid-item.react-resizable:has(.table-widget) {
   overflow: auto;
-} */
+}
 /* min-height: auto !important; */
 
 /* .react-grid-item.react-resizable:has(.comparison-widget) {

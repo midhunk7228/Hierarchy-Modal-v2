@@ -148,8 +148,6 @@ export default function BrandDashboardHeader() {
     Bahrain: { code: "BHD", flag: "🇧🇭" },
   };
 
-  
-
   const DateRangeFilter: React.FC<{
     onDateChange: (startDate: string, endDate: string) => void;
     startDate?: string;
@@ -296,7 +294,7 @@ export default function BrandDashboardHeader() {
       });
     }
   };
-
+  console.log("isExpanded", isExpanded);
   const renderBrandLogos = () => {
     if (!isExpanded) {
       return brands.map((brand, index) => (
@@ -351,13 +349,9 @@ export default function BrandDashboardHeader() {
           key={`expanded-brand-${index}`}
           className={`flex-shrink-0 cursor-pointer ${
             isClicked
-              ? "rounded-lg p-1 grayscale-0 opacity-100 border border-gray-200 shadow-md py-1 px-3 rounded-4xl"
+              ? "rounded-lg p-1 grayscale-0 opacity-100 py-1 px-3 rounded-4xl"
               : "grayscale transition-all opacity-70 hover:opacity-100 hover:grayscale-0"
-          } ${
-            isSelectedAdditional
-              ? "border-1 border-gray-300 rounded-4xl grayscale-0"
-              : ""
-          }`}
+          } ${isSelectedAdditional ? " grayscale-0" : ""}`}
           onDoubleClick={(e) => {
             if (originalIndex !== -1) {
               handleBrandDoubleClick(originalIndex, e, true);
@@ -373,7 +367,9 @@ export default function BrandDashboardHeader() {
             <div className="h-8 px-4 flex items-center justify-center">
               <span
                 className={`text-sm font-medium ${
-                  isSelectedAdditional ? "opacity-100" : "opacity-30"
+                  isSelectedAdditional
+                    ? "opacity-100 border border-gray-300 rounded-4xl py-1 px-3 "
+                    : "opacity-30"
                 }`}
               >
                 {brand.name}
@@ -495,22 +491,20 @@ export default function BrandDashboardHeader() {
               selectedSubBrands,
               brands,
               clickedBrandIndex
-            ).map(
-              (country: { name: string; flag: string; code: string }) => (
-                <button
-                  key={country.code}
-                  onClick={() => handleCountryClick(country.name)}
-                  className={`flex items-center gap-2 rounded-full px-4 py-1 text-sm font-medium transition-all ${
-                    selectedCountries.includes(country.name)
-                      ? "border border-blue-200 bg-blue-50 text-blue-600"
-                      : "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <span className="text-lg">{country.flag}</span>
-                  <span>{country.name}</span>
-                </button>
-              )
-            )}
+            ).map((country: { name: string; flag: string; code: string }) => (
+              <button
+                key={country.code}
+                onClick={() => handleCountryClick(country.name)}
+                className={`flex items-center gap-2 rounded-full px-4 py-1 text-sm font-medium transition-all ${
+                  selectedCountries.includes(country.name)
+                    ? "border border-blue-200 bg-blue-50 text-blue-600"
+                    : "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <span className="text-lg">{country.flag}</span>
+                <span>{country.name}</span>
+              </button>
+            ))}
           </div>
           {/* Right Side Info */}
           <div className="flex items-center gap-4 self-end md:self-center">

@@ -101,7 +101,7 @@ export default function BrandDashboardHeader() {
     { name: "All", logo: "/tropicana.png" },
     { name: "Burger-Boutique", logo: "/pizza_hut.png" },
     { name: "Brw", logo: "/cocacola.jpeg" },
-    { name: "Roadside_Diner", logo: "/pizza_hut.png" },
+    { name: "Roadside_Diner", logo: "/Danone-Logo.png" },
     { name: "Cocoa_Room", logo: "/download (1).png" },
     { name: "Midar", logo: "/download.jpeg" },
     { name: "Meta", logo: "/burgerKing.png" },

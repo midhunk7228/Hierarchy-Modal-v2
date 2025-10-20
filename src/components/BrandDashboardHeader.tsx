@@ -98,16 +98,16 @@ export default function BrandDashboardHeader() {
   }, [selectedSubBrands, selectedBrand]);
 
   const brands = [
-    { name: "All", logo: "/all.png" },
-    { name: "Burger-Boutique", logo: "/Burger_Boutique.png" },
-    { name: "Brw", logo: "/BRW.png" },
-    { name: "Roadside_Diner", logo: "/Roadside_Diner.png" },
-    { name: "Cocoa_Room", logo: "/Cocoa_Room.png" },
-    { name: "Midar", logo: "/Midar.png" },
-    { name: "Meta", logo: "/Nomad_Fatpie.png" },
-    { name: "Nestle", logo: "/Nestle.png" },
-    { name: "White_Robata", logo: "/White_Robata.png" },
-    { name: "Slider_Station", logo: "/Slider_Station.png" },
+    { name: "All", logo: "/tropicana.png" },
+    { name: "Burger-Boutique", logo: "/pizza_hut.png" },
+    { name: "Brw", logo: "/cocacola.jpeg" },
+    { name: "Roadside_Diner", logo: "/pizza_hut.png" },
+    { name: "Cocoa_Room", logo: "/download (1).png" },
+    { name: "Midar", logo: "/download.jpeg" },
+    { name: "Meta", logo: "/burgerKing.png" },
+    { name: "Nestle", logo: "/download (1).jpeg" },
+    { name: "White_Robata", logo: "/subway-logo.png" },
+    { name: "Slider_Station", logo: "/starbucks.png" },
   ];
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
 

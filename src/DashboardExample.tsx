@@ -1433,14 +1433,14 @@ const JsonDrivenDashboard: React.FC = () => {
         <div className="bg-white px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <div className="flex items-center gap-3">
+              {/* <div className="flex items-center gap-3">
                 <p className="text-sm text-gray-500 mt-1 ">
                   <span className="font-bold">Navigation Path: </span>
                   {currentNavigationPath
                     .replace("->", " → ")
                     .replace("#", " | Filters: ")}
                 </p>
-              </div>
+              </div> */}
             </div>
             <div className="flex items-center gap-4">
               <DashboardManager

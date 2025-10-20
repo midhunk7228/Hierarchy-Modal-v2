@@ -884,13 +884,13 @@ const MatrixDisplay: React.FC<
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {getOutcomeIcon(row.outcome)}
-                        <span
+                        {/* <span
                           className={`ml-1 text-sm ${getOutcomeColor(
                             row.outcome
                           )}`}
                         >
                           {row.outcome}
-                        </span>
+                        </span> */}
                       </div>
                     </td>
                   )}

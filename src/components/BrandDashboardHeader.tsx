@@ -388,16 +388,7 @@ export default function BrandDashboardHeader() {
   };
 
   const handleCurrencyToggle = (currency: { code: string; name: string }) => {
-    // const currencyCode = currency?.code;
-    // debugger;
     handleCountryClick(currency.name);
-    // setSelectedCurrencies((prev) => {
-    //   if (prev.includes(currencyCode)) {
-    //     return prev.filter((c) => c !== currencyCode);
-    //   } else {
-    //     return [...prev, currencyCode];
-    //   }
-    // });
   };
 
   return (
@@ -414,7 +405,7 @@ export default function BrandDashboardHeader() {
                 className="absolute left-0 z-10 -ml-4 p-2 transition-all"
                 style={{ transform: "translateX(-50%)" }}
               >
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
+                <ChevronLeft className="h-5 w-5 text-gray-600 cursor-pointer" />
               </button>
             )}
 
@@ -433,7 +424,7 @@ export default function BrandDashboardHeader() {
                 onClick={() => scrollBrands("right")}
                 className="absolute right-0 z-10 -mr-4 p-2 transition-all"
               >
-                <ChevronRight className="h-5 w-5 text-gray-600" />
+                <ChevronRight className="h-5 w-5 text-gray-600 cursor-pointer" />
               </button>
             )}
           </div>

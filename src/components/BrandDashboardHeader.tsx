@@ -313,7 +313,7 @@ export default function BrandDashboardHeader() {
           <img
             src={brand.logo}
             alt={brand.name}
-            className="h-8 object-contain"
+            className="h-6 object-contain"
           />
         </div>
       ));
@@ -379,7 +379,7 @@ export default function BrandDashboardHeader() {
             <img
               src={brand.logo}
               alt={brand.name}
-              className="h-8 object-contain"
+              className="h-6 object-contain"
             />
           )}
         </div>
@@ -411,7 +411,7 @@ export default function BrandDashboardHeader() {
             {showBrandArrows && (
               <button
                 onClick={() => scrollBrands("left")}
-                className="absolute left-0 z-10 -ml-4 rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gray-50"
+                className="absolute left-0 z-10 -ml-4 p-2 transition-all"
                 style={{ transform: "translateX(-50%)" }}
               >
                 <ChevronLeft className="h-5 w-5 text-gray-600" />
@@ -431,8 +431,7 @@ export default function BrandDashboardHeader() {
             {showBrandArrows && (
               <button
                 onClick={() => scrollBrands("right")}
-                className="absolute right-0 z-10 -mr-4 rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gray-50"
-                style={{ transform: "translateX(50%)" }}
+                className="absolute right-0 z-10 -mr-4 p-2 transition-all"
               >
                 <ChevronRight className="h-5 w-5 text-gray-600" />
               </button>
@@ -495,7 +494,7 @@ export default function BrandDashboardHeader() {
               <button
                 key={country.code}
                 onClick={() => handleCountryClick(country.name)}
-                className={`flex items-center gap-2 rounded-full px-4 py-1 text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 rounded-full px-3 text-sm font-medium transition-all ${
                   selectedCountries.includes(country.name)
                     ? "border border-blue-200 bg-blue-50 text-blue-600"
                     : "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"

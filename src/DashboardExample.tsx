@@ -1466,6 +1466,8 @@ const JsonDrivenDashboard: React.FC = () => {
           </div>
         </div>
         <div className="flex justify-end items-center gap-3 pt-2 px-6">
+          {/* <div className="text-3xl font-bold">Finance Dashboard</div> */}
+
           {selectedSubBrands?.length !== 0 && (
             <div className="flex items-center gap-2 bg-white rounded-md px-2 py-1">
               <div className="relative">

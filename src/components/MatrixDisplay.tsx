@@ -340,6 +340,7 @@ const MatrixDisplay: React.FC<
           textType: "circular",
           centerX: 0,
           centerY: 0,
+          forceHidden: true,
         });
 
         // Add click event

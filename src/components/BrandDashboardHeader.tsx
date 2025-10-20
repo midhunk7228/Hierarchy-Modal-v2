@@ -107,7 +107,7 @@ export default function BrandDashboardHeader() {
     { name: "Meta", logo: "/burgerKing.png" },
     { name: "Nestle", logo: "/download (1).jpeg" },
     { name: "White_Robata", logo: "/subway-logo.png" },
-    { name: "Slider_Station", logo: "/starbucks.png" },
+    { name: "Slider_Station", logo: "/starbucks_v2.png" },
   ];
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
 

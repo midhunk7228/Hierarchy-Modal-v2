@@ -11,16 +11,13 @@ import {
   saveBrandSelection,
   loadBrandSelection,
 } from "../../utils/brandSelectionStorage";
-import { getAvailableCountries } from "../../utils/countryUtils";
-import {
-  brands,
-  brandSpecificAdditionals,
-  currencyMapping,
-} from "../../data/brandData";
+import { brandHierarchy } from "../../data/brandHierarchy";
 import BrandSelector from "./BrandSelector";
 import CountryFilter from "./CountryFilter";
 import HeaderActions from "./HeaderActions";
 import TopRightActions from "./TopRightActions";
+
+const brands = brandHierarchy.brands;
 
 export default function BrandDashboardHeader() {
   const dispatch = useDispatch();
@@ -51,6 +48,31 @@ export default function BrandDashboardHeader() {
     }
   }, [selectedBrand, selectedSubBrands]);
 
+  const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
+  const currentBrand = brands[clickedBrandIndex];
+  const outlets = currentBrand?.outlets.map((o) => o.name) || [];
+
+  const getAvailableCountries = () => {
+    if (!currentBrand) {
+      return [];
+    }
+
+    if (selectedSubBrands.length > 0) {
+      const countries = currentBrand.outlets
+        .filter((outlet) => selectedSubBrands.includes(outlet.name))
+        .flatMap((outlet) => outlet.countries);
+
+      const uniqueCountries = Array.from(
+        new Map(countries.map((c) => [c.code, c])).values()
+      );
+      return uniqueCountries;
+    }
+
+    return currentBrand.countries || [];
+  };
+
+  const availableCountries = getAvailableCountries();
+
   useEffect(() => {
     const existFilter = localAppliedFilters.find(
       (f) => f.filterId === "region-filter"
@@ -69,19 +91,8 @@ export default function BrandDashboardHeader() {
     }
   }, [localAppliedFilters]);
 
-  const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
-
   const validRegionFilter = () => {
-    const availabelCountries = getAvailableCountries(
-      selectedSubBrands,
-      brands,
-      clickedBrandIndex
-    );
-    countryFilterApply(
-      availabelCountries.map(
-        (val: { name: string; flag: string; code: string }) => val.name
-      )
-    );
+    countryFilterApply(availableCountries.map((val) => val.name));
   };
 
   useEffect(() => {
@@ -176,19 +187,13 @@ export default function BrandDashboardHeader() {
     handleCountryClick(currency.name);
   };
 
-  const availableCountries = getAvailableCountries(
-    selectedSubBrands,
-    brands,
-    clickedBrandIndex
-  );
-
   return (
     <div className="w-full bg-white">
       <div className="border-b border-gray-200 px-4 py-4 md:px-6">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <BrandSelector
-            brands={brands}
-            brandSpecificAdditionals={brandSpecificAdditionals}
+            brands={brands.map((b) => ({ name: b.name, logo: b.logo }))}
+            outlets={{ [selectedBrand]: outlets }}
             clickedBrandIndex={clickedBrandIndex}
             isExpanded={isExpanded}
             showBrandArrows={showBrandArrows}
@@ -209,7 +214,6 @@ export default function BrandDashboardHeader() {
           />
           <HeaderActions
             selectedCurrencies={selectedCurrencies}
-            currencyMapping={currencyMapping}
             availableCountries={availableCountries}
             selectedCountries={selectedCountries}
             handleCurrencyToggle={handleCurrencyToggle}

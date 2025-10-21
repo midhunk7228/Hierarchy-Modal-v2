@@ -8,7 +8,7 @@ interface Brand {
 
 interface BrandSelectorProps {
   brands: Brand[];
-  brandSpecificAdditionals: Record<string, string[]>;
+  outlets: Record<string, string[]>;
   clickedBrandIndex: number;
   isExpanded: boolean;
   showBrandArrows: boolean;
@@ -24,7 +24,7 @@ interface BrandSelectorProps {
 
 const BrandSelector: React.FC<BrandSelectorProps> = ({
   brands,
-  brandSpecificAdditionals,
+  outlets,
   clickedBrandIndex,
   isExpanded,
   showBrandArrows,
@@ -40,8 +40,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
       const clickedBrand = brands[clickedBrandIndex];
       if (!clickedBrand) return null;
 
-      const additionalBrandNames =
-        brandSpecificAdditionals[clickedBrand.name] || [];
+      const additionalBrandNames = outlets[clickedBrand.name] || [];
       const additionalBrands = additionalBrandNames.map((name) => ({
         name,
         logo: null,

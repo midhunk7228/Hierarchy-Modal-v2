@@ -3,21 +3,22 @@ import { Globe, Ellipsis, X } from "lucide-react";
 import DateRangeFilter from "../UI/DateRangeFilter";
 import OutletSelector from "../UI/OutletSelector";
 
+interface Country {
+  name: string;
+  flag: string;
+  code: string;
+  currencyCode: string;
+}
+
 interface HeaderActionsProps {
   selectedCurrencies: string[];
-  currencyMapping: Record<string, { code: string; flag: string }>;
-  availableCountries: { name: string; flag: string; code: string }[];
+  availableCountries: Country[];
   selectedCountries: string[];
-  handleCurrencyToggle: (country: {
-    name: string;
-    code: string;
-    flag: string;
-  }) => void;
+  handleCurrencyToggle: (country: Country) => void;
 }
 
 const HeaderActions: React.FC<HeaderActionsProps> = ({
   selectedCurrencies,
-  currencyMapping,
   availableCountries,
   selectedCountries,
   handleCurrencyToggle,
@@ -79,9 +80,11 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
             </span>
             {selectedCurrencies.length === 1 && (
               <span className="text-base">
-                {Object.values(currencyMapping).find(
-                  (c) => c.code === selectedCurrencies[0]
-                )?.flag || ""}
+                {
+                  availableCountries.find(
+                    (c) => c.currencyCode === selectedCurrencies[0]
+                  )?.flag
+                }
               </span>
             )}
           </div>
@@ -98,8 +101,6 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                 {availableCountries
                   .filter((country) => country.name !== "All")
                   .map((country) => {
-                    const currency = currencyMapping[country.name];
-                    if (!currency) return null;
                     const isSelected = selectedCountries.includes(country.name);
                     return (
                       <label
@@ -107,9 +108,9 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                         className="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-all hover:bg-gray-50"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{currency.flag}</span>
+                          <span className="text-xl">{country.flag}</span>
                           <span className="text-sm font-medium text-gray-900">
-                            {currency.code}
+                            {country.currencyCode}
                           </span>
                         </div>
                         <div className="relative flex items-center">

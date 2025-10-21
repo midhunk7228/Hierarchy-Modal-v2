@@ -81,7 +81,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
                         : "opacity-30"
                     }`}
                   >
-                    {brand.name}
+                    🏢 {brand.name}
                   </span>
                 </div>
               </div>

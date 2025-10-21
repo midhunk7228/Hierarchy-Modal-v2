@@ -1,23 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import type { BrandChooseType } from "../types/brands";
 
 export interface BrandSelectionState {
   selectedBrand: string;
   selectedSubBrands: string[];
+  selectedAllBrandWiseOutlets: { brandName: string; outlets: string[] }[];
 }
 
 const initialState: BrandSelectionState = {
   selectedBrand: "All",
   selectedSubBrands: [],
+  selectedAllBrandWiseOutlets: [],
 };
 
 const brandSelectionSlice = createSlice({
   name: "brandSelection",
   initialState,
   reducers: {
-    setSelectedBrand(state, action: PayloadAction<string>) {
-      state.selectedBrand = action.payload;
-      state.selectedSubBrands = []; // Reset sub-brands when a new brand is selected
+    setSelectedBrand(state, action: PayloadAction<BrandChooseType>) {
+      state.selectedBrand = action.payload.brandName;
+      state.selectedSubBrands = action.payload.outlets;
+      state.selectedAllBrandWiseOutlets =
+        action.payload.selectedAllBrandWiseOutlets;
     },
     setSelectedSubBrands(state, action: PayloadAction<string[]>) {
       state.selectedSubBrands = action.payload;

@@ -27,6 +27,7 @@ export default function BrandDashboardHeader() {
   const { selectedBrand, selectedSubBrands } = useSelector(
     (state: RootState) => state.brandSelection
   );
+  console.log("selectedSubBrands", selectedSubBrands);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -36,7 +37,7 @@ export default function BrandDashboardHeader() {
     const loadState = async () => {
       const savedSelection = await loadBrandSelection();
       if (savedSelection) {
-        dispatch(setBrandSelection(savedSelection));
+        // dispatch(setBrandSelection(savedSelection));
       }
     };
     loadState();
@@ -68,7 +69,13 @@ export default function BrandDashboardHeader() {
       return uniqueCountries;
     }
 
-    return currentBrand.countries || [];
+    const allOutletCountries = currentBrand.outlets.flatMap(
+      (outlet) => outlet.countries
+    );
+    const uniqueCountries = Array.from(
+      new Map(allOutletCountries.map((c) => [c.code, c])).values()
+    );
+    return uniqueCountries;
   };
 
   const availableCountries = getAvailableCountries();
@@ -106,7 +113,17 @@ export default function BrandDashboardHeader() {
   ) => {
     e.stopPropagation();
     const brandName = brands[truth ? 0 : index].name;
-    dispatch(setSelectedBrand(brandName));
+    const brand = brands.find((b) => b.name === brandName);
+    if (brand) {
+      const allOutlets = brand.outlets.map((o) => o.name);
+      dispatch(
+        setSelectedBrand({
+          brandName,
+          outlets: allOutlets,
+          selectedAllBrandWiseOutlets: [{ brandName, outlets: allOutlets }],
+        })
+      );
+    }
     setIsExpanded(!isExpanded);
     setShowBrandArrows(!showBrandArrows);
     setSelectedCountries(["All"]);

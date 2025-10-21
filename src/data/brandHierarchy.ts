@@ -3,27 +3,16 @@ export const brandHierarchy = {
     {
       name: "All",
       logo: "/tropicana.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-        { name: "UK", flag: "🇬🇧", code: "uk", currencyCode: "GBP" },
-        { name: "Germany", flag: "🇩🇪", code: "de", currencyCode: "EUR" },
-      ],
       outlets: [
         {
-          name: "🏢 NVIDIA",
+          name: "NVIDIA",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
           ],
         },
         {
-          name: "🏢 Pepsi",
+          name: "Pepsi",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -31,7 +20,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 P&G",
+          name: "P&G",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -39,7 +28,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Samsung",
+          name: "Samsung",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -51,18 +40,9 @@ export const brandHierarchy = {
     {
       name: "Burger-Boutique",
       logo: "/pizza_hut.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 McDonald's",
+          name: "McDonald's",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -70,21 +50,21 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Wendy's",
+          name: "Wendy's",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
           ],
         },
         {
-          name: "🏢 Five Guys",
+          name: "Five Guys",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
           ],
         },
         {
-          name: "🏢 Shake Shack",
+          name: "Shake Shack",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -97,18 +77,9 @@ export const brandHierarchy = {
     {
       name: "Brw",
       logo: "/cocacola.jpeg",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 Starbucks",
+          name: "Starbucks",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
@@ -116,21 +87,21 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Dunkin",
+          name: "Dunkin",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
           ],
         },
         {
-          name: "🏢 Costa",
+          name: "Costa",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
           ],
         },
         {
-          name: "🏢 Tim Hortons",
+          name: "Tim Hortons",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
@@ -142,35 +113,30 @@ export const brandHierarchy = {
     {
       name: "Roadside_Diner",
       logo: "/Danone-Logo.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-      ],
       outlets: [
         {
-          name: "🏢 Denny's",
+          name: "Denny's",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
           ],
         },
         {
-          name: "🏢 IHOP",
+          name: "IHOP",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
           ],
         },
         {
-          name: "🏢 Waffle House",
+          name: "Waffle House",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
           ],
         },
         {
-          name: "🏢 Cracker Barrel",
+          name: "Cracker Barrel",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -181,18 +147,9 @@ export const brandHierarchy = {
     {
       name: "Cocoa_Room",
       logo: "/download (1).png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 Godiva",
+          name: "Godiva",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
@@ -201,7 +158,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Lindt",
+          name: "Lindt",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -211,7 +168,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Hershey's",
+          name: "Hershey's",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -221,7 +178,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Ferrero",
+          name: "Ferrero",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -235,18 +192,9 @@ export const brandHierarchy = {
     {
       name: "Midar",
       logo: "/download.jpeg",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 Tesla",
+          name: "Tesla",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -256,7 +204,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 BMW",
+          name: "BMW",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -266,7 +214,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Mercedes",
+          name: "Mercedes",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -276,7 +224,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Audi",
+          name: "Audi",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
@@ -289,18 +237,9 @@ export const brandHierarchy = {
     {
       name: "Meta",
       logo: "/burgerKing.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 Google",
+          name: "Google",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -309,7 +248,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Apple",
+          name: "Apple",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -318,7 +257,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Microsoft",
+          name: "Microsoft",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -328,7 +267,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Amazon",
+          name: "Amazon",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -340,16 +279,9 @@ export const brandHierarchy = {
     {
       name: "Nestle",
       logo: "/download (1).jpeg",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 Unilever",
+          name: "Unilever",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -357,7 +289,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 P&G",
+          name: "P&G",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -365,7 +297,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Kraft",
+          name: "Kraft",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -373,7 +305,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 General Mills",
+          name: "General Mills",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Kuwait", flag: "🇰🇼", code: "kw", currencyCode: "KWD" },
@@ -385,21 +317,16 @@ export const brandHierarchy = {
     {
       name: "White_Robata",
       logo: "/subway-logo.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
-      ],
       outlets: [
         {
-          name: "🏢 Nobu",
+          name: "Nobu",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Qatar", flag: "🇶🇦", code: "qa", currencyCode: "QAR" },
           ],
         },
         {
-          name: "🏢 Zuma",
+          name: "Zuma",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -407,14 +334,14 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Sushi Samba",
+          name: "Sushi Samba",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
           ],
         },
         {
-          name: "🏢 Roka",
+          name: "Roka",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -426,16 +353,9 @@ export const brandHierarchy = {
     {
       name: "Slider_Station",
       logo: "/starbucks_v2.png",
-      countries: [
-        { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
-        { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },
-        { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
-        { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
-        { name: "Bahrain", flag: "🇧🇭", code: "bh", currencyCode: "BHD" },
-      ],
       outlets: [
         {
-          name: "🏢 White Castle",
+          name: "White Castle",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "UAE", flag: "🇦🇪", code: "ae", currencyCode: "AED" },
@@ -443,7 +363,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Krystal",
+          name: "Krystal",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
@@ -451,7 +371,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Sonic",
+          name: "Sonic",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Saudi", flag: "🇸🇦", code: "sa", currencyCode: "SAR" },
@@ -460,7 +380,7 @@ export const brandHierarchy = {
           ],
         },
         {
-          name: "🏢 Culver's",
+          name: "Culver's",
           countries: [
             { name: "All", flag: "🌍", code: "all", currencyCode: "N/A" },
             { name: "Oman", flag: "🇴🇲", code: "om", currencyCode: "OMR" },

@@ -16,3 +16,9 @@ export interface Brand {
   logo: string;
   outlets: Outlet[];
 }
+
+export interface BrandChooseType {
+  brandName: string;
+  outlets: string[];
+  selectedAllBrandWiseOutlets: { brandName: string; outlets: string[] }[];
+}

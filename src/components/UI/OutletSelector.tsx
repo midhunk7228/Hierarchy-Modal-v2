@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import { ChevronDown, Search, Store } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
+import { setSelectedSubBrands } from "../../redux/brandSelectionSlice";
 
 export default function OutletSelector() {
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const { selectedSubBrands, selectedAllBrandWiseOutlets, selectedBrand } =
+    useSelector((state: RootState) => state.brandSelection);
+  const allOutlets = selectedAllBrandWiseOutlets.flatMap((data) => {
+    return data.outlets;
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOutlets, setSelectedOutlets] = useState({
     active: {
@@ -31,15 +40,24 @@ export default function OutletSelector() {
     { id: "jahra", name: "Burger Boutique Jahra" },
     { id: "brw360", name: "BRW - 360 Mall" },
   ];
+  console.log(
+    "selectedBrand",
+    selectedBrand,
+    selectedSubBrands,
+    selectedAllBrandWiseOutlets
+  );
 
-  const toggleOutlet = (type, id) => {
-    setSelectedOutlets((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [id]: !prev[type][id],
-      },
-    }));
+  const toggleOutlet = (outletName: string) => {
+    if (selectedSubBrands.includes(outletName)) {
+      const newSelection = selectedSubBrands.filter((c) => c !== outletName);
+      if (newSelection.length > 0) {
+        dispatch(setSelectedSubBrands(newSelection));
+      } else {
+        dispatch(setSelectedSubBrands([]));
+      }
+    } else {
+      dispatch(setSelectedSubBrands([...selectedSubBrands, outletName]));
+    }
   };
 
   const toggleAllActive = () => {
@@ -70,19 +88,19 @@ export default function OutletSelector() {
     }));
   };
 
-  const getSelectedCount = () => {
-    const activeCount = Object.values(selectedOutlets.active).filter(
-      Boolean
-    ).length;
-    const closedCount = Object.values(selectedOutlets.closed).filter(
-      Boolean
-    ).length;
-    return activeCount + closedCount;
-  };
+  //   const getSelectedCount = () => {
+  //     const activeCount = Object.values(selectedOutlets.active).filter(
+  //       Boolean
+  //     ).length;
+  //     const closedCount = Object.values(selectedOutlets.closed).filter(
+  //       Boolean
+  //     ).length;
+  //     return activeCount + closedCount;
+  //   };
 
-  const filterOutlets = (outlets) => {
+  const filterOutlets = (outlets: string[]) => {
     return outlets.filter((o) =>
-      o.name.toLowerCase().includes(searchTerm.toLowerCase())
+      o.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
@@ -103,7 +121,7 @@ export default function OutletSelector() {
         >
           <Store className="w-4 h-4 text-gray-600" />
           <span className="font-medium text-gray-700">
-            {getSelectedCount()} Outlets
+            {selectedSubBrands?.length} Outlets
           </span>
           <ChevronDown
             className={`w-4 h-4 text-gray-600 transition-transform ${
@@ -132,7 +150,7 @@ export default function OutletSelector() {
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
               {/* All Active Outlets */}
-              <div className="p-3">
+              {/* <div className="p-3">
                 <label className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded cursor-pointer group">
                   <span className="font-semibold text-gray-700">
                     All Active Outlets
@@ -146,23 +164,23 @@ export default function OutletSelector() {
                     />
                   </div>
                 </label>
-              </div>
+              </div> */}
 
               {/* Active Outlets List */}
               <div className="px-3 pb-3 space-y-1">
-                {filterOutlets(activeOutlets).map((outlet) => (
+                {filterOutlets(allOutlets).map((outlet, index) => (
                   <label
-                    key={outlet.id}
+                    key={index + 1}
                     className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded cursor-pointer group"
                   >
                     <div className="flex items-center gap-3">
                       <Store className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-700">{outlet.name}</span>
+                      <span className="text-gray-700">{outlet}</span>
                     </div>
                     <input
                       type="checkbox"
-                      checked={selectedOutlets.active[outlet.id] || false}
-                      onChange={() => toggleOutlet("active", outlet.id)}
+                      checked={selectedSubBrands.includes(outlet) || false}
+                      onChange={() => toggleOutlet(outlet)}
                       className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     />
                   </label>
@@ -170,10 +188,10 @@ export default function OutletSelector() {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-200 my-2"></div>
+              {/* <div className="border-t border-gray-200 my-2"></div> */}
 
               {/* All Closed Outlets */}
-              <div className="p-3">
+              {/* <div className="p-3">
                 <label className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded cursor-pointer group">
                   <span className="font-semibold text-gray-400">
                     All Closed Outlets
@@ -185,10 +203,10 @@ export default function OutletSelector() {
                     className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                   />
                 </label>
-              </div>
+              </div> */}
 
               {/* Closed Outlets List */}
-              <div className="px-3 pb-3 space-y-1">
+              {/* <div className="px-3 pb-3 space-y-1">
                 {filterOutlets(closedOutlets).map((outlet) => (
                   <label
                     key={outlet.id}
@@ -206,7 +224,7 @@ export default function OutletSelector() {
                     />
                   </label>
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
         )}

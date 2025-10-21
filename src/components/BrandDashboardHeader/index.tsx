@@ -1,0 +1,221 @@
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
+import { setLocalAppliedFilters } from "../../redux/filtersSlice";
+import {
+  setSelectedBrand,
+  setSelectedSubBrands,
+  setBrandSelection,
+} from "../../redux/brandSelectionSlice";
+import {
+  saveBrandSelection,
+  loadBrandSelection,
+} from "../../utils/brandSelectionStorage";
+import { getAvailableCountries } from "../../utils/countryUtils";
+import {
+  brands,
+  brandSpecificAdditionals,
+  currencyMapping,
+} from "../../data/brandData";
+import BrandSelector from "./BrandSelector";
+import CountryFilter from "./CountryFilter";
+import HeaderActions from "./HeaderActions";
+import TopRightActions from "./TopRightActions";
+
+export default function BrandDashboardHeader() {
+  const dispatch = useDispatch();
+  const localAppliedFilters = useSelector(
+    (state: RootState) => state.filters.localAppliedFilters
+  );
+  const { selectedBrand, selectedSubBrands } = useSelector(
+    (state: RootState) => state.brandSelection
+  );
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
+  const [showBrandArrows, setShowBrandArrows] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedCurrencies] = useState<string[]>(["KWD"]);
+
+  useEffect(() => {
+    const loadState = async () => {
+      const savedSelection = await loadBrandSelection();
+      if (savedSelection) {
+        dispatch(setBrandSelection(savedSelection));
+      }
+    };
+    loadState();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (selectedBrand) {
+      saveBrandSelection({ selectedBrand, selectedSubBrands });
+    }
+  }, [selectedBrand, selectedSubBrands]);
+
+  useEffect(() => {
+    const existFilter = localAppliedFilters.find(
+      (f) => f.filterId === "region-filter"
+    );
+    if (existFilter) {
+      setSelectedCountries(
+        Array.isArray(existFilter.value) &&
+          existFilter.value.length > 1 &&
+          existFilter.value.includes("All")
+          ? ["All"]
+          : (existFilter?.value as string[])
+      );
+    }
+    if (existFilter === undefined && localAppliedFilters?.length === 0) {
+      setSelectedCountries(["All"]);
+    }
+  }, [localAppliedFilters]);
+
+  const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
+
+  const validRegionFilter = () => {
+    const availabelCountries = getAvailableCountries(
+      selectedSubBrands,
+      brands,
+      clickedBrandIndex
+    );
+    countryFilterApply(
+      availabelCountries.map(
+        (val: { name: string; flag: string; code: string }) => val.name
+      )
+    );
+  };
+
+  useEffect(() => {
+    validRegionFilter();
+  }, [selectedSubBrands, selectedBrand]);
+
+  const handleBrandDoubleClick = (
+    index: number,
+    e: React.MouseEvent,
+    truth: boolean = false
+  ) => {
+    e.stopPropagation();
+    const brandName = brands[truth ? 0 : index].name;
+    dispatch(setSelectedBrand(brandName));
+    setIsExpanded(!isExpanded);
+    setShowBrandArrows(!showBrandArrows);
+    setSelectedCountries(["All"]);
+  };
+
+  const handleAdditionalBrandClick = (
+    brandName: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    let newSelection: string[];
+    if (e.shiftKey) {
+      newSelection = selectedSubBrands.includes(brandName)
+        ? selectedSubBrands.filter((b) => b !== brandName)
+        : [...selectedSubBrands, brandName];
+    } else {
+      newSelection =
+        selectedSubBrands.includes(brandName) && selectedSubBrands.length === 1
+          ? []
+          : [brandName];
+    }
+    dispatch(setSelectedSubBrands(newSelection));
+    setSelectedCountries(["All"]);
+  };
+
+  const handleCountryClick = (countryName: string) => {
+    if (countryName === "All") {
+      setSelectedCountries(["All"]);
+      validRegionFilter();
+    } else {
+      if (selectedCountries.includes("All")) {
+        countryFilterApply([countryName]);
+        setSelectedCountries([countryName]);
+      } else if (selectedCountries.includes(countryName)) {
+        const newSelection = selectedCountries.filter((c) => c !== countryName);
+        if (newSelection.length > 0) {
+          countryFilterApply(newSelection);
+        } else {
+          validRegionFilter();
+        }
+        setSelectedCountries(newSelection.length > 0 ? newSelection : ["All"]);
+      } else {
+        countryFilterApply([...selectedCountries, countryName]);
+        setSelectedCountries([...selectedCountries, countryName]);
+      }
+    }
+  };
+
+  const countryFilterApply = (country: string[]) => {
+    let existingFilter = localAppliedFilters;
+    const existing = existingFilter.find((f) => f.filterId === "region-filter");
+    if (existing) {
+      existingFilter = existingFilter.map((f) =>
+        f.filterId === "region-filter" ? { ...f, value: country } : f
+      );
+    } else {
+      existingFilter = [
+        ...existingFilter,
+        {
+          filterId: "region-filter",
+          value: country,
+        },
+      ];
+    }
+    dispatch(setLocalAppliedFilters(existingFilter));
+  };
+
+  const handleBackButtonClick = () => {
+    setIsExpanded(false);
+    setShowBrandArrows(false);
+  };
+
+  const handleCurrencyToggle = (currency: {
+    name: string;
+    code: string;
+    flag: string;
+  }) => {
+    handleCountryClick(currency.name);
+  };
+
+  const availableCountries = getAvailableCountries(
+    selectedSubBrands,
+    brands,
+    clickedBrandIndex
+  );
+
+  return (
+    <div className="w-full bg-white">
+      <div className="border-b border-gray-200 px-4 py-4 md:px-6">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <BrandSelector
+            brands={brands}
+            brandSpecificAdditionals={brandSpecificAdditionals}
+            clickedBrandIndex={clickedBrandIndex}
+            isExpanded={isExpanded}
+            showBrandArrows={showBrandArrows}
+            selectedSubBrands={selectedSubBrands}
+            handleBrandDoubleClick={handleBrandDoubleClick}
+            handleAdditionalBrandClick={handleAdditionalBrandClick}
+            handleBackButtonClick={handleBackButtonClick}
+          />
+          <TopRightActions />
+        </div>
+      </div>
+      <div className="border-b border-gray-200 px-4 py-3 md:px-6">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+          <CountryFilter
+            availableCountries={availableCountries}
+            selectedCountries={selectedCountries}
+            handleCountryClick={handleCountryClick}
+          />
+          <HeaderActions
+            selectedCurrencies={selectedCurrencies}
+            currencyMapping={currencyMapping}
+            availableCountries={availableCountries}
+            selectedCountries={selectedCountries}
+            handleCurrencyToggle={handleCurrencyToggle}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

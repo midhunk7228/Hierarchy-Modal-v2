@@ -26,6 +26,7 @@ interface BrandSelectorProps {
   ) => void;
   handleAdditionalBrandClick: (brandName: string, e: React.MouseEvent) => void;
   handleBackButtonClick: () => void;
+  reset: () => void;
 }
 
 const BrandSelector: React.FC<BrandSelectorProps> = ({
@@ -40,6 +41,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
   handleBrandDoubleClick,
   handleAdditionalBrandClick,
   handleBackButtonClick,
+  reset,
 }) => {
   const brandScrollRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +113,10 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
               : "grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
           }`}
           onClick={(e) => {
-            if (index === 0) return;
+            if (index === 0) {
+              reset();
+              return;
+            }
             handleBrandClick(index, e);
           }}
           onDoubleClick={(e) => {

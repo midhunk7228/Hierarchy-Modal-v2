@@ -35,28 +35,32 @@ export default function BrandDashboardHeader() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedCurrencies] = useState<string[]>(["KWD"]);
 
+  const initialSetup = () => {
+    const initailOutlets = brands
+      .filter((brand) => brand.name !== "All")
+      .flatMap((outs) => outs.outlets)
+      .flatMap((outlets) => outlets.name);
+
+    const initailBrandWiseOutlets = brands
+      .filter((brand) => brand.name !== "All")
+      .map((brand) => ({
+        brandName: brand.name,
+        outlets: brand.outlets.map((outlet) => outlet.name),
+      }));
+
+    dispatch(
+      setSelectedBrand({
+        brandName: "All",
+        outlets: initailOutlets,
+        selectedAllBrandWiseOutlets: initailBrandWiseOutlets,
+        multiSelectedBrands: [],
+      })
+    );
+  };
   useEffect(() => {
     const loadState = async () => {
       const savedSelection = await loadBrandSelection();
-      const initailOutlets = brands
-        .filter((brand) => brand.name !== "All")
-        .flatMap((outs) => outs.outlets)
-        .flatMap((outlets) => outlets.name);
-
-      const initailBrandWiseOutlets = brands
-        .filter((brand) => brand.name !== "All")
-        .map((brand) => ({
-          brandName: brand.name,
-          outlets: brand.outlets.map((outlet) => outlet.name),
-        }));
-
-      dispatch(
-        setSelectedBrand({
-          brandName: "All",
-          outlets: initailOutlets,
-          selectedAllBrandWiseOutlets: initailBrandWiseOutlets,
-        })
-      );
+      initialSetup();
       if (savedSelection) {
         // dispatch(setBrandSelection(savedSelection));
       }
@@ -178,7 +182,6 @@ export default function BrandDashboardHeader() {
           return isExist.outlets.flatMap((a) => a.name);
         }
       });
-      debugger;
       const selectedOutletsBrandWise = newSelection?.map((out) => {
         const isExist = brands.find((aa) => aa.name === out);
         if (isExist) {
@@ -312,6 +315,7 @@ export default function BrandDashboardHeader() {
             handleBrandDoubleClick={handleBrandDoubleClick}
             handleAdditionalBrandClick={handleAdditionalBrandClick}
             handleBackButtonClick={handleBackButtonClick}
+            reset={initialSetup}
           />
           <TopRightActions />
         </div>

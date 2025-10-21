@@ -5,7 +5,6 @@ import { setLocalAppliedFilters } from "../../redux/filtersSlice";
 import {
   setSelectedBrand,
   setSelectedSubBrands,
-  setBrandSelection,
 } from "../../redux/brandSelectionSlice";
 import {
   saveBrandSelection,
@@ -24,9 +23,8 @@ export default function BrandDashboardHeader() {
   const localAppliedFilters = useSelector(
     (state: RootState) => state.filters.localAppliedFilters
   );
-  const { selectedBrand, selectedSubBrands } = useSelector(
-    (state: RootState) => state.brandSelection
-  );
+  const { selectedBrand, selectedSubBrands, selectedAllBrandWiseOutlets } =
+    useSelector((state: RootState) => state.brandSelection);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -63,9 +61,13 @@ export default function BrandDashboardHeader() {
 
   useEffect(() => {
     if (selectedBrand) {
-      saveBrandSelection({ selectedBrand, selectedSubBrands });
+      saveBrandSelection({
+        selectedBrand,
+        selectedSubBrands,
+        selectedAllBrandWiseOutlets,
+      });
     }
-  }, [selectedBrand, selectedSubBrands]);
+  }, [selectedBrand, selectedSubBrands, selectedAllBrandWiseOutlets]);
 
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
   const currentBrand = brands[clickedBrandIndex];
@@ -144,6 +146,33 @@ export default function BrandDashboardHeader() {
     }
     setIsExpanded(!isExpanded);
     setShowBrandArrows(!showBrandArrows);
+    setSelectedCountries(["All"]);
+  };
+
+  const handleBrandClick = (
+    index: number,
+    e: React.MouseEvent,
+    truth: boolean = false
+  ) => {
+    e.stopPropagation();
+    const brandName = brands[truth ? 0 : index].name;
+    const brand = brands.find((b) => b.name === brandName);
+    debugger;
+    if (brand) {
+      const allOutlets = brand.outlets.map((o) => o.name);
+      dispatch(
+        setSelectedBrand({
+          brandName,
+          outlets: allOutlets,
+          selectedAllBrandWiseOutlets: [{ brandName, outlets: allOutlets }],
+        })
+      );
+      // dispatch(setSelectedSubBrands([]));
+    }
+    if (isExpanded) {
+      setIsExpanded(false);
+      setShowBrandArrows(false);
+    }
     setSelectedCountries(["All"]);
   };
 
@@ -233,6 +262,7 @@ export default function BrandDashboardHeader() {
             isExpanded={isExpanded}
             showBrandArrows={showBrandArrows}
             selectedSubBrands={selectedSubBrands}
+            handleBrandClick={handleBrandClick}
             handleBrandDoubleClick={handleBrandDoubleClick}
             handleAdditionalBrandClick={handleAdditionalBrandClick}
             handleBackButtonClick={handleBackButtonClick}

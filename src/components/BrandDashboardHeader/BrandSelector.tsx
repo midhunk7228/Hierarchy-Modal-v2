@@ -13,6 +13,11 @@ interface BrandSelectorProps {
   isExpanded: boolean;
   showBrandArrows: boolean;
   selectedSubBrands: string[];
+  handleBrandClick: (
+    index: number,
+    e: React.MouseEvent,
+    truth?: boolean
+  ) => void;
   handleBrandDoubleClick: (
     index: number,
     e: React.MouseEvent,
@@ -29,6 +34,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
   isExpanded,
   showBrandArrows,
   selectedSubBrands,
+  handleBrandClick,
   handleBrandDoubleClick,
   handleAdditionalBrandClick,
   handleBackButtonClick,
@@ -99,6 +105,10 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
             ? "grayscale-0 opacity-100"
             : "grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
         }`}
+        onClick={(e) => {
+          if (index === 0) return;
+          handleBrandClick(index, e);
+        }}
         onDoubleClick={(e) => {
           if (index === 0) return;
           handleBrandDoubleClick(index, e);

@@ -5,6 +5,7 @@ import { setLocalAppliedFilters } from "../../redux/filtersSlice";
 import {
   setSelectedBrand,
   setSelectedSubBrands,
+  setMultiSelectedBrands,
 } from "../../redux/brandSelectionSlice";
 import {
   saveBrandSelection,
@@ -23,8 +24,12 @@ export default function BrandDashboardHeader() {
   const localAppliedFilters = useSelector(
     (state: RootState) => state.filters.localAppliedFilters
   );
-  const { selectedBrand, selectedSubBrands, selectedAllBrandWiseOutlets } =
-    useSelector((state: RootState) => state.brandSelection);
+  const {
+    selectedBrand,
+    selectedSubBrands,
+    selectedAllBrandWiseOutlets,
+    multiSelectedBrands,
+  } = useSelector((state: RootState) => state.brandSelection);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -65,9 +70,15 @@ export default function BrandDashboardHeader() {
         selectedBrand,
         selectedSubBrands,
         selectedAllBrandWiseOutlets,
+        multiSelectedBrands,
       });
     }
-  }, [selectedBrand, selectedSubBrands, selectedAllBrandWiseOutlets]);
+  }, [
+    selectedBrand,
+    selectedSubBrands,
+    selectedAllBrandWiseOutlets,
+    multiSelectedBrands,
+  ]);
 
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
   const currentBrand = brands[clickedBrandIndex];
@@ -148,7 +159,7 @@ export default function BrandDashboardHeader() {
     setShowBrandArrows(!showBrandArrows);
     setSelectedCountries(["All"]);
   };
-
+  console.log("multiSelectedBrands", multiSelectedBrands);
   const handleBrandClick = (
     index: number,
     e: React.MouseEvent,
@@ -156,19 +167,53 @@ export default function BrandDashboardHeader() {
   ) => {
     e.stopPropagation();
     const brandName = brands[truth ? 0 : index].name;
-    const brand = brands.find((b) => b.name === brandName);
-    debugger;
-    if (brand) {
-      const allOutlets = brand.outlets.map((o) => o.name);
+    if (e.shiftKey) {
+      const newSelection = multiSelectedBrands.includes(brandName)
+        ? multiSelectedBrands.filter((b) => b !== brandName)
+        : [...multiSelectedBrands, brandName];
+
+      const selectedOutlets = newSelection?.map((out) => {
+        const isExist = brands.find((aa) => aa.name === out);
+        if (isExist) {
+          return isExist.outlets.flatMap((a) => a.name);
+        }
+      });
+      debugger;
+      const selectedOutletsBrandWise = newSelection?.map((out) => {
+        const isExist = brands.find((aa) => aa.name === out);
+        if (isExist) {
+          return {
+            brandName: out,
+            outlets: isExist.outlets.flatMap((a) => a.name),
+          };
+        }
+      });
       dispatch(
         setSelectedBrand({
           brandName,
-          outlets: allOutlets,
-          selectedAllBrandWiseOutlets: [{ brandName, outlets: allOutlets }],
+          outlets: selectedOutlets.flatMap((aa) => aa || []),
+          selectedAllBrandWiseOutlets: selectedOutletsBrandWise.filter(
+            Boolean
+          ) as { brandName: string; outlets: string[] }[],
+          multiSelectedBrands: newSelection,
         })
       );
-      // dispatch(setSelectedSubBrands([]));
+    } else {
+      const brand = brands.find((b) => b.name === brandName);
+      if (brand) {
+        const allOutlets = brand.outlets.map((o) => o.name);
+        dispatch(
+          setSelectedBrand({
+            brandName,
+            outlets: allOutlets,
+            selectedAllBrandWiseOutlets: [{ brandName, outlets: allOutlets }],
+            multiSelectedBrands: [brandName],
+          })
+        );
+        // dispatch(setSelectedSubBrands([]));
+      }
     }
+
     if (isExpanded) {
       setIsExpanded(false);
       setShowBrandArrows(false);
@@ -262,6 +307,7 @@ export default function BrandDashboardHeader() {
             isExpanded={isExpanded}
             showBrandArrows={showBrandArrows}
             selectedSubBrands={selectedSubBrands}
+            multiSelectedBrands={multiSelectedBrands}
             handleBrandClick={handleBrandClick}
             handleBrandDoubleClick={handleBrandDoubleClick}
             handleAdditionalBrandClick={handleAdditionalBrandClick}

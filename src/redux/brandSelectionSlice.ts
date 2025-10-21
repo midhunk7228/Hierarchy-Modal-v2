@@ -6,12 +6,14 @@ export interface BrandSelectionState {
   selectedBrand: string;
   selectedSubBrands: string[];
   selectedAllBrandWiseOutlets: { brandName: string; outlets: string[] }[];
+  multiSelectedBrands: string[];
 }
 
 const initialState: BrandSelectionState = {
   selectedBrand: "All",
   selectedSubBrands: [],
   selectedAllBrandWiseOutlets: [],
+  multiSelectedBrands: [],
 };
 
 const brandSelectionSlice = createSlice({
@@ -23,6 +25,8 @@ const brandSelectionSlice = createSlice({
       state.selectedSubBrands = action.payload.outlets;
       state.selectedAllBrandWiseOutlets =
         action.payload.selectedAllBrandWiseOutlets;
+      state.multiSelectedBrands =
+        action.payload?.multiSelectedBrands ?? state.multiSelectedBrands;
     },
     setSelectedSubBrands(state, action: PayloadAction<string[]>) {
       state.selectedSubBrands = action.payload;
@@ -31,9 +35,16 @@ const brandSelectionSlice = createSlice({
       state.selectedBrand = action.payload.selectedBrand;
       state.selectedSubBrands = action.payload.selectedSubBrands;
     },
+    setMultiSelectedBrands(state, action: PayloadAction<string[]>) {
+      state.multiSelectedBrands = action.payload;
+    },
   },
 });
 
-export const { setSelectedBrand, setSelectedSubBrands, setBrandSelection } =
-  brandSelectionSlice.actions;
+export const {
+  setSelectedBrand,
+  setSelectedSubBrands,
+  setBrandSelection,
+  setMultiSelectedBrands,
+} = brandSelectionSlice.actions;
 export default brandSelectionSlice.reducer;

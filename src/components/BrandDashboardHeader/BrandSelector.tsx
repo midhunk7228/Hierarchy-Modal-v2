@@ -13,6 +13,7 @@ interface BrandSelectorProps {
   isExpanded: boolean;
   showBrandArrows: boolean;
   selectedSubBrands: string[];
+  multiSelectedBrands: string[];
   handleBrandClick: (
     index: number,
     e: React.MouseEvent,
@@ -34,6 +35,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
   isExpanded,
   showBrandArrows,
   selectedSubBrands,
+  multiSelectedBrands,
   handleBrandClick,
   handleBrandDoubleClick,
   handleAdditionalBrandClick,
@@ -97,26 +99,34 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
       );
     }
 
-    return brands.map((brand, index) => (
-      <div
-        key={`brand-${index}`}
-        className={`flex-shrink-0 cursor-pointer transition-all ${
-          index === clickedBrandIndex
-            ? "grayscale-0 opacity-100"
-            : "grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
-        }`}
-        onClick={(e) => {
-          if (index === 0) return;
-          handleBrandClick(index, e);
-        }}
-        onDoubleClick={(e) => {
-          if (index === 0) return;
-          handleBrandDoubleClick(index, e);
-        }}
-      >
-        <img src={brand.logo} alt={brand.name} className="h-6 object-contain" />
-      </div>
-    ));
+    return brands.map((brand, index) => {
+      const isSelected =
+        index === clickedBrandIndex || multiSelectedBrands.includes(brand.name);
+      return (
+        <div
+          key={`brand-${index}`}
+          className={`flex-shrink-0 cursor-pointer transition-all ${
+            isSelected
+              ? "grayscale-0 opacity-100"
+              : "grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
+          }`}
+          onClick={(e) => {
+            if (index === 0) return;
+            handleBrandClick(index, e);
+          }}
+          onDoubleClick={(e) => {
+            if (index === 0) return;
+            handleBrandDoubleClick(index, e);
+          }}
+        >
+          <img
+            src={brand.logo}
+            alt={brand.name}
+            className="h-6 object-contain"
+          />
+        </div>
+      );
+    });
   };
 
   return (

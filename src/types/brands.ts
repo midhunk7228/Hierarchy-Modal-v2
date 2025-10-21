@@ -21,4 +21,5 @@ export interface BrandChooseType {
   brandName: string;
   outlets: string[];
   selectedAllBrandWiseOutlets: { brandName: string; outlets: string[] }[];
+  multiSelectedBrands?: string[];
 }

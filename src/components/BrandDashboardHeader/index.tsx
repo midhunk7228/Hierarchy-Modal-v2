@@ -27,7 +27,6 @@ export default function BrandDashboardHeader() {
   const { selectedBrand, selectedSubBrands } = useSelector(
     (state: RootState) => state.brandSelection
   );
-  console.log("selectedSubBrands", selectedSubBrands);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(["All"]);
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -36,6 +35,25 @@ export default function BrandDashboardHeader() {
   useEffect(() => {
     const loadState = async () => {
       const savedSelection = await loadBrandSelection();
+      const initailOutlets = brands
+        .filter((brand) => brand.name !== "All")
+        .flatMap((outs) => outs.outlets)
+        .flatMap((outlets) => outlets.name);
+
+      const initailBrandWiseOutlets = brands
+        .filter((brand) => brand.name !== "All")
+        .map((brand) => ({
+          brandName: brand.name,
+          outlets: brand.outlets.map((outlet) => outlet.name),
+        }));
+
+      dispatch(
+        setSelectedBrand({
+          brandName: "All",
+          outlets: initailOutlets,
+          selectedAllBrandWiseOutlets: initailBrandWiseOutlets,
+        })
+      );
       if (savedSelection) {
         // dispatch(setBrandSelection(savedSelection));
       }

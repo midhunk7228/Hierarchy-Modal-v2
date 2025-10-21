@@ -5,7 +5,6 @@ import { setLocalAppliedFilters } from "../../redux/filtersSlice";
 import {
   setSelectedBrand,
   setSelectedSubBrands,
-  setMultiSelectedBrands,
 } from "../../redux/brandSelectionSlice";
 import {
   saveBrandSelection,
@@ -87,13 +86,23 @@ export default function BrandDashboardHeader() {
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
   const currentBrand = brands[clickedBrandIndex];
   const outlets = currentBrand?.outlets.map((o) => o.name) || [];
-
+  console.log("multiSelectedBrands", multiSelectedBrands, selectedSubBrands);
   const getAvailableCountries = () => {
+    if (multiSelectedBrands.length > 0) {
+      const countries = brands
+        .filter((brand) => multiSelectedBrands.includes(brand.name))
+        .flatMap((brand) => brand.outlets)
+        .flatMap((outlet) => outlet.countries);
+      const uniqueCountries = Array.from(
+        new Map(countries.map((c) => [c.code, c])).values()
+      );
+      return uniqueCountries;
+    }
+
     if (!currentBrand) {
       return [];
     }
-
-    if (selectedSubBrands.length > 0) {
+    if (selectedSubBrands.length > 0 && currentBrand?.name !== "All") {
       const countries = currentBrand.outlets
         .filter((outlet) => selectedSubBrands.includes(outlet.name))
         .flatMap((outlet) => outlet.countries);
@@ -104,9 +113,9 @@ export default function BrandDashboardHeader() {
       return uniqueCountries;
     }
 
-    const allOutletCountries = currentBrand.outlets.flatMap(
-      (outlet) => outlet.countries
-    );
+    const allOutletCountries = brands
+      .flatMap((outlet) => outlet.outlets)
+      .flatMap((outlet) => outlet.countries);
     const uniqueCountries = Array.from(
       new Map(allOutletCountries.map((c) => [c.code, c])).values()
     );
@@ -175,7 +184,6 @@ export default function BrandDashboardHeader() {
       const newSelection = multiSelectedBrands.includes(brandName)
         ? multiSelectedBrands.filter((b) => b !== brandName)
         : [...multiSelectedBrands, brandName];
-
       const selectedOutlets = newSelection?.map((out) => {
         const isExist = brands.find((aa) => aa.name === out);
         if (isExist) {

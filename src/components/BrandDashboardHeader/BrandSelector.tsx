@@ -103,7 +103,11 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
 
     return brands.map((brand, index) => {
       const isSelected =
-        index === clickedBrandIndex || multiSelectedBrands.includes(brand.name);
+        multiSelectedBrands.length === 0
+          ? brand.name === "All"
+            ? true
+            : false
+          : multiSelectedBrands.includes(brand.name);
       return (
         <div
           key={`brand-${index}`}

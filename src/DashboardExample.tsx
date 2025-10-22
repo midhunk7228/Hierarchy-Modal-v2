@@ -27,6 +27,7 @@ import WidgetPanel from "./components/WidgetPanel";
 import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
 import { setDashboards } from "./redux/dashboardsSlice";
 import { dashboardStorage } from "./utils/dashboardStorage";
+import { PrintableContainer } from "./components/PrintableContainer";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const predefinedWidgets = [
@@ -1531,52 +1532,61 @@ const JsonDrivenDashboard: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="p-6">
-          <ResponsiveGridLayout
-            className="layout"
-            layouts={{ lg: layout }}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-            rowHeight={100}
-            onLayoutChange={onLayoutChange}
-            isDraggable={isEditMode}
-            isResizable={isEditMode}
-            isDroppable={true}
-            onDrop={onDrop}
-            margin={[16, 16]}
-          >
-            {currentDashboard.widgets.map((widget) => (
-              <div
-                key={widget.id}
-                className="bg-white rounded-lg shadow-md border border-gray-300"
-              >
-                <MatrixDisplay
-                  widget={widget}
-                  displayType={widget.displayType || "summary"}
-                  viewType={widget.viewType || "tabular"}
-                  title={widget.title}
-                  apiEndpoint={widget.apiEndpoint}
-                  refreshInterval={widget.refreshInterval}
-                  additionalInfo={widget.additionalInfo}
-                  customStyles={widget.customStyles}
-                  onItemClick={() => {}}
-                  isDragging={false}
-                  onEdit={handleEditWidget}
-                  onDelete={handleDeleteWidget}
-                  isEditMode={isEditMode}
-                  filters={widget.filters || []}
-                  inVisibleFilters={widget.inVisibleFilters || []}
-                  appliedFilters={widgetFilters[widget.id] || []}
-                  onFiltersChange={(filters) =>
-                    handleWidgetFiltersChange(widget.id, filters)
-                  }
-                  onHeightChange={handleHeightChange}
-                  sampleData={SAMPLE_DATA}
-                />
-              </div>
-            ))}
-          </ResponsiveGridLayout>
-        </div>
+        {/* Printable Content */}
+        <PrintableContainer
+          config={{
+            pageFormat: "A4-landscape",
+            marginInches: 0.5,
+          }}
+          className="h-full overflow-y-auto"
+        >
+          <div className="p-6">
+            <ResponsiveGridLayout
+              className="layout"
+              layouts={{ lg: layout }}
+              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+              cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+              rowHeight={100}
+              onLayoutChange={onLayoutChange}
+              isDraggable={isEditMode}
+              isResizable={isEditMode}
+              isDroppable={true}
+              onDrop={onDrop}
+              margin={[16, 16]}
+            >
+              {currentDashboard.widgets.map((widget) => (
+                <div
+                  key={widget.id}
+                  className="bg-white rounded-lg shadow-md border border-gray-300"
+                >
+                  <MatrixDisplay
+                    widget={widget}
+                    displayType={widget.displayType || "summary"}
+                    viewType={widget.viewType || "tabular"}
+                    title={widget.title}
+                    apiEndpoint={widget.apiEndpoint}
+                    refreshInterval={widget.refreshInterval}
+                    additionalInfo={widget.additionalInfo}
+                    customStyles={widget.customStyles}
+                    onItemClick={() => {}}
+                    isDragging={false}
+                    onEdit={handleEditWidget}
+                    onDelete={handleDeleteWidget}
+                    isEditMode={isEditMode}
+                    filters={widget.filters || []}
+                    inVisibleFilters={widget.inVisibleFilters || []}
+                    appliedFilters={widgetFilters[widget.id] || []}
+                    onFiltersChange={(filters) =>
+                      handleWidgetFiltersChange(widget.id, filters)
+                    }
+                    onHeightChange={handleHeightChange}
+                    sampleData={SAMPLE_DATA}
+                  />
+                </div>
+              ))}
+            </ResponsiveGridLayout>
+          </div>
+        </PrintableContainer>
 
         <WidgetEditor
           widget={editingWidget}

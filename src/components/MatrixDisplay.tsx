@@ -44,8 +44,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import BarGraphWidget from "./BarGraph";
 import RevenueDashboard from "./BarWidget";
 
-// const baseUrl = "https://01a9b102-272b-4a62-9992-55f628a4b9a3.mock.pstmn.io";
-const baseUrl = "https://api.hierarchy-dashboard.exthgen.tech";
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const MatrixDisplay: React.FC<
   MatrixDisplayProps & {

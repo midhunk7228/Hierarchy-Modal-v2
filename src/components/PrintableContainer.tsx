@@ -24,7 +24,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
   const { isEditMode } = useSelector((state: RootState) => state.editMode);
 
   const defaultConfig: PrintLayoutConfig = {
-    pageFormat: "A4-landscape",
+    pageFormat: "A3-landscape",
     marginInches: 0.5,
     showPageBreaks: false,
     autoPageBreaks: false,
@@ -78,6 +78,11 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
             .auto-page-break {
               page-break-before: always !important;
               break-before: page !important;
+            }
+
+            .printable-widget {
+              page-break-inside: avoid !important;
+              break-inside: avoid-page !important;
             }
             
             ${
@@ -135,7 +140,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
                 }`}
               >
                 <Maximize2 className="w-4 h-4 mr-2" />
-                A4 Width
+                A3 Width
               </button>
             </>
           )}

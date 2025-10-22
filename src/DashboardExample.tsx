@@ -1532,15 +1532,16 @@ const JsonDrivenDashboard: React.FC = () => {
             </div>
           )}
         </div>
-        {/* Printable Content */}
-        <PrintableContainer
-          config={{
-            pageFormat: "A4-landscape",
-            marginInches: 0.5,
-          }}
-          className="h-full overflow-y-auto"
-        >
-          <div className="p-6">
+
+        <div className="p-6">
+          {/* Printable Content */}
+          <PrintableContainer
+            config={{
+              pageFormat: "A4-landscape",
+              marginInches: 0.5,
+            }}
+            // className="h-full overflow-y-auto"
+          >
             <ResponsiveGridLayout
               className="layout"
               layouts={{ lg: layout }}
@@ -1557,7 +1558,7 @@ const JsonDrivenDashboard: React.FC = () => {
               {currentDashboard.widgets.map((widget) => (
                 <div
                   key={widget.id}
-                  className="bg-white rounded-lg shadow-md border border-gray-300"
+                  className="bg-white rounded-lg shadow-md border border-gray-300 printable-widget"
                 >
                   <MatrixDisplay
                     widget={widget}
@@ -1585,8 +1586,8 @@ const JsonDrivenDashboard: React.FC = () => {
                 </div>
               ))}
             </ResponsiveGridLayout>
-          </div>
-        </PrintableContainer>
+          </PrintableContainer>
+        </div>
 
         <WidgetEditor
           widget={editingWidget}

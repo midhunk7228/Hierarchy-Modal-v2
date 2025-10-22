@@ -150,21 +150,13 @@ export default function OutletSelector() {
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
               {/* All Active Outlets */}
-              {/* <div className="p-3">
+              <div className="p-3 pb-0">
                 <label className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded cursor-pointer group">
                   <span className="font-semibold text-gray-700">
                     All Active Outlets
                   </span>
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={allActiveSelected}
-                      onChange={toggleAllActive}
-                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                  </div>
                 </label>
-              </div> */}
+              </div>
 
               {/* Active Outlets List */}
               <div className="px-3 pb-3 space-y-1">
@@ -177,12 +169,12 @@ export default function OutletSelector() {
                       <Store className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-700">{outlet}</span>
                     </div>
-                    <input
+                    {/* <input
                       type="checkbox"
                       checked={selectedSubBrands.includes(outlet) || false}
                       onChange={() => toggleOutlet(outlet)}
                       className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
+                    /> */}
                   </label>
                 ))}
               </div>

@@ -1,50 +1,183 @@
 import { useState } from "react";
-import { Ellipsis, X } from "lucide-react";
-import DateRangeFilter from "../UI/DateRangeFilter";
+import { Ellipsis, Store } from "lucide-react";
+import MultiSelectDropdown, { Option } from "../UI/MultiSelectDropdown";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../redux/store";
+import {
+  setSelectedBrand,
+  setSelectedSubBrands,
+} from "../../redux/brandSelectionSlice";
 
-export default function TopRightActions() {
-  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2025-03-01",
-    endDate: "2025-03-31",
-  });
+// Example with images (for brands)
+const brandOptions: Option[] = [
+  {
+    value: "burger-boutique",
+    label: "Burger Boutique",
+    image: "/Burger_Boutique.png",
+  },
+  { value: "brw", label: "BRW", image: "/BRW.png" },
+  {
+    value: "roadside-diner",
+    label: "Roadside Diner",
+    image: "/Roadside_Diner.png",
+  },
+  {
+    value: "slider-station",
+    label: "Slider Station",
+    image: "/Slider_Station.png",
+  },
+  { value: "cocoa-room", label: "Cocoa Room", image: "/Cocoa_Room.png" },
+  { value: "lazy-cat", label: "Lazy Cat", image: "/Lazy Cat.png" },
+];
+
+// Example with icons (for outlets)
+const outletOptions: Option[] = [
+  {
+    value: "galleria-mall",
+    label: "Slider Station - Galleria Mall",
+    icon: <Store size={20} />,
+  },
+  {
+    value: "ardiya",
+    label: "Slider Station - Ardiya",
+    icon: <Store size={20} />,
+  },
+  {
+    value: "delivery-oman",
+    label: "Slider Station - Delivery Oman",
+    icon: <Store size={20} />,
+  },
+  {
+    value: "seif-palace",
+    label: "Slider Station - Seif Palace",
+    icon: <Store size={20} />,
+  },
+];
+export default function TopRightActions({
+  isExpanded,
+}: {
+  isExpanded: boolean;
+}) {
+  const dispatch: AppDispatch = useDispatch();
+
+  const {
+    selectedSubBrands,
+    selectedAllBrandWiseOutlets,
+    selectedBrand,
+    multiSelectedBrands,
+    allBrands,
+  } = useSelector((state: RootState) => state.brandSelection);
+  console.log(
+    "selectedSubBrands",
+    selectedSubBrands,
+    selectedAllBrandWiseOutlets,
+    selectedBrand,
+    multiSelectedBrands
+  );
+  const handleOutletSelect = (outletName: string) => {
+    const newSelection = selectedSubBrands.filter((c) => c !== outletName);
+    if (newSelection.length > 0) {
+      dispatch(setSelectedSubBrands(outletName));
+    } else {
+      dispatch(setSelectedSubBrands([]));
+    }
+  };
+
+  const handleBrandSelect = (newSelectionData: string[]) => {
+    const newSelection =
+      multiSelectedBrands?.length === 0 && newSelectionData.includes("All")
+        ? newSelectionData.filter((item) => item !== "All")
+        : newSelectionData;
+    console.log("multiSelectedBrands", selectedAllBrandWiseOutlets);
+    if (newSelection.includes("All")) {
+      const initailOutlets = allBrands
+        .filter((brand) => brand.name !== "All")
+        .flatMap((outs) => outs.outlets)
+        .flatMap((outlets) => outlets.name);
+
+      const initailBrandWiseOutlets = allBrands
+        .filter((brand) => brand.name !== "All")
+        .map((brand) => ({
+          brandName: brand.name,
+          outlets: brand.outlets.map((outlet) => outlet.name),
+        }));
+      dispatch(
+        setSelectedBrand({
+          brandName: "All",
+          outlets: initailOutlets,
+          selectedAllBrandWiseOutlets: initailBrandWiseOutlets,
+          multiSelectedBrands: [],
+        })
+      );
+      return;
+    }
+    const selectedOutlets = newSelection?.map((out) => {
+      const isExist = allBrands.find((aa) => aa.name === out);
+      if (isExist) {
+        return isExist.outlets.flatMap((a) => a.name);
+      }
+    });
+    const selectedOutletsBrandWise = newSelection?.map((out) => {
+      const isExist = allBrands.find((aa) => aa.name === out);
+      if (isExist) {
+        return {
+          brandName: out,
+          outlets: isExist.outlets.flatMap((a) => a.name),
+        };
+      }
+    });
+    dispatch(
+      setSelectedBrand({
+        brandName: ["All"],
+        outlets: selectedOutlets.flatMap((aa) => aa || []),
+        selectedAllBrandWiseOutlets: selectedOutletsBrandWise.filter(
+          Boolean
+        ) as { brandName: string; outlets: string[] }[],
+        multiSelectedBrands: newSelection,
+      })
+    );
+  };
 
   return (
     <div className="relative flex items-center gap-4 self-end md:self-center">
-      <button
-        onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-        className="flex items-center gap-2 rounded-lg bg-white text-gray-600 transition-colors"
-      >
-        <Ellipsis className="h-6 w-6 cursor-pointer" />
-      </button>
-      {openDatePopup === 0 && (
-        <div className="absolute top-full right-0 z-10 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="font-semibold text-gray-800">Select Date Range</h4>
-            <button
-              onClick={() => setOpenDatePopup(null)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <DateRangeFilter
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            onDateChange={(startDate, endDate) =>
-              setDateRange({ startDate, endDate })
-            }
-          />
-          <div className="mt-2 flex justify-end">
-            <button
-              className=" rounded-lg bg-blue-600 px-4 py-1 text-white transition-colors hover:bg-blue-700"
-              onClick={() => setOpenDatePopup(null)}
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
+      <MultiSelectDropdown
+        // To use for outlets, pass outletOptions and manage outlet selection state
+        options={
+          isExpanded
+            ? selectedAllBrandWiseOutlets
+                ?.flatMap((out) => out.outlets)
+                .map((out) => {
+                  return { label: out, value: out };
+                })
+            : allBrands.map((brand) => {
+                return {
+                  value: brand.name,
+                  label: brand.name,
+                  image: brand.logo,
+                };
+              })
+        }
+        selected={
+          isExpanded
+            ? selectedSubBrands
+            : multiSelectedBrands?.length === 0
+            ? ["All"]
+            : multiSelectedBrands
+        }
+        onChange={(kk) => {
+          if (!isExpanded) {
+            handleBrandSelect(kk);
+          } else {
+            handleOutletSelect(kk);
+          }
+        }}
+        title={isExpanded ? "Outlets" : "Brands"}
+        trigger={
+          <button className="flex items-center gap-2 rounded-lg bg-white text-gray-600 transition-colors">
+            <Ellipsis className="h-6 w-6 cursor-pointer" />
+          </button>
+        }
+      />
     </div>
   );
 }

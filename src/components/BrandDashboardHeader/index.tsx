@@ -1,25 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
+import type { RootState, AppDispatch } from "../../redux/store";
 import { setLocalAppliedFilters } from "../../redux/filtersSlice";
 import {
+  setAllBrands,
   setSelectedBrand,
   setSelectedSubBrands,
 } from "../../redux/brandSelectionSlice";
-import {
-  saveBrandSelection,
-  loadBrandSelection,
-} from "../../utils/brandSelectionStorage";
-import { brandHierarchy } from "../../data/brandHierarchy";
+import { saveBrandSelection } from "../../utils/brandSelectionStorage";
+// import { fetchBrandHierarchy } from "../../redux/brandHierarchySlice";
 import BrandSelector from "./BrandSelector";
 import CountryFilter from "./CountryFilter";
 import HeaderActions from "./HeaderActions";
 import TopRightActions from "./TopRightActions";
-
-const brands = brandHierarchy.brands;
+import type { Brand } from "../../types";
+import { fetchBrandHierarchyAPI } from "../../services/brandService";
+import { useIndexedDB } from "../../helper/useIndexedDB";
+import { brandHierarchy } from "../../data/brandHierarchy";
 
 export default function BrandDashboardHeader() {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
+  const { saveData, getData } = useIndexedDB();
+  // const { brands, status } = useSelector(
+  //   (state: RootState) => state.brandHierarchy
+  // );
+  const [brands, setBrands] = useState(brandHierarchy.brands);
   const localAppliedFilters = useSelector(
     (state: RootState) => state.filters.localAppliedFilters
   );
@@ -33,8 +38,59 @@ export default function BrandDashboardHeader() {
   const [showBrandArrows, setShowBrandArrows] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedCurrencies] = useState<string[]>(["KWD"]);
+  const [loadingNav, setLoadingNav] = useState<boolean>(false);
 
-  const initialSetup = () => {
+  const HIERARCHY_CACHE_KEY = "brandHierarchy";
+
+  const initialSetup = useCallback(async (): Promise<void> => {
+    let hierarchyData = await getData<{ brands: Brand[] }>(HIERARCHY_CACHE_KEY);
+    if (hierarchyData) {
+      console.log("Loaded brand hierarchy from cache for initial state.");
+      // will replace the filter when outlets should be always array
+      setBrands(
+        hierarchyData.map((brand) => {
+          return { ...brand, outlets: brand?.outlets || [] };
+        })
+      );
+      initialBrandSetUp(hierarchyData);
+    } else {
+      setLoadingNav(true);
+    }
+    try {
+      // hierarchyData = await fetchBrandHierarchyAPI();
+      // api disabled because percent sign in png
+      hierarchyData = brandHierarchy.brands;
+      if (hierarchyData) {
+        // Update cache
+        await saveData(HIERARCHY_CACHE_KEY, hierarchyData);
+        // will replace the filter when outlets should be always array
+
+        setBrands(
+          hierarchyData.map((brand) => {
+            return { ...brand, outlets: brand?.outlets || [] };
+          })
+        );
+
+        console.log("Brand hierarchy cache updated.");
+      }
+    } catch (error) {
+      console.error("error", error);
+    } finally {
+      setLoadingNav(false);
+    }
+    // Then, fetch from the API for fresh data
+  }, []);
+
+  const initialBrandSetUp = (brands) => {
+    // debugger;
+    // will replace the filter when outlets should be always array
+    dispatch(
+      setAllBrands(
+        brands.map((brand) => {
+          return { ...brand, outlets: brand?.outlets || [] };
+        })
+      )
+    );
     const initailOutlets = brands
       .filter((brand) => brand.name !== "All")
       .flatMap((outs) => outs.outlets)
@@ -56,16 +112,12 @@ export default function BrandDashboardHeader() {
       })
     );
   };
+
   useEffect(() => {
-    const loadState = async () => {
-      const savedSelection = await loadBrandSelection();
-      initialSetup();
-      if (savedSelection) {
-        // dispatch(setBrandSelection(savedSelection));
-      }
-    };
-    loadState();
-  }, [dispatch]);
+    // if (brands.length > 0) {
+    initialSetup();
+    // }
+  }, [initialSetup, dispatch]);
 
   useEffect(() => {
     if (selectedBrand) {
@@ -84,8 +136,9 @@ export default function BrandDashboardHeader() {
   ]);
 
   const clickedBrandIndex = brands.findIndex((b) => b.name === selectedBrand);
-  const currentBrand = brands[clickedBrandIndex];
-  const outlets = currentBrand?.outlets.map((o) => o.name) || [];
+  const currentBrand = brands[clickedBrandIndex] || [];
+  console.log("currentBrand", currentBrand);
+  const outlets = currentBrand?.outlets?.map((o) => o.name) || [];
   console.log("multiSelectedBrands", multiSelectedBrands, selectedSubBrands);
   const getAvailableCountries = () => {
     if (multiSelectedBrands.length > 0) {
@@ -94,7 +147,7 @@ export default function BrandDashboardHeader() {
         .flatMap((brand) => brand.outlets)
         .flatMap((outlet) => outlet.countries);
       const uniqueCountries = Array.from(
-        new Map(countries.map((c) => [c.code, c])).values()
+        new Map(countries.map((c) => [c?.code, c])).values()
       );
       return uniqueCountries;
     }
@@ -112,12 +165,11 @@ export default function BrandDashboardHeader() {
       );
       return uniqueCountries;
     }
-
     const allOutletCountries = brands
-      .flatMap((outlet) => outlet.outlets)
-      .flatMap((outlet) => outlet.countries);
+      .flatMap((outlet) => outlet?.outlets)
+      .flatMap((outlet) => outlet?.countries);
     const uniqueCountries = Array.from(
-      new Map(allOutletCountries.map((c) => [c.code, c])).values()
+      new Map(allOutletCountries.map((c) => [c?.code, c])).values()
     );
     return uniqueCountries;
   };
@@ -325,7 +377,7 @@ export default function BrandDashboardHeader() {
             handleBackButtonClick={handleBackButtonClick}
             reset={initialSetup}
           />
-          <TopRightActions />
+          <TopRightActions isExpanded={isExpanded} />
         </div>
       </div>
       <div className="border-b border-gray-200 px-4 py-3 md:px-6">

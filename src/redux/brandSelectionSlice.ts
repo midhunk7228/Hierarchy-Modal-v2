@@ -1,12 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { BrandChooseType } from "../types/brands";
+import type { BrandChooseType, BrandData } from "../types/brands";
 
 export interface BrandSelectionState {
   selectedBrand: string;
   selectedSubBrands: string[];
   selectedAllBrandWiseOutlets: { brandName: string; outlets: string[] }[];
   multiSelectedBrands: string[];
+  allBrands: BrandData;
 }
 
 const initialState: BrandSelectionState = {
@@ -14,6 +15,7 @@ const initialState: BrandSelectionState = {
   selectedSubBrands: [],
   selectedAllBrandWiseOutlets: [],
   multiSelectedBrands: [],
+  allBrands: [],
 };
 
 const brandSelectionSlice = createSlice({
@@ -38,6 +40,9 @@ const brandSelectionSlice = createSlice({
     setMultiSelectedBrands(state, action: PayloadAction<string[]>) {
       state.multiSelectedBrands = action.payload;
     },
+    setAllBrands(state, action: PayloadAction<BrandData>) {
+      state.allBrands = action.payload;
+    },
   },
 });
 
@@ -46,5 +51,6 @@ export const {
   setSelectedSubBrands,
   setBrandSelection,
   setMultiSelectedBrands,
+  setAllBrands,
 } = brandSelectionSlice.actions;
 export default brandSelectionSlice.reducer;

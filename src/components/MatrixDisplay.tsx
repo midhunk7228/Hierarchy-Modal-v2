@@ -44,7 +44,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import BarGraphWidget from "./BarGraph";
 import RevenueDashboard from "./BarWidget";
 
-const baseUrl = import.meta.env.VITE_BASE_URL;
+const baseUrl = import.meta.env.VITE_WIDGET_BASE_URL;
 
 const MatrixDisplay: React.FC<
   MatrixDisplayProps & {

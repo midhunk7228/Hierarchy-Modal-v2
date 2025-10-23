@@ -44,6 +44,8 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
   reset,
 }) => {
   const brandScrollRef = useRef<HTMLDivElement>(null);
+  const organizationId = 3;
+  const baseURL = import.meta.env.VITE_BASE_URL;
 
   const renderBrandLogos = () => {
     if (isExpanded) {
@@ -66,7 +68,9 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
             }
           >
             <img
-              src={clickedBrand.logo}
+              src={`${baseURL}/clients/${organizationId}${encodeURIComponent(
+                clickedBrand.logo
+              )}`}
               alt={clickedBrand.name}
               className="h-6 object-contain"
             />
@@ -129,9 +133,11 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
           }}
         >
           <img
-            src={brand.logo}
+            src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
+              brand.logo
+            )}`}
             alt={brand.name}
-            className="h-6 object-contain"
+            className="h-4 object-contain "
           />
         </div>
       );

@@ -57,9 +57,9 @@ export default function BrandDashboardHeader() {
       setLoadingNav(true);
     }
     try {
-      // hierarchyData = await fetchBrandHierarchyAPI();
+      hierarchyData = await fetchBrandHierarchyAPI();
       // api disabled because percent sign in png
-      hierarchyData = brandHierarchy.brands;
+      // hierarchyData = brandHierarchy.brands;
       if (hierarchyData) {
         // Update cache
         await saveData(HIERARCHY_CACHE_KEY, hierarchyData);
@@ -71,6 +71,7 @@ export default function BrandDashboardHeader() {
           })
         );
 
+        initialBrandSetUp(hierarchyData.brands);
         console.log("Brand hierarchy cache updated.");
       }
     } catch (error) {
@@ -81,12 +82,12 @@ export default function BrandDashboardHeader() {
     // Then, fetch from the API for fresh data
   }, []);
 
-  const initialBrandSetUp = (brands) => {
+  const initialBrandSetUp = (brands: Brand[]) => {
     // debugger;
     // will replace the filter when outlets should be always array
     dispatch(
       setAllBrands(
-        brands.map((brand) => {
+        brands.map((brand: Brand) => {
           return { ...brand, outlets: brand?.outlets || [] };
         })
       )

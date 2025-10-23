@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 
 export interface PrintLayoutConfig {
   pageFormat:
@@ -396,88 +398,162 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     console.log("=== END DEBUG ===");
   }, [getFirstLevelChildren, calculateTotalHeight]);
 
-  const handlePrint = useCallback(() => {
-    applyAutoLayout();
+  const handlePrint = useCallback(async () => {
+    if (!containerRef.current) return;
 
-    setTimeout(() => {
+    // Store original showPageBreaks state
+    const originalShowPageBreaks = showPageBreaks;
+
+    try {
+      // Show loading state
+      console.log("Generating PDF...");
+
+      const container = containerRef.current;
       const { widthMm, heightMm } = getPageDimensions();
       const marginInches = config.marginInches ?? 0.5;
+      const marginMm = marginInches * 25.4; // Convert inches to mm
 
-      const printStyle = document.createElement("style");
-      printStyle.id = "print-layout-styles";
-      printStyle.textContent = `
-        @page {
-          size: ${widthMm}mm ${heightMm}mm !important;
-          margin: ${marginInches}in !important;
+      // Get orientation from config
+      const orientation = config.pageFormat.includes("landscape")
+        ? "landscape"
+        : "portrait";
+
+      // CRITICAL: Completely remove all dynamic overlays that use oklch colors
+      // Remove them from DOM entirely, not just hide them
+      removeElements(".dynamic-page");
+      removeElements(".print-simulation");
+      removeElements(".auto-page-break");
+      removeElements(".auto-layout-break");
+
+      // Hide control buttons
+      const containerButtons = container.querySelectorAll("button");
+      containerButtons.forEach((btn) => {
+        if (btn instanceof HTMLElement) {
+          btn.style.display = "none";
         }
-        
-        @media print {
-          * {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
+      });
+
+      // Wait for DOM cleanup
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Use html-to-image which handles modern CSS better than html2canvas
+      const dataUrl = await toPng(container, {
+        quality: 1.0,
+        pixelRatio: 2, // Higher quality
+        backgroundColor: "#ffffff",
+        cacheBust: true,
+        filter: (node) => {
+          // Filter out buttons and controls
+          if (node instanceof HTMLElement) {
+            return (
+              !node.classList.contains("print-hide") &&
+              node.tagName !== "BUTTON" &&
+              node.tagName !== "NAV" &&
+              node.tagName !== "ASIDE"
+            );
           }
-          
-          button, .print-hide, nav, aside {
-            display: none !important;
-          }
-          
-          .auto-layout-break {
-            page-break-before: always !important;
-            break-before: page !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            background: transparent !important;
-            display: block !important;
-          }
-          
-          .printable-container > * {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            orphans: 3 !important;
-            widows: 3 !important;
-          }
-          
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            overflow: visible !important;
-            background: white !important;
-          }
-          
-          .h-full, .h-screen, .max-h-screen {
-            height: auto !important;
-            max-height: none !important;
-          }
-          
-          .overflow-y-auto, .overflow-hidden {
-            overflow: visible !important;
-          }
-          
-          .printable-container {
-            max-width: ${widthMm}mm !important;
-            margin: 0 auto !important;
-            box-sizing: border-box !important;
-            position: static !important;
-          }
+          return true;
+        },
+      });
+
+      // Convert data URL to image for dimensions
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      // Calculate dimensions based on image
+      const imgWidth = widthMm - marginMm * 2;
+      const imgHeight = (img.height * imgWidth) / img.width;
+
+      // Create PDF with proper orientation
+      const pdf = new jsPDF({
+        orientation: orientation as "landscape" | "portrait",
+        unit: "mm",
+        format: config.pageFormat.split("-")[0].toLowerCase() as "a3" | "a4",
+      });
+
+      const pageHeight = heightMm - marginMm * 2;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(dataUrl, "PNG", marginMm, marginMm, imgWidth, imgHeight);
+
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is longer than one page
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(
+          dataUrl,
+          "PNG",
+          marginMm,
+          position + marginMm,
+          imgWidth,
+          imgHeight
+        );
+        heightLeft -= pageHeight;
+      }
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `dashboard-${config.pageFormat}-${timestamp}.pdf`;
+
+      // Download the PDF
+      pdf.save(filename);
+
+      console.log("PDF generated successfully!");
+
+      // Restore hidden buttons
+      containerButtons.forEach((btn) => {
+        if (btn instanceof HTMLElement && btn.style.display === "none") {
+          btn.style.display = "";
         }
-      `;
+      });
 
-      const existingStyle = document.getElementById("print-layout-styles");
-      existingStyle?.remove();
-      document.head.appendChild(printStyle);
+      // Recreate page breaks if they were visible before
+      if (originalShowPageBreaks) {
+        setTimeout(() => {
+          createDynamicPagination();
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
 
-      window.print();
+      // Restore hidden buttons even if there was an error
+      if (containerRef.current) {
+        const errorButtons = containerRef.current.querySelectorAll("button");
+        errorButtons.forEach((btn) => {
+          if (btn instanceof HTMLElement && btn.style.display === "none") {
+            btn.style.display = "";
+          }
+        });
 
-      setTimeout(() => {
-        document.getElementById("print-layout-styles")?.remove();
-        removeElements(".auto-layout-break");
-      }, 1000);
-    }, 100);
-  }, [applyAutoLayout, getPageDimensions, config.marginInches, removeElements]);
+        // Recreate page breaks if they were visible before
+        if (originalShowPageBreaks) {
+          setTimeout(() => {
+            createDynamicPagination();
+          }, 100);
+        }
+      }
+
+      alert(
+        `Failed to generate PDF: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }. Please try again.`
+      );
+    }
+  }, [
+    getPageDimensions,
+    config.marginInches,
+    config.pageFormat,
+    removeElements,
+    showPageBreaks,
+    createDynamicPagination,
+  ]);
 
   useEffect(() => {
     if (showPageBreaks) {

@@ -29,7 +29,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
     startDate: "2025-03-01",
     endDate: "2025-03-31",
   });
-
+  const baseURL = import.meta.env.VITE_BASE_URL;
   return (
     <div className="flex items-center gap-4 self-end md:self-center">
       <button
@@ -70,7 +70,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           className="flex cursor-pointer items-center gap-2 transition-colors"
         >
           <Globe className="h-5 w-5 text-gray-600" />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 pr-5">
             <span className="text-base font-medium text-gray-900">
               {selectedCurrencies.length > 0
                 ? selectedCurrencies.length === 1
@@ -79,13 +79,29 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                 : "Select Country"}
             </span>
             {selectedCurrencies.length === 1 && (
-              <span className="text-base">
-                {
+              // <span className="text-base">
+              //   {
+              //     availableCountries.find(
+              //       (c) => c.currencyCode === selectedCurrencies[0]
+              //     )?.flag
+              //   }
+              // </span>
+              <img
+                src={(() => {
+                  const country = availableCountries.find(
+                    (c) => c.currencyCode === selectedCurrencies[0]
+                  );
+                  return country && country.flag
+                    ? `${baseURL}/clients/3/${encodeURIComponent(country.flag)}`
+                    : "";
+                })()}
+                alt={
                   availableCountries.find(
                     (c) => c.currencyCode === selectedCurrencies[0]
-                  )?.flag
+                  )?.flag || "flag"
                 }
-              </span>
+                className="object-cover h-4"
+              />
             )}
           </div>
         </button>
@@ -108,9 +124,15 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                         className="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-all hover:bg-gray-50"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{country.flag}</span>
+                          <img
+                            src={`${baseURL}/clients/3${encodeURIComponent(
+                              country?.flag
+                            )}`}
+                            alt={country?.flag}
+                            className="object-cover h-4"
+                          />
                           <span className="text-sm font-medium text-gray-900">
-                            {country.currencyCode}
+                            {country.currencyCode}sas
                           </span>
                         </div>
                         <div className="relative flex items-center">

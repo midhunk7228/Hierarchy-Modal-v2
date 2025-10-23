@@ -1537,7 +1537,7 @@ const JsonDrivenDashboard: React.FC = () => {
           {/* Printable Content */}
           <PrintableContainer
             config={{
-              pageFormat: "A4-landscape",
+              pageFormat: "A3-landscape",
               marginInches: 0.5,
             }}
             // className="h-full overflow-y-auto"

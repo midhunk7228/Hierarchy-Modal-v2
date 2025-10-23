@@ -47,7 +47,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
     getPageDimensions,
   } = usePrintLayout(defaultConfig);
 
-  const { widthMm } = getPageDimensions();
+  const { widthMm, heightMm } = getPageDimensions();
 
   const onPrintClick = () => {
     onPrint?.();
@@ -73,6 +73,8 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
               pointer-events: none !important;
               z-index: 1000 !important;
               box-sizing: border-box !important;
+              border: 2px dotted rgba(0, 0, 0, 0.4) !important;
+              height: ${heightMm}mm !important;
             }
             
             .auto-page-break {
@@ -104,7 +106,10 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
       )}
 
       {isEditMode && showControls && (
-        <div className="flex flex-wrap items-center gap-2 mb-6 print-hide px-6 py-2 ">
+        <div
+          className="flex flex-wrap items-center gap-2 mb-6 print-hide px-6 py-2"
+          style={{ display: "flex" }}
+        >
           <button
             onClick={() => setShowPageBreaks(!showPageBreaks)}
             className={`px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1 ${

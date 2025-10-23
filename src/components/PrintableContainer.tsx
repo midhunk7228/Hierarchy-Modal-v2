@@ -71,10 +71,33 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
             .dynamic-page {
               position: absolute !important;
               pointer-events: none !important;
-              z-index: 1000 !important;
+              z-index: 9999 !important;
               box-sizing: border-box !important;
-              border: 2px dotted rgba(0, 0, 0, 0.4) !important;
+              border: 3px dashed rgba(59, 130, 246, 0.8) !important;
+              background: rgba(59, 130, 246, 0.03) !important;
               height: ${heightMm}mm !important;
+              box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+            }
+            
+            /* Make sure widgets stay below page break lines */
+            .react-grid-item {
+              z-index: 1 !important;
+            }
+            
+            .react-grid-item.react-grid-placeholder {
+              z-index: 2 !important;
+              background: rgba(59, 130, 246, 0.15) !important;
+              opacity: 0.7 !important;
+            }
+            
+            .react-grid-item.react-draggable-dragging {
+              z-index: 100 !important;
+              opacity: 0.9 !important;
+            }
+            
+            .react-grid-item.resizing {
+              z-index: 100 !important;
+              opacity: 0.9 !important;
             }
             
             .auto-page-break {

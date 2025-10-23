@@ -159,14 +159,15 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
           position: absolute;
           left: 50%;
           transform: translateX(-50%);
-          background: #10b981;
-          color: white;
-          padding: 2px 8px;
+          background: rgb(16, 185, 129);
+          color: rgb(255, 255, 255);
+          padding: 4px 10px;
           border-radius: 4px;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: bold;
-          z-index: 1002;
+          z-index: 10000;
           pointer-events: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         ">AUTO BREAK ${pageCount}</div>`;
 
         component.parentNode?.insertBefore(autoBreak, component);
@@ -207,11 +208,7 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         right: 0;
         width: 100%;
         height: ${pageHeightPx}px;
-        border: 2px dashed hsl(var(--primary));
         pointer-events: none;
-        z-index: 1000;
-        background: hsl(var(--primary) / 0.05);
-        box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
         margin: 0;
         padding: 0;
       `;
@@ -221,14 +218,14 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         position: absolute;
         top: 10px;
         right: 10px;
-        background: hsl(var(--primary));
-        color: hsl(var(--primary-foreground));
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
+        background: rgb(59, 130, 246);
+        color: rgb(255, 255, 255);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
         font-weight: bold;
-        z-index: 1001;
         pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       `;
       pageNumber.textContent = `Page ${i + 1}`;
       pageOverlay.appendChild(pageNumber);
@@ -236,14 +233,33 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       const pageBreakLine = document.createElement("div");
       pageBreakLine.style.cssText = `
         position: absolute;
-        bottom: 0;
+        bottom: -2px;
         left: 0;
         right: 0;
-        height: 2px;
-        background: hsl(var(--primary));
-        z-index: 1001;
+        height: 4px;
+        background: rgb(59, 130, 246);
+        pointer-events: none;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
       `;
       pageOverlay.appendChild(pageBreakLine);
+
+      // Add dimension label at bottom left
+      const dimensionLabel = document.createElement("div");
+      dimensionLabel.style.cssText = `
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgb(59, 130, 246);
+        color: rgb(255, 255, 255);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      `;
+      dimensionLabel.textContent = `${Math.round(pageHeightPx)}px`;
+      pageOverlay.appendChild(dimensionLabel);
 
       container.appendChild(pageOverlay);
     }
@@ -295,14 +311,15 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            background: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
-            padding: 2px 8px;
+            background: rgb(239, 68, 68);
+            color: rgb(255, 255, 255);
+            padding: 4px 10px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
-            z-index: 1002;
+            z-index: 10000;
             pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           ">PAGE BREAK ${pageCount}</div>`;
 
           section.parentNode?.insertBefore(pageBreak, section);
@@ -343,10 +360,10 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         transform: translateX(-50%);
         width: ${pageWidthPx}px;
         height: ${pageHeightPx}px;
-        border: 3px solid hsl(var(--destructive));
-        background: hsl(var(--destructive) / 0.1);
+        border: 3px solid rgb(239, 68, 68);
+        background: rgba(239, 68, 68, 0.1);
         pointer-events: none;
-        z-index: 999;
+        z-index: 9998;
         box-sizing: border-box;
       `;
 
@@ -355,13 +372,14 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         position: absolute;
         top: 10px;
         right: 10px;
-        background: hsl(var(--destructive));
-        color: hsl(var(--destructive-foreground));
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
+        background: rgb(239, 68, 68);
+        color: rgb(255, 255, 255);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
         font-weight: bold;
-        z-index: 1000;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       `;
       pageNumber.textContent = `PRINT PAGE ${i + 1}`;
       pageOverlay.appendChild(pageNumber);
@@ -404,6 +422,9 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     // Store original showPageBreaks state
     const originalShowPageBreaks = showPageBreaks;
 
+    // Declare outside try block for cleanup access
+    let elementsToHide: Element[] = [];
+
     try {
       // Show loading state
       console.log("Generating PDF...");
@@ -425,16 +446,71 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       removeElements(".auto-page-break");
       removeElements(".auto-layout-break");
 
-      // Hide control buttons
-      const containerButtons = container.querySelectorAll("button");
-      containerButtons.forEach((btn) => {
-        if (btn instanceof HTMLElement) {
-          btn.style.display = "none";
+      // Hide control buttons and all overlay elements
+      elementsToHide = [
+        ...container.querySelectorAll("button"),
+        ...container.querySelectorAll(".print-hide"),
+        ...container.querySelectorAll(".dynamic-page"),
+        ...container.querySelectorAll(".print-simulation"),
+        ...container.querySelectorAll(".auto-page-break"),
+        ...container.querySelectorAll(".auto-layout-break"),
+        ...container.querySelectorAll(".react-grid-placeholder"),
+        ...container.querySelectorAll(".react-resizable-handle"),
+        ...container.querySelectorAll("nav"),
+        ...container.querySelectorAll("aside"),
+      ];
+
+      // Enhanced duplicate detection for react-grid-layout
+      // Check both .react-grid-item (wrapper) and .printable-widget (actual content)
+      const allGridItems = container.querySelectorAll(".react-grid-item");
+      const seenWidgetIds = new Set<string>();
+
+      allGridItems.forEach((gridItem) => {
+        if (!(gridItem instanceof HTMLElement)) return;
+
+        // Get the widget ID from react-grid-layout's key attribute
+        const gridKey = gridItem.getAttribute("data-grid") || "";
+
+        // Also look for widget title to identify duplicates
+        const titleElement = gridItem.querySelector("h3, h2, [class*='title']");
+        const widgetTitle = titleElement?.textContent?.trim() || "";
+
+        // Create a unique identifier
+        const uniqueId = `${gridKey}-${widgetTitle}`;
+
+        if (uniqueId && uniqueId !== "-" && seenWidgetIds.has(uniqueId)) {
+          // This is a duplicate, hide the entire grid item
+          console.log("Hiding duplicate widget:", uniqueId);
+          elementsToHide.push(gridItem);
+        } else if (uniqueId && uniqueId !== "-") {
+          seenWidgetIds.add(uniqueId);
         }
       });
 
-      // Wait for DOM cleanup
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Remove empty or near-empty grid items (might be causing black lines)
+      allGridItems.forEach((gridItem) => {
+        if (!(gridItem instanceof HTMLElement)) return;
+
+        const textContent = gridItem.textContent?.trim() || "";
+        const hasImages =
+          gridItem.querySelectorAll("img, svg, canvas").length > 0;
+
+        // If grid item has very little content and no images, it might be a placeholder
+        if (textContent.length < 5 && !hasImages) {
+          console.log("Hiding empty/placeholder grid item");
+          elementsToHide.push(gridItem);
+        }
+      });
+
+      elementsToHide.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.style.display = "none";
+          el.style.visibility = "hidden";
+        }
+      });
+
+      // Wait for DOM cleanup and let browser repaint
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Use html-to-image which handles modern CSS better than html2canvas
       const dataUrl = await toPng(container, {
@@ -442,15 +518,38 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         pixelRatio: 2, // Higher quality
         backgroundColor: "#ffffff",
         cacheBust: true,
+        skipAutoScale: true,
+        includeQueryParams: false,
         filter: (node) => {
-          // Filter out buttons and controls
+          // Filter out all non-content elements
           if (node instanceof HTMLElement) {
-            return (
-              !node.classList.contains("print-hide") &&
-              node.tagName !== "BUTTON" &&
-              node.tagName !== "NAV" &&
-              node.tagName !== "ASIDE"
-            );
+            // Get computed styles
+            const computed = window.getComputedStyle(node);
+
+            // Skip if it's a control or overlay element
+            if (
+              node.classList.contains("print-hide") ||
+              node.classList.contains("dynamic-page") ||
+              node.classList.contains("print-simulation") ||
+              node.classList.contains("auto-page-break") ||
+              node.classList.contains("auto-layout-break") ||
+              node.classList.contains("react-grid-placeholder") ||
+              node.classList.contains("react-resizable-handle") ||
+              node.classList.contains("react-draggable-dragging") ||
+              node.tagName === "BUTTON" ||
+              node.tagName === "NAV" ||
+              node.tagName === "ASIDE" ||
+              node.style.display === "none" ||
+              node.style.visibility === "hidden" ||
+              computed.display === "none" ||
+              computed.visibility === "hidden" ||
+              // Skip elements with very high z-index (likely overlays)
+              ((computed.position === "fixed" ||
+                computed.position === "absolute") &&
+                parseInt(computed.zIndex) > 1000)
+            ) {
+              return false;
+            }
           }
           return true;
         },
@@ -507,10 +606,11 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
 
       console.log("PDF generated successfully!");
 
-      // Restore hidden buttons
-      containerButtons.forEach((btn) => {
-        if (btn instanceof HTMLElement && btn.style.display === "none") {
-          btn.style.display = "";
+      // Restore all hidden elements
+      elementsToHide.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          el.style.display = "";
+          el.style.visibility = "";
         }
       });
 
@@ -523,21 +623,21 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     } catch (error) {
       console.error("Error generating PDF:", error);
 
-      // Restore hidden buttons even if there was an error
-      if (containerRef.current) {
-        const errorButtons = containerRef.current.querySelectorAll("button");
-        errorButtons.forEach((btn) => {
-          if (btn instanceof HTMLElement && btn.style.display === "none") {
-            btn.style.display = "";
+      // Restore all hidden elements even if there was an error
+      if (containerRef.current && elementsToHide.length > 0) {
+        elementsToHide.forEach((el) => {
+          if (el instanceof HTMLElement) {
+            el.style.display = "";
+            el.style.visibility = "";
           }
         });
+      }
 
-        // Recreate page breaks if they were visible before
-        if (originalShowPageBreaks) {
-          setTimeout(() => {
-            createDynamicPagination();
-          }, 100);
-        }
+      // Recreate page breaks if they were visible before
+      if (originalShowPageBreaks) {
+        setTimeout(() => {
+          createDynamicPagination();
+        }, 100);
       }
 
       alert(

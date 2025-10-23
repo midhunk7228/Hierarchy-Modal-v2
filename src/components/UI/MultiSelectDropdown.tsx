@@ -27,6 +27,8 @@ export default function MultiSelectDropdown({
   // allSelected,
   className,
 }: MultiSelectDropdownProps) {
+  const organizationId = 3;
+  const baseURL = import.meta.env.VITE_BASE_URL;
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,9 @@ export default function MultiSelectDropdown({
                 <div className="flex items-center">
                   {option.image && (
                     <img
-                      src={option.image}
+                      src={`${baseURL}/clients/${organizationId}${encodeURIComponent(
+                        option.image
+                      )}`}
                       alt={option.label}
                       className="mr-3 h-8 w-12 object-contain"
                     />

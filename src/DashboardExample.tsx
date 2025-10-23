@@ -1314,7 +1314,7 @@ const JsonDrivenDashboard: React.FC = () => {
   };
 
   const handleHeightChange = (widgetId: string, height: number) => {
-    const rowHeight = 100; // Match the rowHeight prop in ResponsiveGridLayout
+    const rowHeight = 108; // Match the rowHeight prop in ResponsiveGridLayout
     const marginY = 16; // Match the margin prop in ResponsiveGridLayout
 
     // Calculate grid units from pixel height
@@ -1348,24 +1348,7 @@ const JsonDrivenDashboard: React.FC = () => {
 
   // Get layout from Redux store or fallback to widget positions
   const getCurrentLayout = (): ReactGridLayout.Layout[] => {
-    // const savedLayout =
-    //   layouts[`${selectedDashboard}:${currentNavigationPath}`];
-    // if (savedLayout && savedLayout.length > 0) {
-    //   console.log("currentDashboard!!?.savedLayout", savedLayout?.widgets);
-
-    //   // Create a deep copy to avoid issues with frozen objects from Redux
-    //   return JSON.parse(JSON.stringify(savedLayout));
-    // }
-
-    // const defaultLayout = layouts[`${selectedDashboard}:default`];
-    // if (defaultLayout && defaultLayout.length > 0) {
-    //   console.log("currentDashboard!!?.defaultLayout", defaultLayout?.widgets);
-
-    //   return JSON.parse(JSON.stringify(defaultLayout));
-    // }
-    // debugger;
-    // console.log("currentDashboard!!?.widgets", currentDashboard?.widgets);
-    // Fallback to widget positions
+    // Fallback to widget positions - use stored heights directly
     return currentDashboard?.widgets.map((w) => ({
       i: w.id,
       x: w.position.col,
@@ -1547,13 +1530,15 @@ const JsonDrivenDashboard: React.FC = () => {
               layouts={{ lg: layout }}
               breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
               cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-              rowHeight={100}
+              rowHeight={108}
               onLayoutChange={onLayoutChange}
               isDraggable={isEditMode}
               isResizable={isEditMode}
               isDroppable={true}
               onDrop={onDrop}
               margin={[16, 16]}
+              // resizeHandles={["se"]}
+              // compactType={null}
             >
               {currentDashboard.widgets.map((widget) => (
                 <div

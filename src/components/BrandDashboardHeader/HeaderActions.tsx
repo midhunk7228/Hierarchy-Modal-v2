@@ -92,7 +92,9 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                     (c) => c.currencyCode === selectedCurrencies[0]
                   );
                   return country && country.flag
-                    ? `${baseURL}/clients/3/${encodeURIComponent(country.flag)}`
+                    ? `${baseURL}/clients/3/${encodeURIComponent(
+                        country.flag.replace(/^\//, "")
+                      )}`
                     : "";
                 })()}
                 alt={
@@ -125,14 +127,14 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                       >
                         <div className="flex items-center gap-3">
                           <img
-                            src={`${baseURL}/clients/3${encodeURIComponent(
-                              country?.flag
+                            src={`${baseURL}/clients/3/${encodeURIComponent(
+                              country?.flag.replace(/^\//, "")
                             )}`}
                             alt={country?.flag}
                             className="object-cover h-4"
                           />
                           <span className="text-sm font-medium text-gray-900">
-                            {country.currencyCode}sas
+                            {country.currencyCode}
                           </span>
                         </div>
                         <div className="relative flex items-center">

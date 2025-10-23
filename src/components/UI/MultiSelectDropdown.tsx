@@ -91,8 +91,8 @@ export default function MultiSelectDropdown({
                 <div className="flex items-center">
                   {option.image && (
                     <img
-                      src={`${baseURL}/clients/${organizationId}${encodeURIComponent(
-                        option.image
+                      src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
+                        option.image.replace(/^\//, "")
                       )}`}
                       alt={option.label}
                       className="mr-3 h-8 w-12 object-contain"

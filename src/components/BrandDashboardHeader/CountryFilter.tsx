@@ -35,7 +35,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
             {/* <span className="text-lg">{country?.flag}</span> */}
             <img
               src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
-                country?.flag
+                country?.flag.replace(/^\//, "")
               )}`}
               alt={country?.flag}
               className="object-cover h-4"

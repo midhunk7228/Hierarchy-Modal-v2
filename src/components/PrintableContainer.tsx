@@ -133,19 +133,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
           className="flex flex-wrap items-center gap-2 mb-6 print-hide px-6 py-2"
           style={{ display: "flex" }}
         >
-          <button
-            onClick={() => setShowPageBreaks(!showPageBreaks)}
-            className={`px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1 ${
-              showPageBreaks
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
-            }`}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            {showPageBreaks ? "Hide" : "Show"} Page Breaks
-          </button>
-
-          {showPageBreaks && (
+          {/* {showPageBreaks && (
             <>
               <button
                 onClick={() => setAutoPageBreaks(!autoPageBreaks)}
@@ -171,11 +159,21 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
                 A3 Width
               </button>
             </>
-          )}
+          )} */}
 
           <div className="flex-grow" />
-
           <button
+            onClick={() => setShowPageBreaks(!showPageBreaks)}
+            className={`px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1 ${
+              showPageBreaks
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
+            }`}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            {showPageBreaks ? "Hide" : "Show"} Page Breaks
+          </button>
+          {/* <button
             onClick={applyAutoLayout}
             className="px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1 bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"
           >
@@ -197,7 +195,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
           >
             <Bug className="w-4 h-4 mr-2" />
             Debug
-          </button>
+          </button> */}
 
           <button
             onClick={onPrintClick}

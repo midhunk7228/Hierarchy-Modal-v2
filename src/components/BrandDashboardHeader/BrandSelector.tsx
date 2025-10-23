@@ -68,8 +68,8 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
             }
           >
             <img
-              src={`${baseURL}/clients/${organizationId}${encodeURIComponent(
-                clickedBrand.logo
+              src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
+                clickedBrand.logo.replace(/^\//, "")
               )}`}
               alt={clickedBrand.name}
               className="h-6 object-contain"
@@ -134,10 +134,10 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
         >
           <img
             src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
-              brand.logo
+              brand.logo.replace(/^\//, "")
             )}`}
             alt={brand.name}
-            className="h-4 object-contain "
+            className="h-6 object-contain "
           />
         </div>
       );

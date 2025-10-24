@@ -1412,63 +1412,22 @@ const JsonDrivenDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen  flex">
       <div className="flex-1">
-        <div className="bg-white px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              {/* <div className="flex items-center gap-3">
-                <p className="text-sm text-gray-500 mt-1 ">
-                  <span className="font-bold">Navigation Path: </span>
-                  {currentNavigationPath
-                    .replace("->", " → ")
-                    .replace("#", " | Filters: ")}
-                </p>
-              </div> */}
-            </div>
-            <div className="flex items-center gap-4">
-              <DashboardManager
-                currentDashboard={currentDashboard}
-                // setCurrentDashboard={setCurrentDashboard}
-                onLoadDashboard={handleLoadDashboard}
-                currentNavigationPath={currentNavigationPath}
-                selectedDashboard={selectedDashboard}
-                onSelectDashboard={handleSelectDashboard}
-                onCreateDashboard={handleCreateDashboard}
-                onAddCustomWidget={handleAddCustomWidget}
-                onClearLayout={() => {
-                  layoutStorage.deleteLayout(currentNavigationPath);
-                  dispatch(
-                    setLayoutForPath({
-                      path: currentNavigationPath,
-                      layout: [],
-                    })
-                  );
-                }}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end items-center gap-3 pt-2 px-10">
-          {/* <div className="text-3xl font-bold">Finance Dashboard</div> */}
-
+        <div className="flex justify-end items-center gap-2 py-2 px-6 border-b border-gray-200 bg-white">
           {selectedSubBrands?.length !== 0 && (
-            <div className="flex items-center gap-2 bg-white rounded-md px-2 py-1">
+            <div className="flex items-center gap-2">
+              {/* Date Range Button */}
               <div className="relative">
                 <button
                   onClick={() =>
                     setOpenDatePopup(openDatePopup === 0 ? null : 0)
                   }
-                  className="flex items-center gap-2 px-2 py-1 bg-white  text-gray-600 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="flex items-center justify-center w-8 h-8 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  <Ellipsis className="w-6 h-6 cursor-pointer" />
-                  {/* <span className="font-medium">
-                    {formatDateRangeForDisplay(
-                      dateRange.startDate,
-                      dateRange.endDate
-                    )}
-                  </span> */}
+                  <Ellipsis className="w-5 h-5" />
                 </button>
+
                 {openDatePopup === 0 && (
                   <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
                     <div className="flex justify-between items-center mb-3">
@@ -1477,7 +1436,7 @@ const JsonDrivenDashboard: React.FC = () => {
                       </h4>
                       <button
                         onClick={() => setOpenDatePopup(null)}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -1489,9 +1448,9 @@ const JsonDrivenDashboard: React.FC = () => {
                         setDateRange({ startDate, endDate })
                       }
                     />
-                    <div className="mt-2 flex justify-end">
+                    <div className="mt-3 flex justify-end">
                       <button
-                        className=" px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
                         onClick={() => setOpenDatePopup(null)}
                       >
                         Save
@@ -1500,15 +1459,23 @@ const JsonDrivenDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 rounded-lg px-2 py-1">
-                <span>Comparison:</span>
-                <span className="font-medium">{comparisonDate}</span>
+
+              {/* Comparison Badge */}
+              <div className="flex items-center gap-1.5 text-sm text-gray-600 bg-gray-50 rounded-md px-3 py-1.5">
+                <span className="text-gray-500">Comparison:</span>
+                <span className="font-medium text-gray-700">
+                  {comparisonDate}
+                </span>
               </div>
-              <button className="flex items-center gap-2 px-2 py-1 bg-gray-100  text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+
+              {/* Currency Button */}
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-md hover:bg-gray-100 transition-colors">
                 <Coins className="w-4 h-4" />
                 <span className="font-medium">Thousands</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium">
+
+              {/* Filter Button */}
+              <button className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 text-sm hover:bg-blue-50 rounded-md transition-colors font-medium">
                 <span>+</span>
                 <span>Filter</span>
               </button>
@@ -1516,7 +1483,7 @@ const JsonDrivenDashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="px-6">
+        <div className="px-6 bg-[#fcfcfc]">
           {/* Printable Content */}
           <PrintableContainer
             config={{
@@ -1543,7 +1510,7 @@ const JsonDrivenDashboard: React.FC = () => {
               {currentDashboard.widgets.map((widget) => (
                 <div
                   key={widget.id}
-                  className="bg-white rounded-lg shadow-md border border-gray-300 printable-widget"
+                  className="bg-white rounded-lg border border-gray-300 printable-widget"
                 >
                   <MatrixDisplay
                     widget={widget}

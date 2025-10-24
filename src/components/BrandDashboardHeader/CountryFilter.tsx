@@ -19,31 +19,28 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
 }) => {
   const organizationId = 3;
   const baseURL = import.meta.env.VITE_BASE_URL;
+
+  const getFlagUrl = (flag: string) =>
+    `${baseURL}/clients/${organizationId}/${encodeURIComponent(
+      flag.replace(/^\//, "")
+    )}`;
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {availableCountries?.map((country) => {
-        return (
-          <button
-            key={country.code}
-            onClick={() => handleCountryClick(country.name)}
-            className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition-all h-6 ${
-              selectedCountries.includes(country?.name)
-                ? "border border-blue-200 bg-blue-50 text-blue-600"
-                : "border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            {/* <span className="text-lg">{country?.flag}</span> */}
-            <img
-              src={`${baseURL}/clients/${organizationId}/${encodeURIComponent(
-                country?.flag.replace(/^\//, "")
-              )}`}
-              alt={country?.flag}
-              className="object-cover h-4"
-            />
-            <span>{country?.name}</span>
-          </button>
-        );
-      })}
+    <div className="flex flex-wrap gap-1.5">
+      {availableCountries?.map(({ code, name, flag }) => (
+        <button
+          key={code}
+          onClick={() => handleCountryClick(name)}
+          className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium ${
+            selectedCountries.includes(name)
+              ? "bg-gray-700 text-white"
+              : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <img src={getFlagUrl(flag)} alt={name} className="h-3 w-auto" />
+          <span>{name}</span>
+        </button>
+      ))}
     </div>
   );
 };

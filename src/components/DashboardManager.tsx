@@ -1,66 +1,15 @@
-import {
-  Plus,
-  Settings,
-  Pencil,
-  // Coins,
-  // Ellipsis,
-  // Calendar,
-  // X,
-} from "lucide-react";
+import { Plus, Settings, Pencil } from "lucide-react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
-import type {
-  DashboardLayout,
-  // DashboardWidget,
-} from "../DashbiardExampleProps";
+import type { DashboardLayout } from "../DashbiardExampleProps";
 import { useIndexedDB } from "../helper/useIndexedDB";
 import { setDashboards } from "../redux/dashboardsSlice";
 import { mergeDashboard } from "../helper";
 import { dashboardStorage } from "../utils/dashboardStorage";
 import { toggleEditMode } from "../redux/editModeSlice";
 import WidgetPanel from "./WidgetPanel";
-
-// const DateRangeFilter: React.FC<{
-//   onDateChange: (startDate: string, endDate: string) => void;
-//   startDate?: string;
-//   endDate?: string;
-// }> = ({ onDateChange, startDate = "", endDate = "" }) => {
-//   const [localStartDate, setLocalStartDate] = useState(startDate);
-//   const [localEndDate, setLocalEndDate] = useState(endDate);
-
-//   const handleStartDateChange = (date: string) => {
-//     setLocalStartDate(date);
-//     onDateChange(date, localEndDate);
-//   };
-
-//   const handleEndDateChange = (date: string) => {
-//     setLocalEndDate(date);
-//     onDateChange(localStartDate, date);
-//   };
-
-//   return (
-//     <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
-//       <Calendar className="w-4 h-4 text-slate-500" />
-//       <input
-//         type="date"
-//         value={localStartDate}
-//         onChange={(e) => handleStartDateChange(e.target.value)}
-//         className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-//         placeholder="Start Date"
-//       />
-//       <span className="text-slate-400">-</span>
-//       <input
-//         type="date"
-//         value={localEndDate}
-//         onChange={(e) => handleEndDateChange(e.target.value)}
-//         className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-//         placeholder="End Date"
-//       />
-//     </div>
-//   );
-// };
 
 const DashboardManager: React.FC<{
   currentDashboard: DashboardLayout;
@@ -82,24 +31,17 @@ const DashboardManager: React.FC<{
 }) => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configText, setConfigText] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newDashboardName, setNewDashboardName] = useState("");
+  const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
+  const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
+
   const dispatch = useDispatch();
   const dashboards = useSelector(
     (state: RootState) => state.dashboards.dashboards
   );
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newDashboardName, setNewDashboardName] = useState("");
-
   const { isEditMode } = useSelector((state: RootState) => state.editMode);
-  // const [, setEditingWidget] = useState<DashboardWidget | null>(null);
-  // const [, setIsWidgetEditorOpen] = useState(false);
-  const [isWidgetPanelOpen, setIsWidgetPanelOpen] = useState(false);
-  const [isOptionsPopupOpen, setIsOptionsPopupOpen] = useState(false);
-  // const [dateRange, setDateRange] = useState({
-  //   startDate: "2025-03-01",
-  //   endDate: "2025-03-31",
-  // });
-  // const [comparisonDate] = useState("Feb, 2025");
-  // const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
+  const { saveData, getData } = useIndexedDB();
 
   const dashboardOptions = [
     ...dashboards.map((dashboard) => ({
@@ -109,24 +51,19 @@ const DashboardManager: React.FC<{
     { value: "create-new", label: "+ Create New" },
   ];
 
-  const { saveData, getData } = useIndexedDB();
-
   useEffect(() => {
     const loadDashboards = async () => {
       const savedDashboards = (await getData(
         "dashboards"
       )) as DashboardLayout[];
-      console.log("selectedDashboard", selectedDashboard);
       const savedLayout = await dashboardStorage.getDashboard(
         `${selectedDashboard}:${currentNavigationPath}`
       );
+
       if (savedLayout) {
-        const newDashboards = savedDashboards?.map((val) => {
-          if (val.id === savedLayout.id) {
-            return savedLayout;
-          }
-          return val;
-        });
+        const newDashboards = savedDashboards?.map((val) =>
+          val.id === savedLayout.id ? savedLayout : val
+        );
         if (newDashboards && newDashboards.length > 0) {
           dispatch(setDashboards(newDashboards));
         } else {
@@ -135,6 +72,7 @@ const DashboardManager: React.FC<{
         }
         return;
       }
+
       if (savedDashboards && savedDashboards.length > 0) {
         dispatch(
           setDashboards(mergeDashboard(savedDashboards, currentDashboard))
@@ -146,12 +84,13 @@ const DashboardManager: React.FC<{
     };
     loadDashboards();
   }, [currentNavigationPath, currentDashboard]);
-  console.log("setDashboards", dashboards);
+
   const handleCreateNewDashboard = async () => {
     if (newDashboardName.trim() === "") {
       alert("Dashboard name cannot be empty");
       return;
     }
+
     const newDashboard: DashboardLayout = {
       id: `dashboard-${newDashboardName.replace(/\s+/g, "")}`,
       name: newDashboardName,
@@ -159,6 +98,7 @@ const DashboardManager: React.FC<{
       grid: { columns: 12, rows: 8, gap: 16 },
       widgets: [],
     };
+
     const newDashboards = [...dashboards, newDashboard];
     dispatch(setDashboards(newDashboards));
     await saveData("dashboards", newDashboards);
@@ -181,12 +121,9 @@ const DashboardManager: React.FC<{
         `${value}:${currentNavigationPath}`
       );
       if (savedLayout) {
-        const newDashboards = dashboards.map((val) => {
-          if (val.id === savedLayout.id) {
-            return savedLayout;
-          }
-          return val;
-        });
+        const newDashboards = dashboards.map((val) =>
+          val.id === savedLayout.id ? savedLayout : val
+        );
         const selected = newDashboards.find((d) => d.id === value);
         if (selected) {
           onSelectDashboard(value);
@@ -203,12 +140,6 @@ const DashboardManager: React.FC<{
       }
     }
   };
-
-  // const exportConfig = () => {
-  //   const config = JSON.stringify(currentDashboard, null, 2);
-  //   setConfigText(config);
-  //   setIsConfigModalOpen(true);
-  // };
 
   const importConfig = async () => {
     try {
@@ -227,76 +158,73 @@ const DashboardManager: React.FC<{
     }
   };
 
-  // const downloadConfig = () => {
-  //   const config = JSON.stringify(currentDashboard, null, 2);
-  //   const blob = new Blob([config], { type: "application/json" });
-  //   const url = URL.createObjectURL(blob);
-  //   const a = document.createElement("a");
-  //   a.href = url;
-  //   a.download = `${currentDashboard.name}.json`;
-  //   a.click();
-  //   URL.revokeObjectURL(url);
-  // };
-
-  // const handleAddCustomWidget = () => {
-  //   const newWidget: DashboardWidget = {
-  //     id: `widget-${Date.now()}`,
-  //     title: "New Widget",
-  //     displayType: "summary",
-  //     viewType: "single-value",
-  //     position: { row: 0, col: 0, width: 3, height: 2 },
-  //     filters: [],
-  //   };
-  //   setEditingWidget(newWidget);
-  //   setIsWidgetEditorOpen(true);
-  //   setIsWidgetPanelOpen(false); // Close the panel when opening the editor
-  // };
-
-  // Custom styles for react-select
   const customStyles = {
     control: (provided: any) => ({
       ...provided,
       backgroundColor: "white",
       borderColor: "#e5e7eb",
-      borderRadius: "0.5rem",
-      padding: "0.125rem",
-      minHeight: "auto",
-      fontSize: "0.875rem",
+      borderRadius: "0.375rem",
+      padding: "0",
+      minHeight: "32px",
+      height: "32px",
+      fontSize: "0.75rem",
       fontWeight: "500",
       color: "#374151",
       boxShadow: "none",
       "&:hover": {
-        borderColor: "#e5e7eb",
+        borderColor: "#d1d5db",
+        backgroundColor: "#f9fafb",
       },
+    }),
+    valueContainer: (provided: any) => ({
+      ...provided,
+      padding: "0 8px",
+      height: "30px",
+    }),
+    input: (provided: any) => ({
+      ...provided,
+      margin: "0",
+      padding: "0",
+    }),
+    indicatorsContainer: (provided: any) => ({
+      ...provided,
+      height: "30px",
+    }),
+    indicatorSeparator: () => ({
+      display: "none",
+    }),
+    dropdownIndicator: (provided: any) => ({
+      ...provided,
+      padding: "4px",
     }),
     menu: (provided: any) => ({
       ...provided,
-      borderRadius: "0.5rem",
+      borderRadius: "0.375rem",
       overflow: "hidden",
       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
     }),
     option: (provided: any, state: any) => ({
       ...provided,
-      fontSize: "0.875rem",
+      fontSize: "0.75rem",
+      padding: "0.5rem 0.75rem",
       backgroundColor: state.isSelected
-        ? "#3b82f6"
+        ? "#374151"
         : state.isFocused
         ? "#f3f4f6"
         : "white",
       color: state.isSelected ? "white" : "#374151",
       "&:active": {
-        backgroundColor: "#3b82f6",
+        backgroundColor: "#374151",
       },
     }),
     singleValue: (provided: any) => ({
       ...provided,
       color: "#374151",
-      fontSize: "0.875rem",
+      fontSize: "0.75rem",
       fontWeight: "500",
     }),
   };
 
-  console.log("dashboardsNew", dashboards);
   return (
     <>
       <div className="flex flex-col items-end gap-4">
@@ -312,51 +240,50 @@ const DashboardManager: React.FC<{
               isSearchable={false}
             />
           </div>
+
           <div className="relative">
             <button
               onClick={() => setIsOptionsPopupOpen(!isOptionsPopupOpen)}
-              className="px-3 sm:px-4 py-3 bg-gray-50 text-gray-700 cursor-pointer rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1 border border-gray-200"
+              className="px-3 py-1 bg-white text-gray-700 rounded border border-gray-200 hover:bg-gray-50 flex items-center gap-1"
             >
               <Pencil className="w-4 h-4" />
             </button>
 
             {isOptionsPopupOpen && (
-              <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-3 min-w-48">
-                {/* <div className="flex justify-end items-center mb-3">
-                <button
+              <>
+                <div
+                  className="fixed inset-0 z-10"
                   onClick={() => setIsOptionsPopupOpen(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div> */}
-                <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      setIsWidgetPanelOpen(true);
-                      setIsOptionsPopupOpen(false);
-                    }}
-                    className="w-full px-3 py-2 bg-green-700 hover:bg-[#4f967f] cursor-pointer text-white rounded-md transition-colors flex items-center justify-center gap-2 text-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Widget</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      dispatch(toggleEditMode());
-                      setIsOptionsPopupOpen(false);
-                    }}
-                    className={`w-full px-3 py-2 rounded-md transition-colors cursor-pointer flex items-center justify-center gap-2 text-sm ${
-                      isEditMode
-                        ? "bg-red-700 text-white hover:bg-red-900"
-                        : "bg-blue-700 hover:bg-[#626ac2] text-white"
-                    }`}
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>{isEditMode ? "Exit Edit Mode" : "Edit Mode"}</span>
-                  </button>
+                />
+                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded shadow-lg z-20 p-2 min-w-48">
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => {
+                        setIsWidgetPanelOpen(true);
+                        setIsOptionsPopupOpen(false);
+                      }}
+                      className="w-full px-3 py-2 bg-green-700 hover:bg-green-800 text-white rounded flex items-center justify-center gap-2 text-sm font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add Widget</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        dispatch(toggleEditMode());
+                        setIsOptionsPopupOpen(false);
+                      }}
+                      className={`w-full px-3 py-2 rounded flex items-center justify-center gap-2 text-sm font-medium ${
+                        isEditMode
+                          ? "bg-red-700 text-white hover:bg-red-800"
+                          : "bg-blue-700 hover:bg-blue-800 text-white"
+                      }`}
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>{isEditMode ? "Exit Edit Mode" : "Edit Mode"}</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -368,79 +295,94 @@ const DashboardManager: React.FC<{
         </div>
 
         {isCreateModalOpen && (
-          <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-2xl p-8 w-96 border border-gray-200">
-              <h3 className="text-xl font-semibold mb-6 text-gray-800">
-                Create New Dashboard
+          <>
+            <div
+              className="fixed inset-0 bg-black/30 z-40"
+              onClick={() => setIsCreateModalOpen(false)}
+            />
+            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+              <div className="bg-white rounded shadow-xl p-6 w-96 border border-gray-200 pointer-events-auto">
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                  Create New Dashboard
+                </h3>
+                <input
+                  type="text"
+                  value={newDashboardName}
+                  onChange={(e) => setNewDashboardName(e.target.value)}
+                  placeholder="Enter dashboard name"
+                  className="w-full px-3 py-2 border border-gray-200 rounded mb-4 focus:outline-none focus:border-gray-300 text-sm"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="px-4 py-2 text-gray-700 border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateNewDashboard}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {isConfigModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={() => {
+              setIsConfigModalOpen(false);
+              setConfigText("");
+            }}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="bg-white rounded shadow-xl p-6 w-[600px] max-h-[80vh] overflow-hidden flex flex-col border border-gray-200 pointer-events-auto">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                Dashboard Configuration
               </h3>
-              <input
-                type="text"
-                value={newDashboardName}
-                onChange={(e) => setNewDashboardName(e.target.value)}
-                placeholder="Enter dashboard name"
-                className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              <p className="text-sm text-gray-600 mb-4">
+                Current Navigation Path:{" "}
+                <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+                  {currentNavigationPath.replace("->", " → ")}
+                </code>
+              </p>
+
+              <textarea
+                value={configText}
+                onChange={(e) => setConfigText(e.target.value)}
+                placeholder="Paste your dashboard configuration JSON here..."
+                className="flex-1 p-3 border border-gray-200 rounded font-mono text-sm resize-none focus:outline-none focus:border-gray-300"
+                style={{ minHeight: "400px" }}
               />
-              <div className="flex justify-end gap-3">
+
+              <div className="flex justify-end gap-2 mt-4">
                 <button
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-5 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  onClick={() => {
+                    setIsConfigModalOpen(false);
+                    setConfigText("");
+                  }}
+                  className="px-4 py-2 text-gray-700 border border-gray-200 rounded hover:bg-gray-50 text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleCreateNewDashboard}
-                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-                >
-                  Create
-                </button>
+                {configText && (
+                  <button
+                    onClick={importConfig}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+                  >
+                    Import
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        )}
-      </div>
-      {/* Configuration Modal */}
-      {isConfigModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
-            <h3 className="text-lg font-semibold mb-4">
-              Dashboard Configuration
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Current Navigation Path:{" "}
-              <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                {currentNavigationPath.replace("->", " → ")}
-              </code>
-            </p>
-
-            <textarea
-              value={configText}
-              onChange={(e) => setConfigText(e.target.value)}
-              placeholder="Paste your dashboard configuration JSON here..."
-              className="flex-1 p-3 border border-gray-300 rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ minHeight: "400px" }}
-            />
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setIsConfigModalOpen(false);
-                  setConfigText("");
-                }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              {configText && (
-                <button
-                  onClick={importConfig}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Import
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        </>
       )}
     </>
   );

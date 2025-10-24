@@ -41,7 +41,7 @@ export default function OutletSelector() {
         className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded hover:bg-gray-50"
       >
         <Store className="w-4 h-4 text-gray-600" />
-        <span className="text-xs font-medium text-gray-700">
+        <span className="text-xs font-medium text-gray-600">
           {selectedSubBrands?.length} Outlets
         </span>
         <ChevronDown

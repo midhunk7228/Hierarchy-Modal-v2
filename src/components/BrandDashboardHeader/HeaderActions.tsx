@@ -89,7 +89,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
         >
           <Globe className="h-4 w-4 text-gray-600" />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-700">
+            <span className="text-xs font-medium text-gray-600">
               {selectedCurrencies.length > 0
                 ? selectedCurrencies.length === 1
                   ? selectedCurrencies[0]

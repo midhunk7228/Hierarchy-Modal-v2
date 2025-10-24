@@ -1460,7 +1460,7 @@ const JsonDrivenDashboard: React.FC = () => {
               </div>
 
               {/* Currency Button */}
-              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-md hover:bg-gray-100 transition-colors">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 text-sm rounded-md hover:bg-gray-100 transition-colors">
                 <Coins className="w-4 h-4" />
                 <span className="font-medium">Thousands</span>
               </button>

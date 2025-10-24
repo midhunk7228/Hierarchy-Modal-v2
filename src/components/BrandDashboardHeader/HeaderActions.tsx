@@ -51,7 +51,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
     <div className="flex justify-end items-center gap-3 self-end md:self-center">
       <button
         onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-        className="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-50"
+        className="flex items-center gap-2 px-3 py-1 bg-white text-gray-600 rounded hover:bg-gray-50"
       >
         <Ellipsis className="w-5 h-5" />
       </button>

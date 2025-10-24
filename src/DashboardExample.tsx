@@ -9,15 +9,10 @@ import type {
   MatrixData,
 } from "./DashbiardExampleProps";
 import type { RootState } from "./redux/store";
-import {
-  setLayoutForPath,
-  setLayoutLoading,
-  setCurrentNavigationPath,
-} from "./redux/layoutSlice";
+import { setLayoutForPath, setLayoutLoading } from "./redux/layoutSlice";
 import { layoutStorage } from "./utils/layoutStorage";
 import { widgetStorage } from "./utils/widgetStorage";
 import { useIndexedDB } from "./helper/useIndexedDB";
-import DashboardManager from "./components/DashboardManager";
 import MatrixDisplay from "./components/MatrixDisplay";
 import WidgetEditor from "./components/WidgetEditor";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -25,7 +20,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import WidgetPanel from "./components/WidgetPanel";
 import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
-import { setDashboards } from "./redux/dashboardsSlice";
+import { setDashboards, setSelectedDashboardId } from "./redux/dashboardsSlice";
 import { dashboardStorage } from "./utils/dashboardStorage";
 import { PrintableContainer } from "./components/PrintableContainer";
 
@@ -843,46 +838,11 @@ const JsonDrivenDashboard: React.FC = () => {
   const [comparisonDate] = useState("Feb, 2025");
 
   const [isInitialized, setIsInitialized] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] =
-    useState("default-dashboard");
+  const selectedDashboard =
+    useSelector((state: RootState) => state.dashboards.selectedDashboardId) ||
+    "default-dashboard";
 
-  const { saveData } = useIndexedDB();
-  // useEffect(() => {
-  //   const loadSelected = async () => {
-  //     const saved = await getData("selectedDashboard");
-  //     if (saved) {
-  //       setSelectedDashboard(saved as string);
-  //     }
-  //   };
-  //   loadSelected();
-  // }, []);
-
-  const handleSelectDashboard = (dashboardId: string) => {
-    setSelectedDashboard(dashboardId);
-    saveData("selectedDashboard", dashboardId);
-    dispatch(setCurrentNavigationPath(currentNavigationPath));
-  };
-
-  const handleCreateDashboard = async (dashboardId: string) => {
-    //need to update newDashboard
-    const newDashboard: DashboardLayout = {
-      id: `dashboard-${Date.now()}`,
-      name: dashboardId,
-      description: "A new dashboard",
-      grid: {
-        columns: 12,
-        rows: 8,
-        gap: 16,
-      },
-      widgets: [],
-    };
-    handleSelectDashboard(dashboardId);
-    await layoutStorage.saveLayout(dashboardId, [], dashboardId);
-    dashboardStorage.saveDashboard(
-      `${dashboardId}:${currentNavigationPath}`,
-      newDashboard
-    );
-  };
+  const { getData } = useIndexedDB();
 
   // Initialize IndexedDB and load layout for current navigation path
   useEffect(() => {
@@ -890,6 +850,28 @@ const JsonDrivenDashboard: React.FC = () => {
       try {
         dispatch(setLayoutLoading(true));
         await Promise.all([layoutStorage.init(), dashboardStorage.init()]);
+
+        // Load dashboards from IndexedDB
+        const savedDashboards = (await getData("dashboards")) as
+          | DashboardLayout[]
+          | null;
+        const savedSelectedDashboard = (await getData("selectedDashboard")) as
+          | string
+          | null;
+
+        // Initialize dashboards in Redux store
+        if (savedDashboards && savedDashboards.length > 0) {
+          // Use saved dashboards from IndexedDB
+          dispatch(setDashboards(savedDashboards));
+        } else {
+          // Initialize with DEFAULT_DASHBOARD if nothing saved
+          dispatch(setDashboards([DEFAULT_DASHBOARD]));
+        }
+
+        // Initialize selectedDashboardId from saved value or default
+        const dashboardIdToUse = savedSelectedDashboard || "default-dashboard";
+        dispatch(setSelectedDashboardId(dashboardIdToUse));
+
         const storedDashboards = await dashboardStorage.getAllDashboards();
         if (storedDashboards.length > 0) {
           const dashboardsObj = storedDashboards.reduce(
@@ -901,39 +883,39 @@ const JsonDrivenDashboard: React.FC = () => {
           );
 
           // if (
-          //   dashboardsObj[`${selectedDashboard}:${currentNavigationPath}`] ===
+          //   dashboardsObj[`${dashboardIdToUse}:${currentNavigationPath}`] ===
           //   undefined
           // ) {
           // }
           //later remove this condition
           if (
             dashboardsObj[
-              `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
+              `${dashboardIdToUse}:${currentNavigationPath}` as keyof typeof dashboardsObj
             ] !== undefined
           ) {
             setCurrentDashboard(
               dashboardsObj[
-                `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj
+                `${dashboardIdToUse}:${currentNavigationPath}` as keyof typeof dashboardsObj
               ] ||
                 dashboardsObj[
-                  `${selectedDashboard}:default` as keyof typeof dashboardsObj
+                  `${dashboardIdToUse}:default` as keyof typeof dashboardsObj
                 ]
             );
           }
         } else {
           await dashboardStorage.saveDashboard(
-            `${selectedDashboard}:${currentNavigationPath}`,
+            `${dashboardIdToUse}:${currentNavigationPath}`,
             DEFAULT_DASHBOARD
           );
         }
         // Load layout for current navigation path
         const savedLayout = await layoutStorage.getLayout(
-          `${selectedDashboard}:${currentNavigationPath}`
+          `${dashboardIdToUse}:${currentNavigationPath}`
         );
         if (savedLayout) {
           dispatch(
             setLayoutForPath({
-              path: `${selectedDashboard}:${currentNavigationPath}`,
+              path: `${dashboardIdToUse}:${currentNavigationPath}`,
               layout: savedLayout,
             })
           );
@@ -949,16 +931,44 @@ const JsonDrivenDashboard: React.FC = () => {
     };
 
     initializeLayout();
-  }, [selectedDashboard, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // commented for test purpose
-  // Load layout when navigation path changes
+  // Load dashboard content and layout when selectedDashboard or navigation path changes
   useEffect(() => {
     if (!isInitialized) return;
 
-    const loadLayoutForPath = async () => {
+    const loadDashboardAndLayout = async () => {
       try {
         dispatch(setLayoutLoading(true));
+
+        // Load dashboard content from storage
+        const storedDashboards = await dashboardStorage.getAllDashboards();
+        if (storedDashboards.length > 0) {
+          const dashboardsObj = storedDashboards.reduce(
+            (acc, { dashboard, dashboardName }) => ({
+              ...acc,
+              [dashboardName]: dashboard,
+            }),
+            {}
+          );
+
+          // Load dashboard for current path or default
+          const currentDashboardKey =
+            `${selectedDashboard}:${currentNavigationPath}` as keyof typeof dashboardsObj;
+          const defaultDashboardKey =
+            `${selectedDashboard}:default` as keyof typeof dashboardsObj;
+
+          if (dashboardsObj[currentDashboardKey]) {
+            setCurrentDashboard(dashboardsObj[currentDashboardKey]);
+          } else if (dashboardsObj[defaultDashboardKey]) {
+            setCurrentDashboard(dashboardsObj[defaultDashboardKey]);
+          } else if (selectedDashboard === "default-dashboard") {
+            setCurrentDashboard(DEFAULT_DASHBOARD);
+          }
+        }
+
+        // Load layout
         const savedLayout = await layoutStorage.getLayout(
           `${selectedDashboard}:${currentNavigationPath}`
         );
@@ -969,8 +979,7 @@ const JsonDrivenDashboard: React.FC = () => {
               layout: savedLayout,
             })
           );
-        }
-        if (!savedLayout) {
+        } else {
           const defaultLayout = await layoutStorage.getLayout(
             `${selectedDashboard}:default`
           );
@@ -983,7 +992,7 @@ const JsonDrivenDashboard: React.FC = () => {
         }
       } catch (error) {
         console.error(
-          "Failed to load layout for path:",
+          "Failed to load dashboard and layout:",
           currentNavigationPath,
           error
         );
@@ -992,8 +1001,8 @@ const JsonDrivenDashboard: React.FC = () => {
       }
     };
 
-    loadLayoutForPath();
-  }, [currentNavigationPath, dispatch, isInitialized]);
+    loadDashboardAndLayout();
+  }, [selectedDashboard, currentNavigationPath, dispatch, isInitialized]);
 
   // Initialize IndexedDB and load layout for current navigation path
   // useEffect(() => {
@@ -1211,24 +1220,6 @@ const JsonDrivenDashboard: React.FC = () => {
         newLayout,
         selectedDashboard
       );
-    }
-  };
-
-  const handleLoadDashboard = (configText: string): void => {
-    try {
-      const config: DashboardLayout = JSON.parse(configText);
-      setCurrentDashboard((prevDashboard) => ({
-        ...prevDashboard,
-        ...config,
-      }));
-      dashboardStorage.saveDashboard(
-        `${config.name}:${currentNavigationPath}`,
-        config
-      );
-      setWidgetFilters({});
-    } catch (error) {
-      console.error("Error loading dashboard:", error);
-      alert("Invalid dashboard configuration");
     }
   };
 

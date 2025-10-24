@@ -385,7 +385,7 @@ export default function BrandDashboardHeader() {
           </div>
         </div>
       </div>
-      <div className="border-b border-gray-100 px-10 py-2">
+      <div className="border-b border-gray-200 px-10 py-2 ">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <CountryFilter
             availableCountries={availableCountries}

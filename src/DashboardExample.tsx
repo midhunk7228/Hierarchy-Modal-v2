@@ -1405,9 +1405,9 @@ const JsonDrivenDashboard: React.FC = () => {
   return (
     <div className="min-h-screen  flex">
       <div className="flex-1">
-        <div className="flex justify-end items-center gap-2 py-2 px-6 border-b border-gray-200 bg-white">
+        <div className="flex justify-end items-center gap-2 py-2 px-10 bg-[#fcfcfc]">
           {selectedSubBrands?.length !== 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-white rounded-lg p-2 border border-gray-200 ">
               {/* Date Range Button */}
               <div className="relative">
                 <button

@@ -300,7 +300,7 @@ const DashboardManager: React.FC<{
   return (
     <>
       <div className="flex flex-col items-end gap-4">
-        <div className="flex gap-2 ">
+        <div className="flex gap-2 px-4">
           <div style={{ minWidth: "200px" }}>
             <Select
               value={dashboardOptions.find(
@@ -312,80 +312,6 @@ const DashboardManager: React.FC<{
               isSearchable={false}
             />
           </div>
-          {/* <button
-          onClick={exportConfig}
-          className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
-          title="Export Configuration"
-        >
-          <Download className="w-4 h-4" />
-        </button>
-
-        <button
-          onClick={downloadConfig}
-          className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
-          title="Download Configuration"
-        >
-          <Download className="w-4 h-4" />
-          JSON
-        </button>
-
-        <button
-          onClick={() => {
-            setConfigText("");
-            setIsConfigModalOpen(true);
-          }}
-          className="px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-1"
-          title="Import Configuration"
-        >
-          <Upload className="w-4 h-4" />
-        </button>
-
-        <button
-          onClick={onClearLayout}
-          className="px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors flex items-center gap-1"
-          title="Reset Layout for Current Path"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
-
-        <button
-          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors flex items-center gap-1 relative"
-          title="Notifications"
-        >
-          <Bell className="w-4 h-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
-        </button> */}
-          {/* <div className="flex gap-2 w-full xl:w-auto">
-          <button
-            onClick={() => setIsWidgetPanelOpen(true)}
-            // disabled={!isEditMode}
-            className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-[#73bda5] hover:bg-[#4f967f] text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 text-sm sm:text-base cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Widget</span>
-            <span className="sm:hidden">Add</span>
-          </button>
-          <button
-            onClick={() => {
-              dispatch(toggleEditMode());
-            }}
-            className={`flex-1 lg:flex-none px-3 sm:px-4 py-2 rounded-md transition-colors flex items-center justify-center gap-1 text-sm sm:text-base cursor-pointer ${
-              isEditMode
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-[#7d85df] hover:bg-[#626ac2] text-white "
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {isEditMode ? "Exit Edit" : "Edit Mode"}
-            </span>
-            <span className="sm:hidden">{isEditMode ? "Exit" : "Edit"}</span>
-          </button>
-        </div> */}
           <div className="relative">
             <button
               onClick={() => setIsOptionsPopupOpen(!isOptionsPopupOpen)}

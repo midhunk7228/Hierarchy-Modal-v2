@@ -31,12 +31,12 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
   });
   const baseURL = import.meta.env.VITE_BASE_URL;
   return (
-    <div className="flex items-center gap-4 self-end md:self-center">
+    <div className="flex justify-end items-center gap-3 self-end md:self-center">
       <button
         onClick={() => setOpenDatePopup(openDatePopup === 0 ? null : 0)}
-        className="flex items-center gap-2 bg-white text-gray-600 rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
       >
-        <Ellipsis className="w-6 h-6 cursor-pointer" />
+        <Ellipsis className="w-5 h-5" />
       </button>
       {openDatePopup === 0 && (
         <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
@@ -64,14 +64,14 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
         </div>
       )}
 
-      <div className="relative">
+      <div className="relative ">
         <button
           onClick={() => setOpenCurrencyPopup(!openCurrencyPopup)}
-          className="flex cursor-pointer items-center gap-2 transition-colors"
+          className="flex cursor-pointer items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Globe className="h-5 w-5 text-gray-600" />
-          <div className="flex items-center gap-1 pr-5">
-            <span className="text-base font-medium text-gray-900">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">
               {selectedCurrencies.length > 0
                 ? selectedCurrencies.length === 1
                   ? selectedCurrencies[0]
@@ -79,13 +79,6 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                 : "Select Country"}
             </span>
             {selectedCurrencies.length === 1 && (
-              // <span className="text-base">
-              //   {
-              //     availableCountries.find(
-              //       (c) => c.currencyCode === selectedCurrencies[0]
-              //     )?.flag
-              //   }
-              // </span>
               <img
                 src={(() => {
                   const country = availableCountries.find(
@@ -102,7 +95,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
                     (c) => c.currencyCode === selectedCurrencies[0]
                   )?.flag || "flag"
                 }
-                className="object-cover h-4"
+                className="h-4 w-auto object-contain"
               />
             )}
           </div>

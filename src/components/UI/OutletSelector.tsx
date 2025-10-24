@@ -112,7 +112,7 @@ export default function OutletSelector() {
   );
 
   return (
-    <div className="w-full">
+    <div className="">
       <div className="relative inline-block">
         {/* Dropdown Button */}
         <button

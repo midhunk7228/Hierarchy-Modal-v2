@@ -59,7 +59,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
       }));
 
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <div
             key={`expanded-brand-${clickedBrandIndex}`}
             className="flex-shrink-0 cursor-pointer rounded-lg p-1 grayscale-0 opacity-100 py-1 px-3 rounded-4xl"
@@ -87,7 +87,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
                 }`}
                 onClick={(e) => handleAdditionalBrandClick(brand.name, e)}
               >
-                <div className="h-8 px-4 flex items-center justify-center">
+                <div className="h-8 px-2 flex items-center justify-center">
                   <span
                     className={`text-sm font-medium ${
                       isSelectedAdditional
@@ -145,19 +145,18 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
   };
 
   return (
-    <div className="relative flex flex-1 items-center md:w-auto md:mx-6">
+    <div className="relative flex w-full items-center gap-3">
       {showBrandArrows && (
         <button
           onClick={handleBackButtonClick}
-          className="absolute left-0 z-10 -ml-4 p-2 transition-all"
-          style={{ transform: "translateX(-50%)" }}
+          className="flex-shrink-0 hover:bg-gray-50 rounded-lg transition-all"
         >
-          <ChevronLeft className="h-5 w-5 text-gray-600 cursor-pointer" />
+          <ChevronLeft className="h-5 w-5 text-gray-600" />
         </button>
       )}
       <div
         ref={brandScrollRef}
-        className="scrollbar-hide flex items-center gap-8 overflow-x-auto"
+        className="scrollbar-hide flex items-center gap-8 overflow-x-auto flex-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {renderBrandLogos()}

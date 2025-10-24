@@ -131,7 +131,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
 
       {isEditMode && showControls && (
         <div
-          className="flex flex-wrap items-center gap-2 mb-6 print-hide px-6 py-2"
+          className="flex flex-wrap items-center gap-2  print-hide px-5 py-2"
           style={{ display: "flex" }}
         >
           {/* {showPageBreaks && (

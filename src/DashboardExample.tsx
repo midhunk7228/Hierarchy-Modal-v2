@@ -1449,7 +1449,7 @@ const JsonDrivenDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex justify-end items-center gap-3 pt-2 px-6">
+        <div className="flex justify-end items-center gap-3 pt-2 px-10">
           {/* <div className="text-3xl font-bold">Finance Dashboard</div> */}
 
           {selectedSubBrands?.length !== 0 && (
@@ -1516,7 +1516,7 @@ const JsonDrivenDashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="p-6">
+        <div className="px-6">
           {/* Printable Content */}
           <PrintableContainer
             config={{

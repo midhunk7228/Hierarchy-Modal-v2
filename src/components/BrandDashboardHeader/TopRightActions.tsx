@@ -139,7 +139,7 @@ export default function TopRightActions({
   };
 
   return (
-    <div className="relative flex items-center gap-4 self-end md:self-center">
+    <div className="relative flex items-center gap-3 self-end md:self-center">
       <MultiSelectDropdown
         // To use for outlets, pass outletOptions and manage outlet selection state
         options={
@@ -173,8 +173,8 @@ export default function TopRightActions({
         }}
         title={isExpanded ? "Outlets" : "Brands"}
         trigger={
-          <button className="flex items-center gap-2 rounded-lg bg-white text-gray-600 transition-colors">
-            <Ellipsis className="h-6 w-6 cursor-pointer" />
+          <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+            <Ellipsis className="h-5 w-5" />
           </button>
         }
       />

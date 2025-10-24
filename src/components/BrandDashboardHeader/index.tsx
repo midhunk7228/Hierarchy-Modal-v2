@@ -362,26 +362,30 @@ export default function BrandDashboardHeader() {
 
   return (
     <div className="w-full bg-white">
-      <div className="border-b border-gray-200 px-4 py-4 md:px-6">
+      <div className="border-b border-gray-200 px-10 py-4">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <BrandSelector
-            brands={brands.map((b) => ({ name: b.name, logo: b.logo }))}
-            outlets={{ [selectedBrand]: outlets }}
-            clickedBrandIndex={clickedBrandIndex}
-            isExpanded={isExpanded}
-            showBrandArrows={showBrandArrows}
-            selectedSubBrands={selectedSubBrands}
-            multiSelectedBrands={multiSelectedBrands}
-            handleBrandClick={handleBrandClick}
-            handleBrandDoubleClick={handleBrandDoubleClick}
-            handleAdditionalBrandClick={handleAdditionalBrandClick}
-            handleBackButtonClick={handleBackButtonClick}
-            reset={initialSetup}
-          />
-          <TopRightActions isExpanded={isExpanded} />
+          <div className="flex-1 min-w-0">
+            <BrandSelector
+              brands={brands.map((b) => ({ name: b.name, logo: b.logo }))}
+              outlets={{ [selectedBrand]: outlets }}
+              clickedBrandIndex={clickedBrandIndex}
+              isExpanded={isExpanded}
+              showBrandArrows={showBrandArrows}
+              selectedSubBrands={selectedSubBrands}
+              multiSelectedBrands={multiSelectedBrands}
+              handleBrandClick={handleBrandClick}
+              handleBrandDoubleClick={handleBrandDoubleClick}
+              handleAdditionalBrandClick={handleAdditionalBrandClick}
+              handleBackButtonClick={handleBackButtonClick}
+              reset={initialSetup}
+            />
+          </div>
+          <div className="flex-shrink-0">
+            <TopRightActions isExpanded={isExpanded} />
+          </div>
         </div>
       </div>
-      <div className="border-b border-gray-200 px-4 py-3 md:px-6">
+      <div className="border-b border-gray-200 px-10 py-3">
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <CountryFilter
             availableCountries={availableCountries}

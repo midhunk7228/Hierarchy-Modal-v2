@@ -44,6 +44,7 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
   const [matchPrintWidth, setMatchPrintWidth] = useState(
     config.matchPrintWidth ?? false
   );
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const getPageDimensions = useCallback((): PageDimensions => {
@@ -426,7 +427,8 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     let elementsToHide: Element[] = [];
 
     try {
-      // Show loading state
+      // Show loading indicator
+      setIsGeneratingPdf(true);
       console.log("Generating PDF...");
 
       const container = containerRef.current;
@@ -461,29 +463,26 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       ];
 
       // Enhanced duplicate detection for react-grid-layout
-      // Check both .react-grid-item (wrapper) and .printable-widget (actual content)
+      // ONLY remove DOM duplicates (same data-grid key), NOT intentionally added widgets
       const allGridItems = container.querySelectorAll(".react-grid-item");
-      const seenWidgetIds = new Set<string>();
+      const seenGridKeys = new Set<string>();
 
       allGridItems.forEach((gridItem) => {
         if (!(gridItem instanceof HTMLElement)) return;
 
-        // Get the widget ID from react-grid-layout's key attribute
-        const gridKey = gridItem.getAttribute("data-grid") || "";
+        // Get the UNIQUE widget ID from react-grid-layout's key attribute
+        // This is the actual widget ID like "widget-1", "widget-2", etc.
+        const gridKey = gridItem.getAttribute("data-grid");
 
-        // Also look for widget title to identify duplicates
-        const titleElement = gridItem.querySelector("h3, h2, [class*='title']");
-        const widgetTitle = titleElement?.textContent?.trim() || "";
+        if (!gridKey) return; // Skip if no key
 
-        // Create a unique identifier
-        const uniqueId = `${gridKey}-${widgetTitle}`;
-
-        if (uniqueId && uniqueId !== "-" && seenWidgetIds.has(uniqueId)) {
-          // This is a duplicate, hide the entire grid item
-          console.log("Hiding duplicate widget:", uniqueId);
+        // If we've already seen this EXACT grid key, it's a DOM duplicate
+        // (React Grid Layout sometimes creates duplicate DOM nodes)
+        if (seenGridKeys.has(gridKey)) {
+          console.log("Hiding DOM duplicate with key:", gridKey);
           elementsToHide.push(gridItem);
-        } else if (uniqueId && uniqueId !== "-") {
-          seenWidgetIds.add(uniqueId);
+        } else {
+          seenGridKeys.add(gridKey);
         }
       });
 
@@ -620,6 +619,9 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
           createDynamicPagination();
         }, 100);
       }
+
+      // Hide loading indicator
+      setIsGeneratingPdf(false);
     } catch (error) {
       console.error("Error generating PDF:", error);
 
@@ -639,6 +641,9 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
           createDynamicPagination();
         }, 100);
       }
+
+      // Hide loading indicator
+      setIsGeneratingPdf(false);
 
       alert(
         `Failed to generate PDF: ${
@@ -675,5 +680,6 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     debugMeasurements,
     handlePrint,
     getPageDimensions,
+    isGeneratingPdf,
   };
 };

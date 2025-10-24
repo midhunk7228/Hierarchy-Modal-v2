@@ -59,7 +59,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
       }));
 
       return (
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-1">
           <div
             key={`expanded-brand-${clickedBrandIndex}`}
             className="flex-shrink-0 cursor-pointer rounded-lg p-1 grayscale-0 opacity-100 py-1 px-3 rounded-4xl"

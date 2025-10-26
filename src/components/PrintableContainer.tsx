@@ -2,7 +2,7 @@ import React from "react";
 import { usePrintLayout } from "../hooks/usePrintLayout";
 import type { PrintLayoutConfig } from "../hooks/usePrintLayout";
 // import { usePrintLayout, PrintLayoutConfig } from "@/hooks/usePrintLayout";
-import { Download, Eye, Gauge, Bug, FileText, Maximize2 } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 
@@ -36,24 +36,27 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
     containerRef,
     showPageBreaks,
     setShowPageBreaks,
-    autoPageBreaks,
-    setAutoPageBreaks,
     matchPrintWidth,
     setMatchPrintWidth,
-    applyAutoLayout,
-    simulatePrintLayout,
-    debugMeasurements,
     handlePrint,
     getPageDimensions,
     isGeneratingPdf,
   } = usePrintLayout(defaultConfig);
 
-  const { widthMm, heightMm } = getPageDimensions();
+  const { widthMm } = getPageDimensions();
 
   const onPrintClick = () => {
     onPrint?.();
     handlePrint();
   };
+
+  // Ensure preview page-break overlays use the exact A3 width used for export
+  // so the dotted lines align with the final PDF cuts.
+  React.useEffect(() => {
+    if (showPageBreaks && !matchPrintWidth) {
+      setMatchPrintWidth(true);
+    }
+  }, [showPageBreaks, matchPrintWidth, setMatchPrintWidth]);
 
   return (
     <>
@@ -62,6 +65,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
           {`
             .printable-container {
               position: relative;
+              min-height: 100vh;
               ${
                 matchPrintWidth
                   ? `max-width: ${widthMm}mm; margin: 0 auto;`
@@ -76,7 +80,6 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
               box-sizing: border-box !important;
               border: 3px dashed rgba(59, 130, 246, 0.8) !important;
               background: rgba(59, 130, 246, 0.03) !important;
-              height: ${heightMm}mm !important;
               box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
             }
             
@@ -109,6 +112,25 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
             .printable-widget {
               page-break-inside: avoid !important;
               break-inside: avoid-page !important;
+              -webkit-region-break-inside: avoid !important;
+            }
+            
+            /* Ensure proper stacking of page overlays and content */
+            .printable-container > *:not(.dynamic-page):not(.react-grid-layout) {
+              position: relative !important;
+            }
+            
+            /* Make sure the grid layout container doesn't interfere with page breaks */
+            .react-grid-layout {
+              position: relative !important;
+            }
+            
+            @media print {
+              .printable-widget {
+                page-break-inside: avoid !important;
+                break-inside: avoid-page !important;
+                -webkit-region-break-inside: avoid !important;
+              }
             }
             
             ${

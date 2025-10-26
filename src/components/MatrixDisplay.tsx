@@ -1031,20 +1031,20 @@ const MatrixDisplay: React.FC<
           <>
             <button
               onClick={() => onEdit?.(widget.id)}
-              className="p-1 bg-white rounded shadow-md hover:bg-gray-50 transition-colors "
+              className="p-1 bg-white rounded shadow-md hover:bg-gray-50 transition-colors print-hide"
               title="Edit Widget"
             >
               <Edit className="w-4 h-4 text-gray-600" />
             </button>
             <button
               onClick={() => onDelete?.(widget.id)}
-              className="p-1 bg-white rounded shadow-md hover:bg-red-50 transition-colors"
+              className="p-1 bg-white rounded shadow-md hover:bg-red-50 transition-colors print-hide"
               title="Delete Widget"
             >
               <Trash2 className="w-4 h-4 text-red-600" />
             </button>
             <div
-              className="p-1 bg-white rounded shadow-md cursor-move"
+              className="p-1 bg-white rounded shadow-md cursor-move print-hide"
               title="Drag to Move"
             >
               <Move className="w-4 h-4 text-gray-600" />

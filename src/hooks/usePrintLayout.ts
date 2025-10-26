@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { toPng } from "html-to-image";
+import { toCanvas } from "html-to-image";
 import jsPDF from "jspdf";
 
 export interface PrintLayoutConfig {
@@ -185,97 +185,6 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     console.log(`Applied auto-layout with ${breaksInserted} breaks`);
   }, [getPageDimensions, getFirstLevelChildren, removeElements]);
 
-  const createDynamicPagination = useCallback(() => {
-    if (!containerRef.current || !showPageBreaks) return;
-    // debugger;
-    const container = containerRef.current;
-    const { heightPx: pageHeightPx } = getPageDimensions();
-
-    removeElements(".dynamic-page");
-
-    const totalHeight = calculateTotalHeight(container);
-    const totalPages = Math.ceil(totalHeight / pageHeightPx);
-
-    console.log(`Total height: ${totalHeight}px, Pages needed: ${totalPages}`);
-
-    for (let i = 0; i < totalPages; i++) {
-      const pageTopPx = i * pageHeightPx;
-      const pageOverlay = document.createElement("div");
-      pageOverlay.className = "dynamic-page";
-      pageOverlay.style.cssText = `
-        position: absolute;
-        top: ${pageTopPx}px;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: ${pageHeightPx}px;
-        pointer-events: none;
-        margin: 0;
-        padding: 0;
-      `;
-
-      const pageNumber = document.createElement("div");
-      pageNumber.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgb(59, 130, 246);
-        color: rgb(255, 255, 255);
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: bold;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      `;
-      pageNumber.textContent = `Page ${i + 1}`;
-      pageOverlay.appendChild(pageNumber);
-
-      const pageBreakLine = document.createElement("div");
-      pageBreakLine.style.cssText = `
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: rgb(59, 130, 246);
-        pointer-events: none;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-      `;
-      pageOverlay.appendChild(pageBreakLine);
-
-      // Add dimension label at bottom left
-      const dimensionLabel = document.createElement("div");
-      dimensionLabel.style.cssText = `
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        background: rgb(59, 130, 246);
-        color: rgb(255, 255, 255);
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 600;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      `;
-      dimensionLabel.textContent = `${Math.round(pageHeightPx)}px`;
-      pageOverlay.appendChild(dimensionLabel);
-
-      container.appendChild(pageOverlay);
-    }
-
-    if (autoPageBreaks) {
-      insertSmartPageBreaks(totalPages, pageHeightPx);
-    }
-  }, [
-    showPageBreaks,
-    autoPageBreaks,
-    getPageDimensions,
-    calculateTotalHeight,
-    removeElements,
-  ]);
-
   const insertSmartPageBreaks = useCallback(
     (totalPages: number, pageHeightPx: number) => {
       if (!containerRef.current) return;
@@ -338,6 +247,138 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     },
     [getFirstLevelChildren, removeElements]
   );
+
+  const createDynamicPagination = useCallback(() => {
+    if (!containerRef.current || !showPageBreaks) return;
+    // debugger;
+    const container = containerRef.current;
+    const {
+      widthMm,
+      heightMm,
+      widthPx: pageWidthPx,
+      heightPx: pageHeightPx,
+    } = getPageDimensions();
+
+    // Compute scale from A3 preview width (pageWidthPx) to actual rendered container width
+    const renderedWidth = container.clientWidth || pageWidthPx;
+    const pxPerMm = renderedWidth / widthMm;
+
+    // Account for print margins so overlay matches PDF content slice
+    const marginInches = config.marginInches ?? 0.5;
+    const marginMm = marginInches * 25.4;
+    const contentHeightMm = Math.max(1, heightMm - marginMm * 2);
+    const effectivePageHeightPx = Math.max(
+      1,
+      Math.round(contentHeightMm * pxPerMm)
+    );
+
+    removeElements(".dynamic-page");
+
+    const totalHeight = calculateTotalHeight(container);
+    const totalPages = Math.ceil(totalHeight / effectivePageHeightPx);
+
+    console.log(`Total height: ${totalHeight}px, Pages needed: ${totalPages}`);
+    console.log(
+      `A3 base: ${pageWidthPx}px x ${pageHeightPx}px (mm: ${widthMm}x${heightMm}), renderedWidth=${renderedWidth}, pxPerMm=${pxPerMm}, marginMm=${marginMm}, contentHeightPx=${effectivePageHeightPx}`
+    );
+
+    for (let i = 0; i < totalPages; i++) {
+      const pageTopPx = i * effectivePageHeightPx;
+      const pageOverlay = document.createElement("div");
+      pageOverlay.className = "dynamic-page";
+      pageOverlay.style.cssText = `
+        position: absolute;
+        top: ${pageTopPx}px;
+        left: 0;
+        transform: none;
+        width: ${renderedWidth}px;
+        height: ${effectivePageHeightPx}px;
+        pointer-events: none;
+        margin: 0;
+        padding: 0;
+      `;
+
+      const pageNumber = document.createElement("div");
+      pageNumber.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgb(59, 130, 246);
+        color: rgb(255, 255, 255);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      `;
+      pageNumber.textContent = `Page ${i + 1}`;
+      pageOverlay.appendChild(pageNumber);
+
+      const pageBreakLine = document.createElement("div");
+      pageBreakLine.style.cssText = `
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgb(59, 130, 246);
+        pointer-events: none;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+      `;
+      pageOverlay.appendChild(pageBreakLine);
+
+      // Optional: draw inner margin guides to show printable content area
+      const marginInches = config.marginInches ?? 0.5;
+      const marginMm = marginInches * 25.4;
+      const pxPerMm = renderedWidth / widthMm;
+      const marginPx = Math.round(marginMm * pxPerMm);
+      const marginGuide = document.createElement("div");
+      marginGuide.style.cssText = `
+        position: absolute;
+        top: ${marginPx}px;
+        bottom: ${marginPx}px;
+        left: ${marginPx}px;
+        right: ${marginPx}px;
+        border: 1px dashed rgba(59,130,246,0.35);
+        border-radius: 2px;
+        pointer-events: none;
+      `;
+      pageOverlay.appendChild(marginGuide);
+
+      // Add dimension label at bottom left
+      const dimensionLabel = document.createElement("div");
+      dimensionLabel.style.cssText = `
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgb(59, 130, 246);
+        color: rgb(255, 255, 255);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      `;
+      dimensionLabel.textContent = `${Math.round(effectivePageHeightPx)}px`;
+      pageOverlay.appendChild(dimensionLabel);
+
+      container.appendChild(pageOverlay);
+    }
+
+    if (autoPageBreaks) {
+      insertSmartPageBreaks(totalPages, effectivePageHeightPx);
+    }
+  }, [
+    showPageBreaks,
+    autoPageBreaks,
+    getPageDimensions,
+    calculateTotalHeight,
+    removeElements,
+    insertSmartPageBreaks,
+    config.marginInches,
+  ]);
 
   const simulatePrintLayout = useCallback(() => {
     if (!containerRef.current) return;
@@ -426,13 +467,24 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
     // Declare outside try block for cleanup access
     let elementsToHide: Element[] = [];
 
+    // Store original container styles for restoration
+    let originalStyles: {
+      width: string;
+      maxWidth: string;
+      minWidth: string;
+      position: string;
+      left: string;
+      top: string;
+      transform: string;
+    } | null = null;
+
     try {
       // Show loading indicator
       setIsGeneratingPdf(true);
       console.log("Generating PDF...");
 
       const container = containerRef.current;
-      const { widthMm, heightMm } = getPageDimensions();
+      const { widthMm, heightMm, widthPx } = getPageDimensions();
       const marginInches = config.marginInches ?? 0.5;
       const marginMm = marginInches * 25.4; // Convert inches to mm
 
@@ -508,24 +560,43 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         }
       });
 
-      // Wait for DOM cleanup and let browser repaint
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // **FIX: Temporarily scale container to match A3 landscape width**
+      // This ensures the PDF layout matches the preview page breaks
+      originalStyles = {
+        width: container.style.width,
+        maxWidth: container.style.maxWidth,
+        minWidth: container.style.minWidth,
+        position: container.style.position,
+        left: container.style.left,
+        top: container.style.top,
+        transform: container.style.transform,
+      };
 
-      // Use html-to-image which handles modern CSS better than html2canvas
-      const dataUrl = await toPng(container, {
-        quality: 1.0,
-        pixelRatio: 2, // Higher quality
+      // Set container to exact A3 landscape width
+      container.style.width = `${widthPx}px`;
+      container.style.maxWidth = `${widthPx}px`;
+      container.style.minWidth = `${widthPx}px`;
+      container.style.position = "relative";
+      container.style.left = "0";
+      container.style.top = "0";
+      container.style.transform = "none";
+
+      console.log(`Scaling container to A3 width: ${widthPx}px`);
+
+      // Wait for layout recalculation and DOM cleanup
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Capture to a canvas (pixel-accurate) so we can slice per page without overlap
+      const fullCanvas = await toCanvas(container, {
+        pixelRatio: 1, // keep 1:1 with laid-out widthPx to match preview
         backgroundColor: "#ffffff",
         cacheBust: true,
         skipAutoScale: true,
         includeQueryParams: false,
+        width: widthPx,
         filter: (node) => {
-          // Filter out all non-content elements
           if (node instanceof HTMLElement) {
-            // Get computed styles
             const computed = window.getComputedStyle(node);
-
-            // Skip if it's a control or overlay element
             if (
               node.classList.contains("print-hide") ||
               node.classList.contains("dynamic-page") ||
@@ -542,7 +613,6 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
               node.style.visibility === "hidden" ||
               computed.display === "none" ||
               computed.visibility === "hidden" ||
-              // Skip elements with very high z-index (likely overlays)
               ((computed.position === "fixed" ||
                 computed.position === "absolute") &&
                 parseInt(computed.zIndex) > 1000)
@@ -554,16 +624,7 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         },
       });
 
-      // Convert data URL to image for dimensions
-      const img = new Image();
-      img.src = dataUrl;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      // Calculate dimensions based on image
       const imgWidth = widthMm - marginMm * 2;
-      const imgHeight = (img.height * imgWidth) / img.width;
 
       // Create PDF with proper orientation
       const pdf = new jsPDF({
@@ -572,28 +633,60 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         format: config.pageFormat.split("-")[0].toLowerCase() as "a3" | "a4",
       });
 
-      const pageHeight = heightMm - marginMm * 2;
-      let heightLeft = imgHeight;
-      let position = 0;
+      // Map mm to pixels to slice the canvas exactly at preview page boundaries
+      const pageHeightMm = heightMm - marginMm * 2;
+      const pxPerMm = fullCanvas.width / widthMm;
+      const pageHeightPx = Math.round(pageHeightMm * pxPerMm);
 
-      // Add first page
-      pdf.addImage(dataUrl, "PNG", marginMm, marginMm, imgWidth, imgHeight);
+      const totalPages = Math.max(
+        1,
+        Math.ceil(fullCanvas.height / pageHeightPx)
+      );
+      console.log(
+        `Canvas ${fullCanvas.width}x${fullCanvas.height}px -> ${totalPages} pages, pageHeightPx=${pageHeightPx}`
+      );
 
-      heightLeft -= pageHeight;
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
 
-      // Add additional pages if content is longer than one page
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
+        const sliceTopPx = i * pageHeightPx;
+        const sliceHeightPx = Math.min(
+          pageHeightPx,
+          Math.max(0, fullCanvas.height - sliceTopPx)
+        );
+
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = fullCanvas.width;
+        pageCanvas.height = sliceHeightPx;
+        const ctx = pageCanvas.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(
+            fullCanvas,
+            0,
+            sliceTopPx,
+            fullCanvas.width,
+            sliceHeightPx,
+            0,
+            0,
+            fullCanvas.width,
+            sliceHeightPx
+          );
+        }
+
+        const pageDataUrl = pageCanvas.toDataURL("image/png");
+        const sliceHeightMm = sliceHeightPx / pxPerMm;
         pdf.addImage(
-          dataUrl,
+          pageDataUrl,
           "PNG",
           marginMm,
-          position + marginMm,
+          marginMm,
           imgWidth,
-          imgHeight
+          sliceHeightMm
         );
-        heightLeft -= pageHeight;
       }
 
       // Generate filename with timestamp
@@ -604,6 +697,18 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       pdf.save(filename);
 
       console.log("PDF generated successfully!");
+
+      // **FIX: Restore original container styles**
+      if (containerRef.current && originalStyles) {
+        const container = containerRef.current;
+        container.style.width = originalStyles.width;
+        container.style.maxWidth = originalStyles.maxWidth;
+        container.style.minWidth = originalStyles.minWidth;
+        container.style.position = originalStyles.position;
+        container.style.left = originalStyles.left;
+        container.style.top = originalStyles.top;
+        container.style.transform = originalStyles.transform;
+      }
 
       // Restore all hidden elements
       elementsToHide.forEach((el) => {
@@ -624,6 +729,18 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       setIsGeneratingPdf(false);
     } catch (error) {
       console.error("Error generating PDF:", error);
+
+      // **FIX: Restore original container styles even on error**
+      if (containerRef.current && originalStyles) {
+        const container = containerRef.current;
+        container.style.width = originalStyles.width;
+        container.style.maxWidth = originalStyles.maxWidth;
+        container.style.minWidth = originalStyles.minWidth;
+        container.style.position = originalStyles.position;
+        container.style.left = originalStyles.left;
+        container.style.top = originalStyles.top;
+        container.style.transform = originalStyles.transform;
+      }
 
       // Restore all hidden elements even if there was an error
       if (containerRef.current && elementsToHide.length > 0) {

@@ -1494,9 +1494,9 @@ const JsonDrivenDashboard: React.FC = () => {
               isResizable={isEditMode}
               isDroppable={true}
               onDrop={onDrop}
-              margin={[16, 16]}
-              // resizeHandles={["se"]}
-              // compactType={null}
+              margin={[8, 8]}
+              resizeHandles={["se"]}
+              compactType={null}
             >
               {currentDashboard.widgets.map((widget) => (
                 <div

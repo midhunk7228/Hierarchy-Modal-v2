@@ -56,6 +56,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
     if (showPageBreaks && !matchPrintWidth) {
       setMatchPrintWidth(true);
     }
+    // When page breaks are hidden, ensure any dynamic overlays are removed by re-rendering styles only when visible
   }, [showPageBreaks, matchPrintWidth, setMatchPrintWidth]);
 
   return (
@@ -196,6 +197,8 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
             <Eye className="w-4 h-4 mr-2" />
             {showPageBreaks ? "Hide" : "Show"} Page Breaks
           </button>
+
+          {/* Precision grid toggle removed per user feedback */}
           {/* <button
             onClick={applyAutoLayout}
             className="px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1 bg-white text-gray-600 hover:bg-gray-50 border border-gray-300"

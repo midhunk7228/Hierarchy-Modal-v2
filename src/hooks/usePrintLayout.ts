@@ -298,22 +298,7 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
         padding: 0;
       `;
 
-      const pageNumber = document.createElement("div");
-      pageNumber.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgb(59, 130, 246);
-        color: rgb(255, 255, 255);
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: bold;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      `;
-      pageNumber.textContent = `Page ${i + 1}`;
-      pageOverlay.appendChild(pageNumber);
+      // Page number label removed per user request
 
       const pageBreakLine = document.createElement("div");
       pageBreakLine.style.cssText = `
@@ -328,23 +313,7 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       `;
       pageOverlay.appendChild(pageBreakLine);
 
-      // Optional: draw inner margin guides to show printable content area
-      const marginInches = config.marginInches ?? 0.5;
-      const marginMm = marginInches * 25.4;
-      const pxPerMm = renderedWidth / widthMm;
-      const marginPx = Math.round(marginMm * pxPerMm);
-      const marginGuide = document.createElement("div");
-      marginGuide.style.cssText = `
-        position: absolute;
-        top: ${marginPx}px;
-        bottom: ${marginPx}px;
-        left: ${marginPx}px;
-        right: ${marginPx}px;
-        border: 1px dashed rgba(59,130,246,0.35);
-        border-radius: 2px;
-        pointer-events: none;
-      `;
-      pageOverlay.appendChild(marginGuide);
+      // Margin guide removed per user request
 
       // Add dimension label at bottom left
       const dimensionLabel = document.createElement("div");
@@ -782,6 +751,16 @@ export const usePrintLayout = (config: PrintLayoutConfig) => {
       setTimeout(createDynamicPagination, 100);
     }
   }, [showPageBreaks, autoPageBreaks, createDynamicPagination]);
+
+  // Cleanup any overlay artifacts when page breaks are hidden
+  useEffect(() => {
+    if (!showPageBreaks) {
+      removeElements(".dynamic-page");
+      removeElements(".print-simulation");
+      removeElements(".auto-page-break");
+      removeElements(".auto-layout-break");
+    }
+  }, [showPageBreaks, removeElements]);
 
   return {
     containerRef,

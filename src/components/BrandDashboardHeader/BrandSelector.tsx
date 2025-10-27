@@ -183,7 +183,7 @@ const BrandSelector: React.FC<BrandSelectorProps> = ({
 
   return (
     <div
-      className="relative flex w-full items-center gap-4 py-2 select-none"
+      className="relative flex w-full items-center gap-4 py-2 select-none h-6"
       style={{
         userSelect: "none",
         WebkitUserSelect: "none",

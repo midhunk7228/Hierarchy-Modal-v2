@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Calendar, ChartBarBig, Coins, Ellipsis, X } from "lucide-react";
+import { ChartBarBig, Coins, Ellipsis } from "lucide-react";
 import type {
   DashboardLayout,
   AppliedFilter,
@@ -23,6 +23,9 @@ import { BarChart, PieChart, Table, DollarSign } from "lucide-react";
 import { setDashboards, setSelectedDashboardId } from "./redux/dashboardsSlice";
 import { dashboardStorage } from "./utils/dashboardStorage";
 import { PrintableContainer } from "./components/PrintableContainer";
+import AdvancedDateRangePicker from "./components/UI/AdvancedDateRangePicker";
+import type { DateRangeSelection } from "./types/dateRange";
+import { setLocalAppliedFilters } from "./redux/filtersSlice";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const predefinedWidgets = [
@@ -830,12 +833,15 @@ const JsonDrivenDashboard: React.FC = () => {
   const [widgetFilters, setWidgetFilters] = useState<
     Record<string, AppliedFilter[]>
   >({});
-  const [openDatePopup, setOpenDatePopup] = useState<number | null>(null);
-  const [dateRange, setDateRange] = useState({
-    startDate: "2025-03-01",
-    endDate: "2025-03-31",
-  });
+  const [openDatePopup, setOpenDatePopup] = useState<boolean>(false);
+  const [dateSelection, setDateSelection] = useState<DateRangeSelection | null>(
+    null
+  );
   const [comparisonDate] = useState("Feb, 2025");
+
+  const localAppliedFilters = useSelector(
+    (state: RootState) => state.filters.localAppliedFilters
+  );
 
   const [isInitialized, setIsInitialized] = useState(false);
   const selectedDashboard =
@@ -882,12 +888,6 @@ const JsonDrivenDashboard: React.FC = () => {
             {}
           );
 
-          // if (
-          //   dashboardsObj[`${dashboardIdToUse}:${currentNavigationPath}`] ===
-          //   undefined
-          // ) {
-          // }
-          //later remove this condition
           if (
             dashboardsObj[
               `${dashboardIdToUse}:${currentNavigationPath}` as keyof typeof dashboardsObj
@@ -1003,71 +1003,6 @@ const JsonDrivenDashboard: React.FC = () => {
 
     loadDashboardAndLayout();
   }, [selectedDashboard, currentNavigationPath, dispatch, isInitialized]);
-
-  // Initialize IndexedDB and load layout for current navigation path
-  // useEffect(() => {
-  //   const initializeLayout = async () => {
-  //     try {
-  //       dispatch(setLayoutLoading(true));
-  //       await layoutStorage.init();
-
-  //       // Load layout for current navigation path
-  //       const savedLayout = await layoutStorage.getLayout(
-  //         currentNavigationPath
-  //       );
-  //       if (savedLayout) {
-  //         dispatch(
-  //           setLayoutForPath({
-  //             path: currentNavigationPath,
-  //             layout: savedLayout,
-  //           })
-  //         );
-  //       }
-
-  //       setIsInitialized(true);
-  //     } catch (error) {
-  //       console.error("Failed to initialize layout storage:", error);
-  //       setIsInitialized(true);
-  //     } finally {
-  //       dispatch(setLayoutLoading(false));
-  //     }
-  //   };
-
-  //   initializeLayout();
-  // }, [currentNavigationPath, dispatch]);
-
-  // Load layout when navigation path changes
-  // useEffect(() => {
-  //   if (!isInitialized) return;
-
-  //   const loadLayoutForPath = async () => {
-  //     try {
-  //       dispatch(setLayoutLoading(true));
-  //       const savedLayout = await layoutStorage.getLayout(
-  //         currentNavigationPath
-  //       );
-  //       if (savedLayout) {
-  //         dispatch(
-  //           setLayoutForPath({
-  //             path: currentNavigationPath,
-  //             layout: savedLayout,
-  //           })
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error(
-  //         "Failed to load layout for path:",
-  //         currentNavigationPath,
-  //         error
-  //       );
-  //     } finally {
-  //       dispatch(setLayoutLoading(false));
-  //     }
-  //   };
-
-  //   loadLayoutForPath();
-  // }, [currentNavigationPath, dispatch, isInitialized]);
-
   const handleEditWidget = (widgetId: string): void => {
     const widget = currentDashboard.widgets.find((w) => w.id === widgetId);
     if (widget) {
@@ -1351,55 +1286,26 @@ const JsonDrivenDashboard: React.FC = () => {
 
   const layout = getCurrentLayout();
 
-  // Show loading state while initializing
-  // if (!isInitialized || isLayoutLoading) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-  //         <p className="text-gray-600">Loading dashboard layout...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-  const DateRangeFilter: React.FC<{
-    onDateChange: (startDate: string, endDate: string) => void;
-    startDate?: string;
-    endDate?: string;
-  }> = ({ onDateChange, startDate = "", endDate = "" }) => {
-    const [localStartDate, setLocalStartDate] = useState(startDate);
-    const [localEndDate, setLocalEndDate] = useState(endDate);
+  const handleDateApply = (selection: DateRangeSelection) => {
+    setDateSelection(selection);
 
-    const handleStartDateChange = (date: string) => {
-      setLocalStartDate(date);
-      onDateChange(date, localEndDate);
-    };
-
-    const handleEndDateChange = (date: string) => {
-      setLocalEndDate(date);
-      onDateChange(localStartDate, date);
-    };
-
-    return (
-      <div className="flex items-center space-x-2 bg-slate-100 rounded-md p-2">
-        <Calendar className="w-4 h-4 text-slate-500" />
-        <input
-          type="date"
-          value={localStartDate}
-          onChange={(e) => handleStartDateChange(e.target.value)}
-          className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-          placeholder="Start Date"
-        />
-        <span className="text-slate-400">-</span>
-        <input
-          type="date"
-          value={localEndDate}
-          onChange={(e) => handleEndDateChange(e.target.value)}
-          className="text-sm bg-transparent border-none focus:ring-0 focus:outline-none w-32"
-          placeholder="End Date"
-        />
-      </div>
+    // Update Redux filters with date range selection
+    const existingFilters = localAppliedFilters.filter(
+      (f) => f.filterId !== "date-range"
     );
+
+    const dateRangeFilter = {
+      filterId: "date-range",
+      value: selection as unknown as AppliedFilter["value"],
+    };
+
+    dispatch(setLocalAppliedFilters([...existingFilters, dateRangeFilter]));
+
+    setOpenDatePopup(false);
+  };
+
+  const handleDateCancel = () => {
+    setOpenDatePopup(false);
   };
 
   return (
@@ -1411,44 +1317,11 @@ const JsonDrivenDashboard: React.FC = () => {
               {/* Date Range Button */}
               <div className="relative">
                 <button
-                  onClick={() =>
-                    setOpenDatePopup(openDatePopup === 0 ? null : 0)
-                  }
+                  onClick={() => setOpenDatePopup(!openDatePopup)}
                   className="flex items-center justify-center w-8 h-8 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
                 >
                   <Ellipsis className="w-5 h-5" />
                 </button>
-
-                {openDatePopup === 0 && (
-                  <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-4 w-80">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-semibold text-gray-800">
-                        Select Date Range
-                      </h4>
-                      <button
-                        onClick={() => setOpenDatePopup(null)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <DateRangeFilter
-                      startDate={dateRange.startDate}
-                      endDate={dateRange.endDate}
-                      onDateChange={(startDate, endDate) =>
-                        setDateRange({ startDate, endDate })
-                      }
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <button
-                        className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                        onClick={() => setOpenDatePopup(null)}
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Comparison Badge */}
@@ -1474,7 +1347,7 @@ const JsonDrivenDashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="px-6 bg-[#fcfcfc]">
+        <div className="px-[32px] bg-[#fcfcfc]">
           {/* Printable Content */}
           <PrintableContainer
             config={{
@@ -1547,6 +1420,25 @@ const JsonDrivenDashboard: React.FC = () => {
         onClose={() => setIsWidgetPanelOpen(false)}
         onAddCustomWidget={handleAddCustomWidget}
       />
+
+      {/* Advanced Date Range Picker Modal */}
+      {openDatePopup && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/20"
+            onClick={() => setOpenDatePopup(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="pointer-events-auto">
+              <AdvancedDateRangePicker
+                initialSelection={dateSelection || undefined}
+                onApply={handleDateApply}
+                onCancel={handleDateCancel}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

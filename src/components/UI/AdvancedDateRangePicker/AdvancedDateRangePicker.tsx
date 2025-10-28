@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { Plus, X, ChevronDown } from "lucide-react";
+import { Plus, X, ChevronDown, CalendarDays } from "lucide-react";
 import type {
   DateRangeSelection,
   DateRangeUnit,
@@ -71,6 +71,9 @@ export default function AdvancedDateRangePicker({
     ("days" | "specific-date")[]
   >([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeFilterView, setActiveFilterView] = useState<
+    "days" | "specific-date" | null
+  >(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Recalculate duration whenever dependencies change
@@ -393,76 +396,125 @@ export default function AdvancedDateRangePicker({
             </button>
           </div>
 
-          {/* Days Filter */}
-          {excludeEnabled && excludeFilterTypes.includes("days") && (
-            <div className="flex gap-2 mb-3">
-              {WEEKDAY_LABELS.map((day) => (
+          {/* Filter Icons */}
+          {excludeEnabled && excludeFilterTypes.length > 0 && (
+            <div className="flex gap-2 items-center">
+              {excludeFilterTypes.includes("days") && (
                 <button
-                  key={day.value}
-                  onClick={() => toggleWeekday(day.value)}
-                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    excludedWeekdays.includes(day.value)
-                      ? "bg-red-100 text-red-700 border-2 border-red-400"
+                  onClick={() =>
+                    setActiveFilterView(
+                      activeFilterView === "days" ? null : "days"
+                    )
+                  }
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeFilterView === "days"
+                      ? "bg-blue-100 text-blue-700 border border-blue-300"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  {day.label}
+                  <CalendarDays className="w-4 h-4" />
+                  <span>Days ({excludedWeekdays.length} selected)</span>
                 </button>
-              ))}
-            </div>
-          )}
+              )}
 
-          {/* Specific Date Filter */}
-          {excludeEnabled && excludeFilterTypes.includes("specific-date") && (
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-center p-4 border border-gray-200 rounded-md bg-gray-50">
-                <DayPicker
-                  mode="multiple"
-                  selected={excludedSpecificDates.map((d) => parseUtc(d))}
-                  onSelect={(dates) => {
-                    if (dates) {
-                      setExcludedSpecificDates(dates.map((d) => formatUtc(d)));
-                    }
-                  }}
-                  modifiersClassNames={{
-                    selected: "bg-red-500 text-white hover:bg-red-600",
-                  }}
-                />
-              </div>
-
-              {excludedSpecificDates.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {excludedSpecificDates.map((date) => (
-                    <div
-                      key={date}
-                      className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
-                    >
-                      <span>
-                        {new Date(date + "T00:00:00").toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          }
-                        )}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setExcludedSpecificDates(
-                            excludedSpecificDates.filter((d) => d !== date)
-                          );
-                        }}
-                        className="hover:bg-red-200 rounded-full p-0.5"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              {excludeFilterTypes.includes("specific-date") && (
+                <button
+                  onClick={() =>
+                    setActiveFilterView(
+                      activeFilterView === "specific-date"
+                        ? null
+                        : "specific-date"
+                    )
+                  }
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeFilterView === "specific-date"
+                      ? "bg-blue-100 text-blue-700 border border-blue-300"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  <span>Dates ({excludedSpecificDates.length} selected)</span>
+                </button>
               )}
             </div>
           )}
+
+          {/* Days Filter Content - Shown when icon clicked */}
+          {excludeEnabled &&
+            activeFilterView === "days" &&
+            excludeFilterTypes.includes("days") && (
+              <div className="mt-3 flex gap-2">
+                {WEEKDAY_LABELS.map((day) => (
+                  <button
+                    key={day.value}
+                    onClick={() => toggleWeekday(day.value)}
+                    className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      excludedWeekdays.includes(day.value)
+                        ? "bg-red-100 text-red-700 border-2 border-red-400"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+          {/* Specific Date Filter Content - Shown when icon clicked */}
+          {excludeEnabled &&
+            activeFilterView === "specific-date" &&
+            excludeFilterTypes.includes("specific-date") && (
+              <div className="mt-3 flex flex-col gap-3">
+                <div className="flex justify-center p-4 border border-gray-200 rounded-md bg-gray-50">
+                  <DayPicker
+                    mode="multiple"
+                    selected={excludedSpecificDates.map((d) => parseUtc(d))}
+                    onSelect={(dates) => {
+                      if (dates) {
+                        setExcludedSpecificDates(
+                          dates.map((d) => formatUtc(d))
+                        );
+                      }
+                    }}
+                    modifiersClassNames={{
+                      selected: "bg-red-500 text-white hover:bg-red-600",
+                    }}
+                  />
+                </div>
+
+                {excludedSpecificDates.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {excludedSpecificDates.map((date) => (
+                      <div
+                        key={date}
+                        className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
+                      >
+                        <span>
+                          {new Date(date + "T00:00:00").toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setExcludedSpecificDates(
+                              excludedSpecificDates.filter((d) => d !== date)
+                            );
+                          }}
+                          className="hover:bg-red-200 rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
         </div>
 
         {/* Calendar Views - Conditional based on unit */}

@@ -101,9 +101,9 @@ export default function PresetSidebar({
   };
 
   return (
-    <div className="w-72 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
+    <div className="w-72 bg-white border-r border-gray-200 py-4 flex flex-col ">
       {/* Default Presets */}
-      <div className="mb-6">
+      <div className="mb-3 px-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-semibold text-gray-600 uppercase">
             Quick Select
@@ -131,8 +131,8 @@ export default function PresetSidebar({
       </div>
 
       {/* Saved Dates Section */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col flex-1 min-h-0 border-t border-gray-200 px-4">
+        <div className="flex items-center justify-between mb-2 flex-shrink-0 mt-3">
           <div className="flex items-center gap-1">
             <h3 className="text-xs font-semibold text-gray-600 uppercase">
               Saved Dates
@@ -147,17 +147,17 @@ export default function PresetSidebar({
         </div>
 
         {showHelp && (
-          <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+          <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 flex-shrink-0">
             Save your frequently used date ranges for quick access later.
           </div>
         )}
 
         {savedDates.length === 0 ? (
-          <p className="text-xs text-gray-500 mb-3 italic">
+          <p className="text-xs text-gray-500 mb-3 italic flex-shrink-0">
             No saved dates yet
           </p>
         ) : (
-          <div className="space-y-2 mb-3 max-h-64 overflow-y-auto">
+          <div className="space-y-2 mb-3 overflow-y-auto flex-1 min-h-0">
             {savedDates.map((saved) => (
               <div
                 key={saved.id}
@@ -205,7 +205,7 @@ export default function PresetSidebar({
 
         <button
           onClick={() => setShowSaveModal(true)}
-          className="w-full px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full flex-shrink-0 px-3 py-2 text-[#003DB8] opacity-50 hover:opacity-100 text-sm font-medium rounded-mdtransition-colors flex items-center justify-center gap-2 mt-auto"
         >
           <Plus className="w-4 h-4" />
           Save selected date

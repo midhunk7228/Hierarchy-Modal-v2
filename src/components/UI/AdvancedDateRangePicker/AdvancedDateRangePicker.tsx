@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import type {
@@ -57,6 +57,10 @@ export default function AdvancedDateRangePicker({
     initialSelection?.excludedWeekdays || []
   );
 
+  // Ref for measuring text width
+  const durationInputRef = useRef<HTMLInputElement>(null);
+  const [unitPosition, setUnitPosition] = useState(0);
+
   // Recalculate duration whenever dependencies change
   useEffect(() => {
     const newDuration = calcDurationFromRange(
@@ -67,6 +71,21 @@ export default function AdvancedDateRangePicker({
     );
     setDuration(newDuration);
   }, [startDateUtc, endDateUtc, unit, excludedWeekdays]);
+
+  // Calculate unit position based on duration text width
+  useEffect(() => {
+    if (durationInputRef.current) {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (context) {
+        // Match the input's font style
+        context.font = "14px system-ui, -apple-system, sans-serif";
+        const textWidth = context.measureText(duration.toString()).width;
+        // 12px (left padding) + text width + 4px (one space)
+        setUnitPosition(12 + textWidth + 4);
+      }
+    }
+  }, [duration]);
 
   const handleStartDateChange = (value: string) => {
     setStartDateUtc(value);
@@ -188,10 +207,10 @@ export default function AdvancedDateRangePicker({
             <button
               key={u}
               onClick={() => handleUnitChange(u)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-light transition-colors ${
                 unit === u
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-[#EBF0F9] text-[#003DB8] border border-[#003DB8]"
+                  : "bg-[#EBF0F9] text-gray-500 hover:bg-[#EBF0F9]"
               }`}
             >
               {u.charAt(0).toUpperCase() + u.slice(1)}
@@ -227,15 +246,19 @@ export default function AdvancedDateRangePicker({
             <label className="block text-xs font-medium text-gray-600 mb-1">
               Duration
             </label>
-            <div className="flex items-center gap-2">
+            <div className="relative">
               <input
+                ref={durationInputRef}
                 type="number"
                 min="1"
                 value={duration}
                 onChange={(e) => handleDurationChange(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
-              <span className="text-sm text-gray-500 whitespace-nowrap">
+              <span
+                className="absolute top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none"
+                style={{ left: `${unitPosition}px` }}
+              >
                 {getUnitAbbreviation(unit)}
               </span>
             </div>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import type {
   DateRangeSelection,
   DateRangeUnit,
@@ -12,10 +11,13 @@ import {
   getTodayUtc,
   calcEndFromDuration,
   calcDurationFromRange,
-  enumerateIncludedDates,
   createSelection,
+  getUnitAbbreviation,
 } from "../../../utils/dateRange";
 import PresetSidebar from "./PresetSidebar";
+import MonthPicker from "./MonthPicker";
+import QuarterPicker from "./QuarterPicker";
+import DateInput from "./DateInput";
 
 interface AdvancedDateRangePickerProps {
   initialSelection?: Partial<DateRangeSelection>;
@@ -55,7 +57,7 @@ export default function AdvancedDateRangePicker({
     initialSelection?.excludedWeekdays || []
   );
 
-  // Recalculate whenever dependencies change
+  // Recalculate duration whenever dependencies change
   useEffect(() => {
     const newDuration = calcDurationFromRange(
       startDateUtc,
@@ -111,6 +113,14 @@ export default function AdvancedDateRangePicker({
     setEndDateUtc(endDate);
   };
 
+  const handleSavedDateSelect = (selection: DateRangeSelection) => {
+    setStartDateUtc(selection.startDateUtc);
+    setEndDateUtc(selection.endDateUtc);
+    setUnit(selection.unit);
+    setExcludedWeekdays(selection.excludedWeekdays);
+    setDuration(selection.duration);
+  };
+
   const handleToday = () => {
     setStartDateUtc(today);
     setEndDateUtc(today);
@@ -161,6 +171,7 @@ export default function AdvancedDateRangePicker({
       {/* Left Sidebar: Presets and Saved Dates */}
       <PresetSidebar
         onPresetSelect={handlePresetSelect}
+        onSavedDateSelect={handleSavedDateSelect}
         currentSelection={createSelection(
           startDateUtc,
           endDateUtc,
@@ -194,10 +205,10 @@ export default function AdvancedDateRangePicker({
             <label className="block text-xs font-medium text-gray-600 mb-1">
               Start Date
             </label>
-            <input
-              type="date"
+            <DateInput
               value={startDateUtc}
-              onChange={(e) => handleStartDateChange(e.target.value)}
+              onChange={handleStartDateChange}
+              placeholder="MM/DD/YYYY"
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -205,10 +216,10 @@ export default function AdvancedDateRangePicker({
             <label className="block text-xs font-medium text-gray-600 mb-1">
               End Date
             </label>
-            <input
-              type="date"
+            <DateInput
               value={endDateUtc}
-              onChange={(e) => handleEndDateChange(e.target.value)}
+              onChange={handleEndDateChange}
+              placeholder="MM/DD/YYYY"
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -224,8 +235,8 @@ export default function AdvancedDateRangePicker({
                 onChange={(e) => handleDurationChange(Number(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                {unit}(s)
+              <span className="text-sm text-gray-500 whitespace-nowrap">
+                {getUnitAbbreviation(unit)}
               </span>
             </div>
           </div>
@@ -255,23 +266,33 @@ export default function AdvancedDateRangePicker({
           </div>
         </div>
 
-        {/* Twin Calendars */}
+        {/* Calendar Views - Conditional based on unit */}
         <div className="flex gap-4 justify-center mb-4">
-          <DayPicker
-            mode="range"
-            selected={selectedRange}
-            onSelect={handleCalendarSelect}
-            numberOfMonths={2}
-            disabled={(date) => excludedWeekdays.includes(date.getDay())}
-            modifiersClassNames={{
-              selected: "rdp-day_selected bg-blue-600 text-white",
-              disabled: "rdp-day_disabled opacity-30",
-            }}
-            components={{
-              IconLeft: () => <ChevronLeft className="w-4 h-4" />,
-              IconRight: () => <ChevronRight className="w-4 h-4" />,
-            }}
-          />
+          {(unit === "day" || unit === "week") && (
+            <DayPicker
+              mode="range"
+              selected={selectedRange}
+              onSelect={handleCalendarSelect}
+              numberOfMonths={2}
+              disabled={(date) => excludedWeekdays.includes(date.getDay())}
+              modifiersClassNames={{
+                selected: "rdp-day_selected bg-blue-600 text-white",
+                disabled: "rdp-day_disabled opacity-30",
+              }}
+            />
+          )}
+          {unit === "month" && (
+            <MonthPicker
+              selectedRange={selectedRange}
+              onSelect={handleCalendarSelect}
+            />
+          )}
+          {unit === "quarter" && (
+            <QuarterPicker
+              selectedRange={selectedRange}
+              onSelect={handleCalendarSelect}
+            />
+          )}
         </div>
 
         {/* Footer Actions */}

@@ -205,6 +205,63 @@ export function createSelection(
 }
 
 /**
+ * Convert YYYY-MM-DD to MM/DD/YYYY
+ */
+export function formatDisplayDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-");
+  return `${month}/${day}/${year}`;
+}
+
+/**
+ * Convert MM/DD/YYYY to YYYY-MM-DD
+ */
+export function parseDisplayDate(displayStr: string): string | null {
+  const parts = displayStr.split("/");
+  if (parts.length !== 3) return null;
+
+  const [month, day, year] = parts;
+  const monthNum = parseInt(month, 10);
+  const dayNum = parseInt(day, 10);
+  const yearNum = parseInt(year, 10);
+
+  if (
+    isNaN(monthNum) ||
+    isNaN(dayNum) ||
+    isNaN(yearNum) ||
+    monthNum < 1 ||
+    monthNum > 12 ||
+    dayNum < 1 ||
+    dayNum > 31 ||
+    yearNum < 1900 ||
+    yearNum > 2100
+  ) {
+    return null;
+  }
+
+  const monthStr = monthNum.toString().padStart(2, "0");
+  const dayStr = dayNum.toString().padStart(2, "0");
+  return `${yearNum}-${monthStr}-${dayStr}`;
+}
+
+/**
+ * Get unit abbreviation
+ */
+export function getUnitAbbreviation(unit: DateRangeUnit): string {
+  switch (unit) {
+    case "day":
+      return "d";
+    case "week":
+      return "w";
+    case "month":
+      return "m";
+    case "quarter":
+      return "q";
+    default:
+      return "";
+  }
+}
+
+/**
  * Get preset date ranges
  */
 export function getPresets() {

@@ -106,9 +106,9 @@ export default function MonthPicker({
                   px-3 py-2 text-sm font-medium rounded-md transition-colors
                   ${
                     isSelected
-                      ? "bg-blue-600 text-white"
+                      ? "bg-[#003DB8] text-white"
                       : inRange
-                      ? "bg-blue-100 text-blue-900"
+                      ? "bg-[#CEDBF5] text-[#1F1F1F]"
                       : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }
                 `}

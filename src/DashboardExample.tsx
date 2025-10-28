@@ -838,6 +838,7 @@ const JsonDrivenDashboard: React.FC = () => {
     null
   );
   const [comparisonDate] = useState("Feb, 2025");
+  const [isPageBreaksEnabled, setIsPageBreaksEnabled] = useState(false);
 
   const localAppliedFilters = useSelector(
     (state: RootState) => state.filters.localAppliedFilters
@@ -1348,12 +1349,14 @@ const JsonDrivenDashboard: React.FC = () => {
         </div>
 
         <div className="px-[32px] bg-[#fcfcfc]">
+          {console.log("isPageBreaksEnabled", isPageBreaksEnabled)}
           {/* Printable Content */}
           <PrintableContainer
             config={{
               pageFormat: "A3-landscape",
               marginInches: 0.5,
             }}
+            onPageBreaksChange={setIsPageBreaksEnabled}
             // className="h-full overflow-y-auto"
           >
             <ResponsiveGridLayout
@@ -1369,7 +1372,7 @@ const JsonDrivenDashboard: React.FC = () => {
               onDrop={onDrop}
               margin={[8, 8]}
               resizeHandles={["se"]}
-              compactType={null}
+              compactType={isPageBreaksEnabled ? null : "vertical"}
             >
               {currentDashboard.widgets.map((widget) => (
                 <div

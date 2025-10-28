@@ -12,6 +12,7 @@ interface PrintableContainerProps {
   showControls?: boolean;
   className?: string;
   onPrint?: () => void;
+  onPageBreaksChange?: (enabled: boolean) => void;
 }
 
 export const PrintableContainer: React.FC<PrintableContainerProps> = ({
@@ -20,6 +21,7 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
   showControls = true,
   className = "",
   onPrint,
+  onPageBreaksChange,
 }) => {
   const { isEditMode } = useSelector((state: RootState) => state.editMode);
 
@@ -58,6 +60,11 @@ export const PrintableContainer: React.FC<PrintableContainerProps> = ({
     }
     // When page breaks are hidden, ensure any dynamic overlays are removed by re-rendering styles only when visible
   }, [showPageBreaks, matchPrintWidth, setMatchPrintWidth]);
+
+  // Notify parent when page breaks state changes
+  React.useEffect(() => {
+    onPageBreaksChange?.(showPageBreaks);
+  }, [showPageBreaks, onPageBreaksChange]);
 
   return (
     <>

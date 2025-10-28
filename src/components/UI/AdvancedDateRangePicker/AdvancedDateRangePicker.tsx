@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { Plus, X, ChevronDown, CalendarDays } from "lucide-react";
+import { X, ChevronDown, CalendarDays, Bookmark } from "lucide-react";
 import type {
   DateRangeSelection,
   DateRangeUnit,
+  SavedDateRange,
 } from "../../../types/dateRange";
 import {
   parseUtc,
@@ -19,6 +20,7 @@ import PresetSidebar from "./PresetSidebar";
 import MonthPicker from "./MonthPicker";
 import QuarterPicker from "./QuarterPicker";
 import DateInput from "./DateInput";
+import { useIndexedDB } from "../../../helper/useIndexedDB";
 
 interface AdvancedDateRangePickerProps {
   initialSelection?: Partial<DateRangeSelection>;
@@ -68,13 +70,20 @@ export default function AdvancedDateRangePicker({
   // Exclude filter state
   const [excludeEnabled, setExcludeEnabled] = useState(false);
   const [excludeFilterTypes, setExcludeFilterTypes] = useState<
-    ("days" | "specific-date")[]
+    ("days" | "specific-date" | "saved-dates")[]
   >([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeFilterView, setActiveFilterView] = useState<
-    "days" | "specific-date" | null
+    "days" | "specific-date" | "saved-dates" | null
   >(null);
+  const [excludedSavedDates, setExcludedSavedDates] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load saved dates for filter
+  const { getData } = useIndexedDB();
+  const [savedDatesForFilter, setSavedDatesForFilter] = useState<
+    SavedDateRange[]
+  >([]);
 
   // Recalculate duration whenever dependencies change
   useEffect(() => {
@@ -116,6 +125,17 @@ export default function AdvancedDateRangePicker({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Load saved dates for filter
+  useEffect(() => {
+    const loadSavedDates = async () => {
+      const data = await getData<SavedDateRange[]>("savedDateRanges");
+      if (data) {
+        setSavedDatesForFilter(data);
+      }
+    };
+    loadSavedDates();
+  }, [getData]);
 
   const handleStartDateChange = (value: string) => {
     setStartDateUtc(value);
@@ -168,6 +188,16 @@ export default function AdvancedDateRangePicker({
     setUnit(selection.unit);
     setExcludedWeekdays(selection.excludedWeekdays);
     setDuration(selection.duration);
+
+    // Enable exclude filters if there are excluded weekdays
+    // The saved date's excludedWeekdays will be restored automatically
+    if (selection.excludedWeekdays.length > 0) {
+      setExcludeEnabled(true);
+      // Add "days" filter type to show the filter
+      if (!excludeFilterTypes.includes("days")) {
+        setExcludeFilterTypes([...excludeFilterTypes, "days"]);
+      }
+    }
   };
 
   const handleToday = () => {
@@ -182,6 +212,13 @@ export default function AdvancedDateRangePicker({
     setDuration(1);
     setUnit("day");
     setExcludedWeekdays([]);
+
+    // Clear all exclude filters
+    setExcludeEnabled(false);
+    setExcludeFilterTypes([]);
+    setExcludedSpecificDates([]);
+    setExcludedSavedDates([]);
+    setActiveFilterView(null);
   };
 
   const handleApply = () => {
@@ -383,17 +420,39 @@ export default function AdvancedDateRangePicker({
                         Specific Date
                       </span>
                     </label>
+                    <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={excludeFilterTypes.includes("saved-dates")}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setExcludeFilterTypes([
+                              ...excludeFilterTypes,
+                              "saved-dates",
+                            ]);
+                          } else {
+                            setExcludeFilterTypes(
+                              excludeFilterTypes.filter(
+                                (t) => t !== "saved-dates"
+                              )
+                            );
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Saved Dates</span>
+                    </label>
                   </div>
                 </div>
               )}
             </div>
 
-            <button
+            {/* <button
               disabled={!excludeEnabled}
               className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
-            </button>
+            </button> */}
           </div>
 
           {/* Filter Icons */}
@@ -434,6 +493,24 @@ export default function AdvancedDateRangePicker({
                 >
                   <CalendarDays className="w-4 h-4" />
                   <span>Dates ({excludedSpecificDates.length} selected)</span>
+                </button>
+              )}
+
+              {excludeFilterTypes.includes("saved-dates") && (
+                <button
+                  onClick={() =>
+                    setActiveFilterView(
+                      activeFilterView === "saved-dates" ? null : "saved-dates"
+                    )
+                  }
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeFilterView === "saved-dates"
+                      ? "bg-blue-100 text-blue-700 border border-blue-300"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <Bookmark className="w-4 h-4" />
+                  <span>Saved ({excludedSavedDates.length} selected)</span>
                 </button>
               )}
             </div>
@@ -515,6 +592,78 @@ export default function AdvancedDateRangePicker({
                 )}
               </div>
             )}
+
+          {/* Saved Dates Filter Content - Shown when icon clicked */}
+          {excludeEnabled &&
+            activeFilterView === "saved-dates" &&
+            excludeFilterTypes.includes("saved-dates") && (
+              <div className="mt-3 flex flex-col gap-3">
+                {savedDatesForFilter.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No saved dates available
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-md p-2">
+                    {savedDatesForFilter.map((saved) => {
+                      const isExcluded = excludedSavedDates.includes(saved.id);
+                      return (
+                        <div
+                          key={saved.id}
+                          className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors ${
+                            isExcluded
+                              ? "bg-red-50 border border-red-300"
+                              : "bg-white hover:bg-gray-50 border border-gray-200"
+                          }`}
+                          onClick={() => {
+                            if (isExcluded) {
+                              setExcludedSavedDates(
+                                excludedSavedDates.filter(
+                                  (id) => id !== saved.id
+                                )
+                              );
+                            } else {
+                              setExcludedSavedDates([
+                                ...excludedSavedDates,
+                                saved.id,
+                              ]);
+                            }
+                          }}
+                        >
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900">
+                              {saved.label}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {new Date(
+                                saved.selection.startDateUtc + "T00:00:00"
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}{" "}
+                              -{" "}
+                              {new Date(
+                                saved.selection.endDateUtc + "T00:00:00"
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={isExcluded}
+                            onChange={() => {}}
+                            className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
         </div>
 
         {/* Calendar Views - Conditional based on unit */}
@@ -534,11 +683,32 @@ export default function AdvancedDateRangePicker({
                   excludeEnabled &&
                   excludeFilterTypes.includes("specific-date") &&
                   excludedSpecificDates.includes(formatUtc(date));
-                return isWeekdayExcluded || isSpecificDateExcluded;
+
+                // Check if date falls within any excluded saved date range
+                const isInExcludedSavedDate =
+                  excludeEnabled &&
+                  excludeFilterTypes.includes("saved-dates") &&
+                  excludedSavedDates.some((savedId) => {
+                    const saved = savedDatesForFilter.find(
+                      (s) => s.id === savedId
+                    );
+                    if (!saved) return false;
+                    const dateStr = formatUtc(date);
+                    return (
+                      dateStr >= saved.selection.startDateUtc &&
+                      dateStr <= saved.selection.endDateUtc
+                    );
+                  });
+
+                return (
+                  isWeekdayExcluded ||
+                  isSpecificDateExcluded ||
+                  isInExcludedSavedDate
+                );
               }}
               modifiersClassNames={{
-                selected: "rdp-day_selected bg-blue-600 text-white",
-                disabled: "rdp-day_disabled opacity-30",
+                selected: "rdp-day_selected bg-[#003DB8]",
+                disabled: "rdp-day_disabled opacity-30 bg-gray-100 text-black",
               }}
             />
           )}

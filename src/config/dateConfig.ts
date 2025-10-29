@@ -31,11 +31,19 @@ export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
  * ignoring days from the previous or next month even if they fall within
  * the same calendar week.
  *
- * Example:
- * - Current month starts on Wednesday (1st is Wednesday)
- * - Normal "This Week" would include Monday-Tuesday from previous month
- * - With this enabled, "This Week" only includes Wednesday-Sunday (5 days)
- *
  * @default false
  */
 export const CONSTRAIN_WEEK_TO_CURRENT_MONTH = false as const;
+
+/**
+ * Allow selection of future dates
+ *
+ * When disabled, users will not be able to select dates that are in the future
+ * (dates after today). This is useful for preventing selection of dates that
+ * haven't occurred yet in reports or analytics.
+ *
+ * When enabled, users can select any date including future dates.
+ *
+ * @default true
+ */
+export const ALLOW_FUTURE_DATES = true as const;

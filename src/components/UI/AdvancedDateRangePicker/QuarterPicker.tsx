@@ -7,6 +7,8 @@ import {
   setYear,
   startOfQuarter,
 } from "date-fns";
+import { parseUtc, getTodayUtc } from "../../../utils/dateRange";
+import { ALLOW_FUTURE_DATES } from "../../../config/dateConfig";
 
 interface QuarterPickerProps {
   selectedRange: { from: Date; to: Date };
@@ -22,6 +24,7 @@ export default function QuarterPicker({
   // Get the starting year from selected range or current year
   const selectedStartYear = getYear(selectedRange.from);
   const [displayYear, setDisplayYear] = useState(selectedStartYear);
+  const today = parseUtc(getTodayUtc());
 
   const handleQuarterClick = (year: number, quarterIndex: number) => {
     // quarterIndex is 0-3, but date-fns expects 1-4
@@ -84,6 +87,14 @@ export default function QuarterPicker({
     return year === toYear && quarterIndex === toQuarter;
   };
 
+  const isFutureQuarter = (year: number, quarterIndex: number): boolean => {
+    if (ALLOW_FUTURE_DATES) return false;
+    const quarterDate = startOfQuarter(
+      setQuarter(setYear(new Date(), year), quarterIndex + 1)
+    );
+    return quarterDate > today;
+  };
+
   const renderYear = (year: number) => {
     return (
       <div key={year} className="flex-1">
@@ -95,14 +106,21 @@ export default function QuarterPicker({
             const isEnd = isQuarterEnd(year, index);
             const isSelected = isStart || isEnd;
 
+            const futureQuarter = isFutureQuarter(year, index);
+
             return (
               <button
                 key={quarter}
-                onClick={() => handleQuarterClick(year, index)}
+                onClick={() =>
+                  !futureQuarter && handleQuarterClick(year, index)
+                }
+                disabled={futureQuarter}
                 className={`
                   px-4 py-6 text-base font-medium rounded-md transition-colors
                   ${
-                    isSelected
+                    futureQuarter
+                      ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : isSelected
                       ? "bg-blue-600 text-white"
                       : inRange
                       ? "bg-blue-100 text-blue-900"

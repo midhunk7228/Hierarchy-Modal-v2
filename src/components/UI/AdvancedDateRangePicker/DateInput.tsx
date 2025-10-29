@@ -10,26 +10,26 @@ interface DateInputProps {
 export default function DateInput({
   value,
   onChange,
-  placeholder = "MM/DD/YYYY",
+  placeholder = "DD/MM/YYYY",
   className = "",
 }: DateInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [displayValue, setDisplayValue] = useState("");
 
-  // Convert YYYY-MM-DD to MM/DD/YYYY
+  // Convert YYYY-MM-DD to DD/MM/YYYY
   const formatToDisplay = (dateStr: string): string => {
     if (!dateStr || dateStr.length !== 10) return "";
     const [year, month, day] = dateStr.split("-");
-    return `${month}/${day}/${year}`;
+    return `${day}/${month}/${year}`;
   };
 
-  // Convert MM/DD/YYYY to YYYY-MM-DD
+  // Convert DD/MM/YYYY to YYYY-MM-DD
   const formatToInternal = (displayStr: string): string | null => {
     const cleaned = displayStr.replace(/\D/g, "");
     if (cleaned.length !== 8) return null;
 
-    const month = cleaned.substring(0, 2);
-    const day = cleaned.substring(2, 4);
+    const day = cleaned.substring(0, 2);
+    const month = cleaned.substring(2, 4);
     const year = cleaned.substring(4, 8);
 
     const monthNum = parseInt(month, 10);

@@ -2,7 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { X, ChevronDown, CalendarDays, Bookmark } from "lucide-react";
+import {
+  X,
+  ChevronDown,
+  CalendarDays,
+  Bookmark,
+  AlertTriangle,
+} from "lucide-react";
 import type {
   DateRangeSelection,
   DateRangeUnit,
@@ -17,6 +23,7 @@ import {
   createSelection,
   getUnitAbbreviation,
 } from "../../../utils/dateRange";
+import { ALLOW_FUTURE_DATES } from "../../../config/dateConfig";
 import PresetSidebar from "./PresetSidebar";
 import MonthPicker from "./MonthPicker";
 import QuarterPicker from "./QuarterPicker";
@@ -160,6 +167,25 @@ export default function AdvancedDateRangePicker({
     }
   };
 
+  // Check if dates violate ALLOW_FUTURE_DATES condition
+  const hasFutureDates =
+    !ALLOW_FUTURE_DATES && (startDateUtc > today || endDateUtc > today);
+  const getFutureDateWarning = () => {
+    if (!hasFutureDates) return null;
+
+    const startIsFuture = startDateUtc > today;
+    const endIsFuture = endDateUtc > today;
+
+    if (startIsFuture && endIsFuture) {
+      return "Start date and end date cannot be in the future.";
+    } else if (startIsFuture) {
+      return "Start date cannot be in the future.";
+    } else if (endIsFuture) {
+      return "End date cannot be in the future.";
+    }
+    return null;
+  };
+
   const handleDurationChange = (value: number) => {
     if (value <= 0) return;
     setDuration(value);
@@ -231,6 +257,11 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleApply = () => {
+    // Prevent applying if future dates are not allowed and dates violate the rule
+    if (hasFutureDates) {
+      return;
+    }
+
     const selection = createSelection(
       startDateUtc,
       endDateUtc,
@@ -306,7 +337,7 @@ export default function AdvancedDateRangePicker({
               <DateInput
                 value={startDateUtc}
                 onChange={handleStartDateChange}
-                placeholder="MM/DD/YYYY"
+                placeholder="DD/MM/YYYY"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -317,7 +348,7 @@ export default function AdvancedDateRangePicker({
               <DateInput
                 value={endDateUtc}
                 onChange={handleEndDateChange}
-                placeholder="MM/DD/YYYY"
+                placeholder="DD/MM/YYYY"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -343,6 +374,14 @@ export default function AdvancedDateRangePicker({
               </div>
             </div>
           </div>
+
+          {/* Future Date Warning */}
+          {hasFutureDates && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800">{getFutureDateWarning()}</p>
+            </div>
+          )}
 
           {/* Exclude Filter */}
           <div className="mb-4">
@@ -827,6 +866,10 @@ export default function AdvancedDateRangePicker({
                 onSelect={handleCalendarSelect}
                 numberOfMonths={2}
                 disabled={(date) => {
+                  // Check if future dates are not allowed
+                  const isFutureDate =
+                    !ALLOW_FUTURE_DATES && formatUtc(date) > today;
+
                   const isWeekdayExcluded =
                     excludeEnabled &&
                     excludeFilterTypes.includes("days") &&
@@ -862,6 +905,7 @@ export default function AdvancedDateRangePicker({
                     });
 
                   return (
+                    isFutureDate ||
                     isWeekdayExcluded ||
                     isSpecificDateExcluded ||
                     isInExcludedSavedDate ||
@@ -916,7 +960,12 @@ export default function AdvancedDateRangePicker({
             </button>
             <button
               onClick={handleApply}
-              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
+              disabled={hasFutureDates}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                hasFutureDates
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
             >
               Apply
             </button>

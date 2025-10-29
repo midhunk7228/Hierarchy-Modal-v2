@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { parseUtc, formatUtc } from "../../../utils/dateRange";
-import { getMonth, getYear, setMonth, setYear } from "date-fns";
+import { parseUtc, getTodayUtc } from "../../../utils/dateRange";
+import { getMonth, getYear, setMonth, setYear, startOfMonth } from "date-fns";
+import { ALLOW_FUTURE_DATES } from "../../../config/dateConfig";
 
 interface MonthPickerProps {
   selectedRange: { from: Date; to: Date };
@@ -30,6 +31,7 @@ export default function MonthPicker({
   // Get the starting year from selected range or current year
   const selectedStartYear = getYear(selectedRange.from);
   const [displayYear, setDisplayYear] = useState(selectedStartYear);
+  const today = parseUtc(getTodayUtc());
 
   const handleMonthClick = (year: number, monthIndex: number) => {
     const clickedDate = setMonth(setYear(new Date(), year), monthIndex);
@@ -87,6 +89,14 @@ export default function MonthPicker({
     return year === toYear && monthIndex === toMonth;
   };
 
+  const isFutureMonth = (year: number, monthIndex: number): boolean => {
+    if (ALLOW_FUTURE_DATES) return false;
+    const monthDate = startOfMonth(
+      setMonth(setYear(new Date(), year), monthIndex)
+    );
+    return monthDate > today;
+  };
+
   const renderYear = (year: number) => {
     return (
       <div key={year} className="flex-1">
@@ -98,14 +108,19 @@ export default function MonthPicker({
             const isEnd = isMonthEnd(year, index);
             const isSelected = isStart || isEnd;
 
+            const futureMonth = isFutureMonth(year, index);
+
             return (
               <button
                 key={month}
-                onClick={() => handleMonthClick(year, index)}
+                onClick={() => !futureMonth && handleMonthClick(year, index)}
+                disabled={futureMonth}
                 className={`
                   px-3 py-2 text-sm font-medium rounded-md transition-colors
                   ${
-                    isSelected
+                    futureMonth
+                      ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : isSelected
                       ? "bg-[#003DB8] text-white"
                       : inRange
                       ? "bg-[#CEDBF5] text-[#1F1F1F]"

@@ -1,6 +1,5 @@
 import {
   parseISO,
-  formatISO,
   addDays,
   addWeeks,
   addMonths,
@@ -14,11 +13,14 @@ import {
   differenceInMonths,
   differenceInQuarters,
   eachDayOfInterval,
+  getMonth,
+  getYear,
 } from "date-fns";
-import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 import type { DateRangeUnit, DateRangeSelection } from "../types/dateRange";
 import {
   WEEK_STARTS_ON,
+  ALLOW_FUTURE_DATES,
   CONSTRAIN_WEEK_TO_CURRENT_MONTH,
 } from "../config/dateConfig";
 
@@ -33,18 +35,25 @@ export function parseUtc(dateStr: string): Date {
 }
 
 /**
- * Format a Date as yyyy-MM-dd in UTC
+ * Format a Date as yyyy-MM-dd (date only, no timezone conversion)
  */
 export function formatUtc(date: Date): string {
-  const utcDate = fromZonedTime(date, UTC_ZONE);
-  return formatISO(utcDate, { representation: "date" });
+  // Extract date components directly to avoid timezone conversion issues
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**
- * Get today's date in UTC as yyyy-MM-dd
+ * Get today's date in local timezone as yyyy-MM-dd
  */
 export function getTodayUtc(): string {
-  return formatUtc(new Date());
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -208,21 +217,21 @@ export function createSelection(
 }
 
 /**
- * Convert YYYY-MM-DD to MM/DD/YYYY
+ * Convert YYYY-MM-DD to DD/MM/YYYY
  */
 export function formatDisplayDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-");
-  return `${month}/${day}/${year}`;
+  return `${day}/${month}/${year}`;
 }
 
 /**
- * Convert MM/DD/YYYY to YYYY-MM-DD
+ * Convert DD/MM/YYYY to YYYY-MM-DD
  */
 export function parseDisplayDate(displayStr: string): string | null {
   const parts = displayStr.split("/");
   if (parts.length !== 3) return null;
 
-  const [month, day, year] = parts;
+  const [day, month, year] = parts;
   const monthNum = parseInt(month, 10);
   const dayNum = parseInt(day, 10);
   const yearNum = parseInt(year, 10);
@@ -292,25 +301,47 @@ export function getPresets() {
     thisWeek: {
       label: "This Week",
       getValue: () => {
-        // Start of week using configured week start day
+        // Calculate the week boundaries
         let weekStart = startOfWeek(todayDate, {
           weekStartsOn: WEEK_STARTS_ON,
         });
-        // End of week is start + 6 days (7 days total)
         let weekEnd = addDays(weekStart, 6);
 
-        // If constraining to current month, adjust boundaries
+        // Apply ALLOW_FUTURE_DATES constraint: if false, don't allow dates beyond today
+        if (!ALLOW_FUTURE_DATES) {
+          const weekEndStr = formatUtc(weekEnd);
+          const weekStartStr = formatUtc(weekStart);
+
+          if (weekEndStr > today) {
+            weekEnd = todayDate;
+          }
+          if (weekStartStr > today) {
+            weekStart = todayDate;
+          }
+        }
+
+        // Check CONSTRAIN_WEEK_TO_CURRENT_MONTH condition
         if (CONSTRAIN_WEEK_TO_CURRENT_MONTH) {
+          const currentMonth = getMonth(todayDate);
+          const currentYear = getYear(todayDate);
           const currentMonthStart = startOfMonth(todayDate);
           const currentMonthEnd = endOfMonth(todayDate);
 
-          // If weekStart is before current month, start from month start
-          if (weekStart < currentMonthStart) {
+          // Check if weekStart belongs to current month
+          // If not, set weekStart as first day of current month
+          if (
+            getMonth(weekStart) !== currentMonth ||
+            getYear(weekStart) !== currentYear
+          ) {
             weekStart = currentMonthStart;
           }
 
-          // If weekEnd is after current month, end at month end
-          if (weekEnd > currentMonthEnd) {
+          // Check if weekEnd belongs to current month
+          // If not, set weekEnd as last day of current month
+          if (
+            getMonth(weekEnd) !== currentMonth ||
+            getYear(weekEnd) !== currentYear
+          ) {
             weekEnd = currentMonthEnd;
           }
         }

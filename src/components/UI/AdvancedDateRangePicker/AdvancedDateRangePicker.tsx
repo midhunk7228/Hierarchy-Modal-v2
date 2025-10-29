@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { startOfMonth } from "date-fns";
 import {
   X,
   ChevronDown,
@@ -28,6 +29,7 @@ import { ALLOW_FUTURE_DATES } from "../../../config/dateConfig";
 import PresetSidebar from "./PresetSidebar";
 import MonthPicker from "./MonthPicker";
 import QuarterPicker from "./QuarterPicker";
+import WeekPicker from "./WeekPicker";
 import DateInput from "./DateInput";
 import { useIndexedDB } from "../../../helper/useIndexedDB";
 
@@ -100,6 +102,15 @@ export default function AdvancedDateRangePicker({
     SavedDateRange[]
   >([]);
 
+  // State to control which month is displayed in DayPicker
+  const [displayedMonth, setDisplayedMonth] = useState<Date>(() => {
+    // Initialize with start date or today
+    if (initialSelection?.startDateUtc) {
+      return startOfMonth(parseUtc(initialSelection.startDateUtc));
+    }
+    return startOfMonth(parseUtc(today));
+  });
+
   // Recalculate duration whenever dependencies change
   useEffect(() => {
     if (startDateUtc && endDateUtc) {
@@ -162,6 +173,10 @@ export default function AdvancedDateRangePicker({
     if (value && endDateUtc && parseUtc(value) > parseUtc(endDateUtc)) {
       setEndDateUtc(value);
     }
+    // Navigate calendar to show the month of the new start date
+    if (value) {
+      setDisplayedMonth(startOfMonth(parseUtc(value)));
+    }
   };
 
   const handleEndDateChange = (value: string) => {
@@ -169,6 +184,10 @@ export default function AdvancedDateRangePicker({
     // If new end is before start, adjust start (only if both dates are valid)
     if (value && startDateUtc && parseUtc(value) < parseUtc(startDateUtc)) {
       setStartDateUtc(value);
+    }
+    // Navigate calendar to show the month of the new end date
+    if (value) {
+      setDisplayedMonth(startOfMonth(parseUtc(value)));
     }
   };
 
@@ -207,6 +226,8 @@ export default function AdvancedDateRangePicker({
         excludedWeekdays
       );
       setEndDateUtc(newEndDate);
+      // Navigate calendar to show the month of the calculated end date
+      setDisplayedMonth(startOfMonth(parseUtc(newEndDate)));
     }
     // If only endDate exists, calculate startDate from endDate (backwards)
     else if (endDateUtc) {
@@ -217,6 +238,8 @@ export default function AdvancedDateRangePicker({
         excludedWeekdays
       );
       setStartDateUtc(newStartDate);
+      // Navigate calendar to show the month of the calculated start date
+      setDisplayedMonth(startOfMonth(parseUtc(newStartDate)));
     }
     // If neither exists, do nothing (handled by input being disabled or validation)
   };
@@ -236,6 +259,10 @@ export default function AdvancedDateRangePicker({
   const handlePresetSelect = (startDate: string, endDate: string) => {
     setStartDateUtc(startDate);
     setEndDateUtc(endDate);
+    // Navigate calendar to show the month of the start date
+    if (startDate) {
+      setDisplayedMonth(startOfMonth(parseUtc(startDate)));
+    }
   };
 
   const handleSavedDateSelect = (selection: DateRangeSelection) => {
@@ -244,6 +271,11 @@ export default function AdvancedDateRangePicker({
     setUnit(selection.unit);
     setExcludedWeekdays(selection.excludedWeekdays);
     setDuration(selection.duration);
+
+    // Navigate calendar to show the month of the start date
+    if (selection.startDateUtc) {
+      setDisplayedMonth(startOfMonth(parseUtc(selection.startDateUtc)));
+    }
 
     // Enable exclude filters if there are excluded weekdays
     // The saved date's excludedWeekdays will be restored automatically
@@ -260,6 +292,8 @@ export default function AdvancedDateRangePicker({
     setStartDateUtc(today);
     setEndDateUtc(today);
     setExcludedWeekdays([]);
+    // Navigate calendar to show the current month
+    setDisplayedMonth(startOfMonth(parseUtc(today)));
   };
 
   const handleClear = () => {
@@ -902,12 +936,14 @@ export default function AdvancedDateRangePicker({
 
           {/* Calendar Views - Conditional based on unit */}
           <div className="flex gap-4 justify-center mb-4">
-            {(unit === "day" || unit === "week") && (
+            {unit === "day" && (
               <DayPicker
                 mode="range"
                 navLayout="around"
                 selected={selectedRange}
                 onSelect={handleCalendarSelect}
+                month={displayedMonth}
+                onMonthChange={setDisplayedMonth}
                 numberOfMonths={2}
                 disabled={(date) => {
                   // Check if future dates are not allowed
@@ -964,6 +1000,12 @@ export default function AdvancedDateRangePicker({
                 classNames={{
                   chevron: "fill-black", // Style the chevron SVG
                 }}
+              />
+            )}
+            {unit === "week" && (
+              <WeekPicker
+                selectedRange={monthQuarterRange}
+                onSelect={handleCalendarSelect}
               />
             )}
             {unit === "month" && (

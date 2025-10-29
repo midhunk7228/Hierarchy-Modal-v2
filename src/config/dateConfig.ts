@@ -46,4 +46,4 @@ export const CONSTRAIN_WEEK_TO_CURRENT_MONTH = false as const;
  *
  * @default true
  */
-export const ALLOW_FUTURE_DATES = true as const;
+export const ALLOW_FUTURE_DATES = false as const;

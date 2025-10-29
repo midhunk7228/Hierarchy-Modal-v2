@@ -19,6 +19,7 @@ import {
   formatUtc,
   getTodayUtc,
   calcEndFromDuration,
+  calcStartFromDuration,
   calcDurationFromRange,
   createSelection,
   getUnitAbbreviation,
@@ -101,13 +102,17 @@ export default function AdvancedDateRangePicker({
 
   // Recalculate duration whenever dependencies change
   useEffect(() => {
-    const newDuration = calcDurationFromRange(
-      startDateUtc,
-      endDateUtc,
-      unit,
-      excludedWeekdays
-    );
-    setDuration(newDuration);
+    if (startDateUtc && endDateUtc) {
+      const newDuration = calcDurationFromRange(
+        startDateUtc,
+        endDateUtc,
+        unit,
+        excludedWeekdays
+      );
+      setDuration(newDuration);
+    } else {
+      setDuration(1);
+    }
   }, [startDateUtc, endDateUtc, unit, excludedWeekdays]);
 
   // Calculate unit position based on duration text width
@@ -153,28 +158,31 @@ export default function AdvancedDateRangePicker({
 
   const handleStartDateChange = (value: string) => {
     setStartDateUtc(value);
-    // If new start is after end, adjust end
-    if (parseUtc(value) > parseUtc(endDateUtc)) {
+    // If new start is after end, adjust end (only if both dates are valid)
+    if (value && endDateUtc && parseUtc(value) > parseUtc(endDateUtc)) {
       setEndDateUtc(value);
     }
   };
 
   const handleEndDateChange = (value: string) => {
     setEndDateUtc(value);
-    // If new end is before start, adjust start
-    if (parseUtc(value) < parseUtc(startDateUtc)) {
+    // If new end is before start, adjust start (only if both dates are valid)
+    if (value && startDateUtc && parseUtc(value) < parseUtc(startDateUtc)) {
       setStartDateUtc(value);
     }
   };
 
   // Check if dates violate ALLOW_FUTURE_DATES condition
   const hasFutureDates =
-    !ALLOW_FUTURE_DATES && (startDateUtc > today || endDateUtc > today);
+    !ALLOW_FUTURE_DATES &&
+    startDateUtc &&
+    endDateUtc &&
+    (startDateUtc > today || endDateUtc > today);
   const getFutureDateWarning = () => {
     if (!hasFutureDates) return null;
 
-    const startIsFuture = startDateUtc > today;
-    const endIsFuture = endDateUtc > today;
+    const startIsFuture = startDateUtc && startDateUtc > today;
+    const endIsFuture = endDateUtc && endDateUtc > today;
 
     if (startIsFuture && endIsFuture) {
       return "Start date and end date cannot be in the future.";
@@ -189,13 +197,28 @@ export default function AdvancedDateRangePicker({
   const handleDurationChange = (value: number) => {
     if (value <= 0) return;
     setDuration(value);
-    const newEndDate = calcEndFromDuration(
-      startDateUtc,
-      unit,
-      value,
-      excludedWeekdays
-    );
-    setEndDateUtc(newEndDate);
+
+    // If startDate exists, calculate endDate from startDate
+    if (startDateUtc) {
+      const newEndDate = calcEndFromDuration(
+        startDateUtc,
+        unit,
+        value,
+        excludedWeekdays
+      );
+      setEndDateUtc(newEndDate);
+    }
+    // If only endDate exists, calculate startDate from endDate (backwards)
+    else if (endDateUtc) {
+      const newStartDate = calcStartFromDuration(
+        endDateUtc,
+        unit,
+        value,
+        excludedWeekdays
+      );
+      setStartDateUtc(newStartDate);
+    }
+    // If neither exists, do nothing (handled by input being disabled or validation)
   };
 
   const handleUnitChange = (newUnit: DateRangeUnit) => {
@@ -240,8 +263,8 @@ export default function AdvancedDateRangePicker({
   };
 
   const handleClear = () => {
-    setStartDateUtc(today);
-    setEndDateUtc(today);
+    setStartDateUtc("");
+    setEndDateUtc("");
     setDuration(1);
     setUnit("day");
     setExcludedWeekdays([]);
@@ -256,7 +279,20 @@ export default function AdvancedDateRangePicker({
     setActiveFilterView(null);
   };
 
+  // Check if dates are empty
+  const hasEmptyDates = Boolean(
+    !startDateUtc ||
+      startDateUtc.trim() === "" ||
+      !endDateUtc ||
+      endDateUtc.trim() === ""
+  );
+
   const handleApply = () => {
+    // Prevent applying if dates are empty
+    if (hasEmptyDates) {
+      return;
+    }
+
     // Prevent applying if future dates are not allowed and dates violate the rule
     if (hasFutureDates) {
       return;
@@ -287,9 +323,17 @@ export default function AdvancedDateRangePicker({
     }
   };
 
-  const selectedRange = {
-    from: parseUtc(startDateUtc),
-    to: parseUtc(endDateUtc),
+  // Use today as default dates for MonthPicker and QuarterPicker when empty
+  const todayDateObj = parseUtc(today);
+  const selectedRange: DateRange = {
+    from: startDateUtc ? parseUtc(startDateUtc) : undefined,
+    to: endDateUtc ? parseUtc(endDateUtc) : undefined,
+  };
+
+  // For MonthPicker and QuarterPicker, provide default dates if empty
+  const monthQuarterRange = {
+    from: startDateUtc ? parseUtc(startDateUtc) : todayDateObj,
+    to: endDateUtc ? parseUtc(endDateUtc) : todayDateObj,
   };
 
   return (
@@ -924,13 +968,13 @@ export default function AdvancedDateRangePicker({
             )}
             {unit === "month" && (
               <MonthPicker
-                selectedRange={selectedRange}
+                selectedRange={monthQuarterRange}
                 onSelect={handleCalendarSelect}
               />
             )}
             {unit === "quarter" && (
               <QuarterPicker
-                selectedRange={selectedRange}
+                selectedRange={monthQuarterRange}
                 onSelect={handleCalendarSelect}
               />
             )}
@@ -960,9 +1004,9 @@ export default function AdvancedDateRangePicker({
             </button>
             <button
               onClick={handleApply}
-              disabled={hasFutureDates}
+              disabled={Boolean(hasEmptyDates || hasFutureDates)}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                hasFutureDates
+                hasEmptyDates || hasFutureDates
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700"
               }`}

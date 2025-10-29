@@ -125,6 +125,63 @@ export function calcEndFromDuration(
 }
 
 /**
+ * Calculate the start date from end date, duration, and excluded weekdays
+ * For day unit, we count only included days (working backwards)
+ */
+export function calcStartFromDuration(
+  endDateUtc: string,
+  unit: DateRangeUnit,
+  duration: number,
+  excludedWeekdays: number[]
+): string {
+  if (duration <= 0) return endDateUtc;
+
+  if (unit === "day" && excludedWeekdays.length > 0) {
+    // Count only included days (backwards)
+    let currentDate = parseUtc(endDateUtc);
+    let includedDaysCount = 0;
+
+    // Include the end date itself if it's not excluded
+    if (!excludedWeekdays.includes(currentDate.getDay())) {
+      includedDaysCount = 1;
+    }
+
+    // Keep subtracting days until we reach the desired duration
+    while (includedDaysCount < duration) {
+      currentDate = addDays(currentDate, -1);
+      if (!excludedWeekdays.includes(currentDate.getDay())) {
+        includedDaysCount++;
+      }
+    }
+
+    return formatUtc(currentDate);
+  } else {
+    // For other units or no exclusions, subtract duration - 1
+    const date = parseUtc(endDateUtc);
+    let result: Date;
+
+    switch (unit) {
+      case "day":
+        result = addDays(date, -(duration - 1));
+        break;
+      case "week":
+        result = addWeeks(date, -(duration - 1));
+        break;
+      case "month":
+        result = addMonths(date, -(duration - 1));
+        break;
+      case "quarter":
+        result = addQuarters(date, -(duration - 1));
+        break;
+      default:
+        result = date;
+    }
+
+    return formatUtc(result);
+  }
+}
+
+/**
  * Calculate duration from start and end dates
  */
 export function calcDurationFromRange(

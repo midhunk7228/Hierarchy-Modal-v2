@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { startOfMonth } from "date-fns";
+import { startOfMonth, startOfWeek, addDays } from "date-fns";
+import { enGB } from "date-fns/locale";
+// no-op
 import {
   X,
   ChevronDown,
@@ -25,11 +27,15 @@ import {
   createSelection,
   getUnitAbbreviation,
 } from "../../../utils/dateRange";
-import { ALLOW_FUTURE_DATES } from "../../../config/dateConfig";
+import {
+  ALLOW_FUTURE_DATES,
+  WEEK_STARTS_ON,
+  WEEK_NUMBERING_MODE,
+} from "../../../config/dateConfig";
 import PresetSidebar from "./PresetSidebar";
 import MonthPicker from "./MonthPicker";
 import QuarterPicker from "./QuarterPicker";
-import WeekPicker from "./WeekPicker";
+// Week view will use DayPicker with week numbers instead of the custom WeekPicker list
 import DateInput from "./DateInput";
 import { useIndexedDB } from "../../../helper/useIndexedDB";
 
@@ -379,6 +385,30 @@ export default function AdvancedDateRangePicker({
       }
     }
   };
+
+  // When in week mode, snap the selection to whole weeks
+  const handleWeekCalendarSelect = (
+    range: { from?: Date; to?: Date } | undefined
+  ) => {
+    if (!range) return;
+    if (range.from) {
+      const weekStartFrom = startOfWeek(range.from, {
+        weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+      });
+      const weekEndFrom = addDays(weekStartFrom, 6);
+      if (range.to) {
+        const weekStartTo = startOfWeek(range.to, {
+          weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
+        });
+        const weekEndTo = addDays(weekStartTo, 6);
+        handleCalendarSelect({ from: weekStartFrom, to: weekEndTo });
+      } else {
+        handleCalendarSelect({ from: weekStartFrom, to: weekEndFrom });
+      }
+    }
+  };
+
+  // Week numbers are currently supplied by DayPicker and formatted below.
 
   // Use today as default dates for MonthPicker and QuarterPicker when empty
   const todayDateObj = parseUtc(today);
@@ -1098,9 +1128,121 @@ export default function AdvancedDateRangePicker({
               />
             )}
             {unit === "week" && (
-              <WeekPicker
-                selectedRange={monthQuarterRange}
-                onSelect={handleCalendarSelect}
+              <DayPicker
+                mode="range"
+                navLayout="around"
+                showWeekNumber
+                locale={WEEK_NUMBERING_MODE === "iso" ? enGB : undefined}
+                formatters={{
+                  formatWeekNumber: (weekNumber) =>
+                    `W${String(weekNumber).padStart(2, "0")}`,
+                }}
+                selected={selectedRange}
+                onSelect={handleWeekCalendarSelect}
+                onWeekNumberClick={(_weekNumber: number, dates: Date[]) => {
+                  if (dates && dates.length > 0) {
+                    handleWeekCalendarSelect({
+                      from: dates[0],
+                      to: dates[dates.length - 1],
+                    });
+                  }
+                }}
+                month={displayedMonth}
+                onMonthChange={setDisplayedMonth}
+                numberOfMonths={2}
+                disabled={(date) => {
+                  const isFutureDate =
+                    !ALLOW_FUTURE_DATES && formatUtc(date) > today;
+
+                  const isWeekdayExcluded =
+                    excludeEnabled &&
+                    excludeFilterTypes.includes("days") &&
+                    excludedWeekdays.includes(date.getDay());
+                  const isSpecificDateExcluded =
+                    excludeEnabled &&
+                    excludeFilterTypes.includes("specific-date") &&
+                    excludedSpecificDates.includes(formatUtc(date));
+
+                  const isInExcludedSavedDate =
+                    excludeEnabled &&
+                    excludeFilterTypes.includes("saved-dates") &&
+                    excludedSavedDates.some((savedId) => {
+                      const saved = savedDatesForFilter.find(
+                        (s) => s.id === savedId
+                      );
+                      if (!saved) return false;
+                      const dateStr = formatUtc(date);
+                      const isInRange =
+                        dateStr >= saved.selection.startDateUtc &&
+                        dateStr <= saved.selection.endDateUtc;
+                      if (!isInRange) return false;
+                      if (
+                        saved.selection.excludedWeekdays &&
+                        saved.selection.excludedWeekdays.length > 0 &&
+                        saved.selection.excludedWeekdays.includes(date.getDay())
+                      ) {
+                        return true;
+                      }
+                      if (
+                        saved.selection.excludedSpecificDates &&
+                        saved.selection.excludedSpecificDates.length > 0 &&
+                        saved.selection.excludedSpecificDates.includes(dateStr)
+                      ) {
+                        return true;
+                      }
+                      if (saved.selection.excludedSavedDates) {
+                        const isInExcludedSaved =
+                          saved.selection.excludedSavedDates.some(
+                            (excludedSavedId) => {
+                              const excludedSaved = savedDatesForFilter.find(
+                                (s) => s.id === excludedSavedId
+                              );
+                              if (!excludedSaved) return false;
+                              return (
+                                dateStr >=
+                                  excludedSaved.selection.startDateUtc &&
+                                dateStr <= excludedSaved.selection.endDateUtc
+                              );
+                            }
+                          );
+                        if (isInExcludedSaved) return true;
+                      }
+                      let isInExcludedRange = false;
+                      if (saved.selection.excludedDateRanges) {
+                        isInExcludedRange =
+                          saved.selection.excludedDateRanges.some(
+                            (range) =>
+                              dateStr >= range.start && dateStr <= range.end
+                          );
+                        if (isInExcludedRange) return true;
+                      }
+                      return false;
+                    });
+
+                  const isInExcludedDateRange =
+                    excludeEnabled &&
+                    excludeFilterTypes.includes("date-range") &&
+                    excludedDateRanges.some((range) => {
+                      const dateStr = formatUtc(date);
+                      return dateStr >= range.start && dateStr <= range.end;
+                    });
+
+                  return (
+                    isFutureDate ||
+                    isWeekdayExcluded ||
+                    isSpecificDateExcluded ||
+                    isInExcludedSavedDate ||
+                    isInExcludedDateRange
+                  );
+                }}
+                modifiersClassNames={{
+                  selected: "rdp-day_selected bg-[#003DB8]",
+                  disabled:
+                    "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                }}
+                classNames={{
+                  chevron: "fill-black",
+                }}
               />
             )}
             {unit === "month" && (

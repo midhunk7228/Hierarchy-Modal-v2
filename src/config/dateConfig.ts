@@ -46,4 +46,22 @@ export const CONSTRAIN_WEEK_TO_CURRENT_MONTH = false as const;
  *
  * @default true
  */
-export const ALLOW_FUTURE_DATES = false as const;
+export const ALLOW_FUTURE_DATES = true as const;
+
+/**
+ * Week numbering mode
+ * - "iso": ISO-8601 weeks (Mon start, week 1 contains Jan 4)
+ * - "jan1": Week 1 is the week that contains Jan 1 (matches screenshot behavior)
+ * - "firstFullWeek": Week 1 is the first full week of the year starting on WEEK_STARTS_ON
+ */
+export type WeekNumberingMode =
+  | "iso"
+  | "jan1"
+  | "firstFullWeek"
+  | "calendarYearBased";
+
+/**
+ * Controls how week numbers are calculated and displayed in week view
+ * @default "iso"
+ */
+export const WEEK_NUMBERING_MODE: WeekNumberingMode = "firstFullWeek";

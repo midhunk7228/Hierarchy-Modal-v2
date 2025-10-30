@@ -21,7 +21,7 @@ import type { DateRangeUnit, DateRangeSelection } from "../types/dateRange";
 import {
   WEEK_STARTS_ON,
   ALLOW_FUTURE_DATES,
-  CONSTRAIN_WEEK_TO_CURRENT_MONTH,
+  WEEK_NUMBERING_MODE,
 } from "../config/dateConfig";
 
 const UTC_ZONE = "UTC";
@@ -387,9 +387,11 @@ export function getPresets() {
     thisWeek: {
       label: "This Week",
       getValue: () => {
-        // Calculate the week boundaries
+        // Calculate the week boundaries based on WEEK_NUMBERING_MODE
+        // iso: ISO-8601 week (starts Monday)
+        // calendarYearBased: start based on configured WEEK_STARTS_ON but constrain to current month
         let weekStart = startOfWeek(todayDate, {
-          weekStartsOn: WEEK_STARTS_ON,
+          weekStartsOn: WEEK_NUMBERING_MODE === "iso" ? 1 : WEEK_STARTS_ON,
         });
         let weekEnd = addDays(weekStart, 6);
 
@@ -406,8 +408,8 @@ export function getPresets() {
           }
         }
 
-        // Check CONSTRAIN_WEEK_TO_CURRENT_MONTH condition
-        if (CONSTRAIN_WEEK_TO_CURRENT_MONTH) {
+        // When WEEK_NUMBERING_MODE is calendarYearBased, constrain the range to the current month
+        if (WEEK_NUMBERING_MODE === "calendarYearBased") {
           const currentMonth = getMonth(todayDate);
           const currentYear = getYear(todayDate);
           const currentMonthStart = startOfMonth(todayDate);

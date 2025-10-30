@@ -272,19 +272,34 @@ export default function AdvancedDateRangePicker({
     setExcludedWeekdays(selection.excludedWeekdays);
     setDuration(selection.duration);
 
+    // Restore exclude filter state
+    if (selection.excludeEnabled !== undefined) {
+      setExcludeEnabled(selection.excludeEnabled);
+    }
+    if (selection.excludeFilterTypes) {
+      setExcludeFilterTypes(selection.excludeFilterTypes);
+    } else {
+      setExcludeFilterTypes([]);
+    }
+    if (selection.excludedSpecificDates) {
+      setExcludedSpecificDates(selection.excludedSpecificDates);
+    } else {
+      setExcludedSpecificDates([]);
+    }
+    if (selection.excludedSavedDates) {
+      setExcludedSavedDates(selection.excludedSavedDates);
+    } else {
+      setExcludedSavedDates([]);
+    }
+    if (selection.excludedDateRanges) {
+      setExcludedDateRanges(selection.excludedDateRanges);
+    } else {
+      setExcludedDateRanges([]);
+    }
+
     // Navigate calendar to show the month of the start date
     if (selection.startDateUtc) {
       setDisplayedMonth(startOfMonth(parseUtc(selection.startDateUtc)));
-    }
-
-    // Enable exclude filters if there are excluded weekdays
-    // The saved date's excludedWeekdays will be restored automatically
-    if (selection.excludedWeekdays.length > 0) {
-      setExcludeEnabled(true);
-      // Add "days" filter type to show the filter
-      if (!excludeFilterTypes.includes("days")) {
-        setExcludeFilterTypes([...excludeFilterTypes, "days"]);
-      }
     }
   };
 
@@ -311,6 +326,9 @@ export default function AdvancedDateRangePicker({
     setExcludedDateRanges([]);
     setTempDateRange(undefined);
     setActiveFilterView(null);
+
+    // Navigate calendar to current month
+    setDisplayedMonth(startOfMonth(parseUtc(today)));
   };
 
   // Check if dates are empty
@@ -336,7 +354,12 @@ export default function AdvancedDateRangePicker({
       startDateUtc,
       endDateUtc,
       unit,
-      excludedWeekdays
+      excludedWeekdays,
+      excludeEnabled,
+      excludeFilterTypes,
+      excludedSpecificDates,
+      excludedSavedDates,
+      excludedDateRanges
     );
     onApply(selection);
   };
@@ -380,7 +403,12 @@ export default function AdvancedDateRangePicker({
           startDateUtc,
           endDateUtc,
           unit,
-          excludedWeekdays
+          excludedWeekdays,
+          excludeEnabled,
+          excludeFilterTypes,
+          excludedSpecificDates,
+          excludedSavedDates,
+          excludedDateRanges
         )}
       />
 
@@ -576,9 +604,7 @@ export default function AdvancedDateRangePicker({
                           Saved Dates
                         </span>
                       </label>
-
-                      {/* inprogress */}
-                      {/* <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={excludeFilterTypes.includes("date-range")}
@@ -601,18 +627,11 @@ export default function AdvancedDateRangePicker({
                         <span className="text-sm text-gray-700">
                           Date Range
                         </span>
-                      </label> */}
+                      </label>
                     </div>
                   </div>
                 )}
               </div>
-
-              {/* <button
-              disabled={!excludeEnabled}
-              className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-5 h-5" />
-            </button> */}
             </div>
 
             {/* Filter Icons */}
@@ -690,7 +709,9 @@ export default function AdvancedDateRangePicker({
                     }`}
                   >
                     <CalendarDays className="w-4 h-4" />
-                    <span>Ranges ({excludedDateRanges.length} selected)</span>
+                    <span>
+                      Date Ranges ({excludedDateRanges.length} selected)
+                    </span>
                   </button>
                 )}
               </div>
@@ -857,77 +878,95 @@ export default function AdvancedDateRangePicker({
               activeFilterView === "date-range" &&
               excludeFilterTypes.includes("date-range") && (
                 <div className="mt-3 flex flex-col gap-3">
-                  <p className="text-xs text-gray-500 text-center mb-2">
-                    Select start date, then end date to exclude a date range
-                  </p>
-                  <div className="flex justify-center p-4 border border-gray-200 rounded-md bg-gray-50">
+                  <div className="border border-gray-200 rounded-md bg-gray-50 p-4">
                     <DayPicker
                       mode="range"
                       selected={tempDateRange}
-                      onSelect={(range) => {
-                        setTempDateRange(range);
-                        if (range?.from && range?.to) {
+                      onSelect={(range) => setTempDateRange(range)}
+                      numberOfMonths={2}
+                      disabled={(date) => {
+                        const isFutureDate =
+                          !ALLOW_FUTURE_DATES && formatUtc(date) > today;
+                        return isFutureDate;
+                      }}
+                      modifiersClassNames={{
+                        selected:
+                          "bg-red-500 text-white hover:bg-red-600 rounded-md",
+                      }}
+                    />
+                  </div>
+
+                  {tempDateRange?.from && tempDateRange?.to && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
                           const newRange = {
                             id: `range-${Date.now()}`,
-                            start: formatUtc(range.from),
-                            end: formatUtc(range.to),
+                            start: formatUtc(tempDateRange.from!),
+                            end: formatUtc(tempDateRange.to!),
                           };
                           setExcludedDateRanges([
                             ...excludedDateRanges,
                             newRange,
                           ]);
-                          // Reset the temporary range after adding
-                          setTimeout(() => setTempDateRange(undefined), 100);
-                        }
-                      }}
-                      numberOfMonths={2}
-                      modifiersClassNames={{
-                        selected: "bg-[#003DB8] text-white",
-                        range_start: "bg-[#003DB8] text-white rounded-l-md",
-                        range_end: "bg-[#003DB8] text-white rounded-r-md",
-                        range_middle: "bg-[#EBF0F9] text-black",
-                      }}
-                    />
-                  </div>
+                          setTempDateRange(undefined);
+                        }}
+                        className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+                      >
+                        Add Date Range
+                      </button>
+                      <button
+                        onClick={() => setTempDateRange(undefined)}
+                        className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors"
+                      >
+                        Clear Selection
+                      </button>
+                    </div>
+                  )}
 
                   {excludedDateRanges.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {excludedDateRanges.map((range) => (
-                        <div
-                          key={range.id}
-                          className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
-                        >
-                          <span>
-                            {new Date(
-                              range.start + "T00:00:00"
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                            {" - "}
-                            {new Date(
-                              range.end + "T00:00:00"
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                          <button
-                            onClick={() => {
-                              setExcludedDateRanges(
-                                excludedDateRanges.filter(
-                                  (r) => r.id !== range.id
-                                )
-                              );
-                            }}
-                            className="hover:bg-red-200 rounded-full p-0.5"
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-gray-600 font-medium">
+                        Excluded Date Ranges:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {excludedDateRanges.map((range) => (
+                          <div
+                            key={range.id}
+                            className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs"
                           >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
+                            <span>
+                              {new Date(
+                                range.start + "T00:00:00"
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                              {" - "}
+                              {new Date(
+                                range.end + "T00:00:00"
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setExcludedDateRanges(
+                                  excludedDateRanges.filter(
+                                    (r) => r.id !== range.id
+                                  )
+                                );
+                              }}
+                              className="hover:bg-red-200 rounded-full p-0.5"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -960,6 +999,7 @@ export default function AdvancedDateRangePicker({
                     excludedSpecificDates.includes(formatUtc(date));
 
                   // Check if date falls within any excluded saved date range
+                  // and also check if the date should be excluded based on the saved date's own filters
                   const isInExcludedSavedDate =
                     excludeEnabled &&
                     excludeFilterTypes.includes("saved-dates") &&
@@ -969,10 +1009,65 @@ export default function AdvancedDateRangePicker({
                       );
                       if (!saved) return false;
                       const dateStr = formatUtc(date);
-                      return (
+
+                      // Check if date is within the saved date's range
+                      const isInRange =
                         dateStr >= saved.selection.startDateUtc &&
-                        dateStr <= saved.selection.endDateUtc
-                      );
+                        dateStr <= saved.selection.endDateUtc;
+
+                      if (!isInRange) return false;
+
+                      // Check if the saved date has excluded weekdays and this date matches one
+                      if (
+                        saved.selection.excludedWeekdays &&
+                        saved.selection.excludedWeekdays.length > 0 &&
+                        saved.selection.excludedWeekdays.includes(date.getDay())
+                      ) {
+                        return true;
+                      }
+
+                      // Check if the saved date has excluded specific dates and this date is one of them
+                      if (
+                        saved.selection.excludedSpecificDates &&
+                        saved.selection.excludedSpecificDates.length > 0 &&
+                        saved.selection.excludedSpecificDates.includes(dateStr)
+                      ) {
+                        return true;
+                      }
+
+                      // Check if the saved date has excluded saved dates and this date is in one of them
+                      if (saved.selection.excludedSavedDates) {
+                        const isInExcludedSaved =
+                          saved.selection.excludedSavedDates.some(
+                            (excludedSavedId) => {
+                              const excludedSaved = savedDatesForFilter.find(
+                                (s) => s.id === excludedSavedId
+                              );
+                              if (!excludedSaved) return false;
+                              return (
+                                dateStr >=
+                                  excludedSaved.selection.startDateUtc &&
+                                dateStr <= excludedSaved.selection.endDateUtc
+                              );
+                            }
+                          );
+                        if (isInExcludedSaved) return true;
+                      }
+
+                      // Check if the saved date has excluded date ranges and this date is in one of them
+                      let isInExcludedRange = false;
+                      if (saved.selection.excludedDateRanges) {
+                        isInExcludedRange =
+                          saved.selection.excludedDateRanges.some(
+                            (range) =>
+                              dateStr >= range.start && dateStr <= range.end
+                          );
+                        if (isInExcludedRange) return true;
+                      }
+
+                      // Only exclude if this date was originally excluded in the saved date range
+                      // If it wasn't excluded, it should remain enabled
+                      return false;
                     });
 
                   // Check if date falls within any excluded date range

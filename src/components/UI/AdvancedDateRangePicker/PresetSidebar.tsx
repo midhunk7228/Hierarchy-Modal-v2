@@ -177,17 +177,53 @@ export default function PresetSidebar({
                         saved.selection.endDateUtc
                       )}
                     </div>
-                    {saved.selection.excludedWeekdays.length > 0 && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        Excluded:{" "}
-                        {saved.selection.excludedWeekdays
-                          .map(
-                            (d) =>
-                              ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
-                                d
-                              ]
-                          )
-                          .join(", ")}
+                    {(saved.selection.excludedWeekdays?.length > 0 ||
+                      (saved.selection.excludedSpecificDates &&
+                        saved.selection.excludedSpecificDates.length > 0) ||
+                      (saved.selection.excludedSavedDates &&
+                        saved.selection.excludedSavedDates.length > 0) ||
+                      (saved.selection.excludedDateRanges &&
+                        saved.selection.excludedDateRanges.length > 0)) && (
+                      <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                        {saved.selection.excludedWeekdays?.length > 0 && (
+                          <div>
+                            Days:{" "}
+                            {saved.selection.excludedWeekdays
+                              .map(
+                                (d) =>
+                                  [
+                                    "Sun",
+                                    "Mon",
+                                    "Tue",
+                                    "Wed",
+                                    "Thu",
+                                    "Fri",
+                                    "Sat",
+                                  ][d]
+                              )
+                              .join(", ")}
+                          </div>
+                        )}
+                        {saved.selection.excludedSpecificDates &&
+                          saved.selection.excludedSpecificDates.length > 0 && (
+                            <div>
+                              Specific Dates:{" "}
+                              {saved.selection.excludedSpecificDates.length}
+                            </div>
+                          )}
+                        {saved.selection.excludedSavedDates &&
+                          saved.selection.excludedSavedDates.length > 0 && (
+                            <div>
+                              Saved: {saved.selection.excludedSavedDates.length}
+                            </div>
+                          )}
+                        {saved.selection.excludedDateRanges &&
+                          saved.selection.excludedDateRanges.length > 0 && (
+                            <div>
+                              Ranges:{" "}
+                              {saved.selection.excludedDateRanges.length}
+                            </div>
+                          )}
                       </div>
                     )}
                   </button>
@@ -242,7 +278,7 @@ export default function PresetSidebar({
                   }}
                 />
               </div>
-              <div className="mb-4 p-2 bg-gray-50 rounded text-xs text-gray-600">
+              <div className="mb-4 p-2 bg-gray-50 rounded text-xs text-gray-600 space-y-1">
                 <div>
                   <strong>Range:</strong>{" "}
                   {formatDateRange(
@@ -254,17 +290,39 @@ export default function PresetSidebar({
                   <strong>Duration:</strong> {currentSelection.duration}{" "}
                   {currentSelection.unit}(s)
                 </div>
-                {currentSelection.excludedWeekdays.length > 0 && (
-                  <div>
-                    <strong>Excluded:</strong>{" "}
-                    {currentSelection.excludedWeekdays
-                      .map(
-                        (d) =>
-                          ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d]
-                      )
-                      .join(", ")}
-                  </div>
-                )}
+                {currentSelection.excludedWeekdays &&
+                  currentSelection.excludedWeekdays.length > 0 && (
+                    <div>
+                      <strong>Excluded Days:</strong>{" "}
+                      {currentSelection.excludedWeekdays
+                        .map(
+                          (d) =>
+                            ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d]
+                        )
+                        .join(", ")}
+                    </div>
+                  )}
+                {currentSelection.excludedSpecificDates &&
+                  currentSelection.excludedSpecificDates.length > 0 && (
+                    <div>
+                      <strong>Excluded Specific Dates:</strong>{" "}
+                      {currentSelection.excludedSpecificDates.length} date(s)
+                    </div>
+                  )}
+                {currentSelection.excludedSavedDates &&
+                  currentSelection.excludedSavedDates.length > 0 && (
+                    <div>
+                      <strong>Excluded Saved Dates:</strong>{" "}
+                      {currentSelection.excludedSavedDates.length} saved date(s)
+                    </div>
+                  )}
+                {currentSelection.excludedDateRanges &&
+                  currentSelection.excludedDateRanges.length > 0 && (
+                    <div>
+                      <strong>Excluded Date Ranges:</strong>{" "}
+                      {currentSelection.excludedDateRanges.length} range(s)
+                    </div>
+                  )}
               </div>
               <div className="flex justify-end gap-2">
                 <button

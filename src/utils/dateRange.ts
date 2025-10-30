@@ -249,7 +249,17 @@ export function createSelection(
   startDateUtc: string,
   endDateUtc: string,
   unit: DateRangeUnit = "day",
-  excludedWeekdays: number[] = []
+  excludedWeekdays: number[] = [],
+  excludeEnabled?: boolean,
+  excludeFilterTypes?: (
+    | "days"
+    | "specific-date"
+    | "saved-dates"
+    | "date-range"
+  )[],
+  excludedSpecificDates?: string[],
+  excludedSavedDates?: string[],
+  excludedDateRanges?: Array<{ id: string; start: string; end: string }>
 ): DateRangeSelection {
   const duration = calcDurationFromRange(
     startDateUtc,
@@ -263,7 +273,7 @@ export function createSelection(
     excludedWeekdays
   );
 
-  return {
+  const selection: DateRangeSelection = {
     startDateUtc,
     endDateUtc,
     unit,
@@ -271,6 +281,25 @@ export function createSelection(
     excludedWeekdays,
     includedDatesUtc,
   };
+
+  // Add optional exclude filter fields if provided
+  if (excludeEnabled !== undefined) {
+    selection.excludeEnabled = excludeEnabled;
+  }
+  if (excludeFilterTypes) {
+    selection.excludeFilterTypes = excludeFilterTypes;
+  }
+  if (excludedSpecificDates) {
+    selection.excludedSpecificDates = excludedSpecificDates;
+  }
+  if (excludedSavedDates) {
+    selection.excludedSavedDates = excludedSavedDates;
+  }
+  if (excludedDateRanges) {
+    selection.excludedDateRanges = excludedDateRanges;
+  }
+
+  return selection;
 }
 
 /**

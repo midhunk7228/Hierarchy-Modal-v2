@@ -2,7 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-import { startOfMonth, startOfWeek, addDays } from "date-fns";
+import {
+  startOfMonth,
+  startOfWeek,
+  addDays,
+  addMonths,
+  getYear,
+  getMonth,
+  setMonth,
+  setYear,
+} from "date-fns";
 import { enGB } from "date-fns/locale";
 // no-op
 import {
@@ -53,6 +62,21 @@ const WEEKDAY_LABELS = [
   { value: 4, label: "Th" },
   { value: 5, label: "Fr" },
   { value: 6, label: "Sa" },
+];
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 export default function AdvancedDateRangePicker({
@@ -115,6 +139,15 @@ export default function AdvancedDateRangePicker({
       return startOfMonth(parseUtc(initialSelection.startDateUtc));
     }
     return startOfMonth(parseUtc(today));
+  });
+
+  // State to control months view mode (0 = left calendar, 1 = right calendar, null = day view)
+  const [monthsViewIndex, setMonthsViewIndex] = useState<number | null>(null);
+  const [monthsViewYear, setMonthsViewYear] = useState<number>(() => {
+    if (initialSelection?.startDateUtc) {
+      return getYear(parseUtc(initialSelection.startDateUtc));
+    }
+    return getYear(parseUtc(today));
   });
 
   // Recalculate duration whenever dependencies change
@@ -422,6 +455,304 @@ export default function AdvancedDateRangePicker({
     from: startDateUtc ? parseUtc(startDateUtc) : todayDateObj,
     to: endDateUtc ? parseUtc(endDateUtc) : todayDateObj,
   };
+
+  // Helper function for disabled date logic (used by all DayPicker instances)
+  const isDateDisabled = (date: Date): boolean => {
+    // Check if future dates are not allowed
+    const isFutureDate = !ALLOW_FUTURE_DATES && formatUtc(date) > today;
+
+    const isWeekdayExcluded =
+      excludeEnabled &&
+      excludeFilterTypes.includes("days") &&
+      excludedWeekdays.includes(date.getDay());
+    const isSpecificDateExcluded =
+      excludeEnabled &&
+      excludeFilterTypes.includes("specific-date") &&
+      excludedSpecificDates.includes(formatUtc(date));
+
+    // Check if date falls within any excluded saved date range
+    const isInExcludedSavedDate =
+      excludeEnabled &&
+      excludeFilterTypes.includes("saved-dates") &&
+      excludedSavedDates.some((savedId) => {
+        const saved = savedDatesForFilter.find((s) => s.id === savedId);
+        if (!saved) return false;
+        const dateStr = formatUtc(date);
+
+        const isInRange =
+          dateStr >= saved.selection.startDateUtc &&
+          dateStr <= saved.selection.endDateUtc;
+
+        if (!isInRange) return false;
+
+        if (
+          saved.selection.excludedWeekdays &&
+          saved.selection.excludedWeekdays.length > 0 &&
+          saved.selection.excludedWeekdays.includes(date.getDay())
+        ) {
+          return true;
+        }
+
+        if (
+          saved.selection.excludedSpecificDates &&
+          saved.selection.excludedSpecificDates.length > 0 &&
+          saved.selection.excludedSpecificDates.includes(dateStr)
+        ) {
+          return true;
+        }
+
+        if (saved.selection.excludedSavedDates) {
+          const isInExcludedSaved = saved.selection.excludedSavedDates.some(
+            (excludedSavedId) => {
+              const excludedSaved = savedDatesForFilter.find(
+                (s) => s.id === excludedSavedId
+              );
+              if (!excludedSaved) return false;
+              return (
+                dateStr >= excludedSaved.selection.startDateUtc &&
+                dateStr <= excludedSaved.selection.endDateUtc
+              );
+            }
+          );
+          if (isInExcludedSaved) return true;
+        }
+
+        let isInExcludedRange = false;
+        if (saved.selection.excludedDateRanges) {
+          isInExcludedRange = saved.selection.excludedDateRanges.some(
+            (range) => dateStr >= range.start && dateStr <= range.end
+          );
+          if (isInExcludedRange) return true;
+        }
+
+        return false;
+      });
+
+    const isInExcludedDateRange =
+      excludeEnabled &&
+      excludeFilterTypes.includes("date-range") &&
+      excludedDateRanges.some((range) => {
+        const dateStr = formatUtc(date);
+        return dateStr >= range.start && dateStr <= range.end;
+      });
+
+    return (
+      isFutureDate ||
+      isWeekdayExcluded ||
+      isSpecificDateExcluded ||
+      isInExcludedSavedDate ||
+      isInExcludedDateRange
+    );
+  };
+
+  // Handle month selection from months grid
+  const handleMonthSelect = (year: number, monthIndex: number) => {
+    const newDate = startOfMonth(
+      setMonth(setYear(new Date(), year), monthIndex)
+    );
+    setDisplayedMonth(newDate);
+    setMonthsViewIndex(null);
+    setMonthsViewYear(year);
+  };
+
+  // Sync monthsViewYear when displayedMonth changes
+  useEffect(() => {
+    if (monthsViewIndex === null) {
+      setMonthsViewYear(getYear(displayedMonth));
+    }
+  }, [displayedMonth, monthsViewIndex]);
+
+  // Render months grid component
+  const renderMonthsGrid = (year: number) => {
+    return (
+      <div className="flex flex-col w-full">
+        {/* Year Navigation */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setMonthsViewYear(monthsViewYear - 1)}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <span className="text-lg">{"<<"}</span>
+          </button>
+          <div className="text-lg font-semibold">{year}</div>
+          <button
+            onClick={() => setMonthsViewYear(monthsViewYear + 1)}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <span className="text-lg">{">>"}</span>
+          </button>
+        </div>
+        {/* Months Grid */}
+        <div className="grid grid-cols-3 gap-2 w-full">
+          {MONTHS.map((month, index) => {
+            const isFuture =
+              !ALLOW_FUTURE_DATES &&
+              startOfMonth(setMonth(setYear(new Date(), year), index)) >
+                parseUtc(today);
+            const isSelected =
+              getYear(displayedMonth) === year &&
+              getMonth(displayedMonth) === index;
+            return (
+              <button
+                key={month}
+                onClick={() => !isFuture && handleMonthSelect(year, index)}
+                disabled={isFuture}
+                className={`
+                  px-3 py-4 border border-gray-300 text-sm font-medium rounded-md transition-colors
+                  ${
+                    isFuture
+                      ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : isSelected
+                      ? "bg-[#003DB8] text-white"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+              >
+                {month}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Refs for the calendar containers to attach click handlers
+  const leftCalendarRef = useRef<HTMLDivElement>(null);
+  const rightCalendarRef = useRef<HTMLDivElement>(null);
+
+  // Add click handlers to month names in captions without changing visual appearance
+  useEffect(() => {
+    if (unit !== "day") return;
+
+    const applyMonthClickHandler = (
+      captionElement: HTMLElement,
+      actualCalendarIndex: number
+    ) => {
+      // Check if already processed by looking for the month span
+      const existingSpan = captionElement.querySelector(
+        "span[data-month-name]"
+      );
+      if (existingSpan) {
+        // Already processed, just ensure space is there
+        const textContent = captionElement.textContent || "";
+        captionElement.style.gap = "6px";
+        if (!textContent.includes(" ") && !textContent.includes("\u00A0")) {
+          // No space found, check if we have month span and year text node
+          const yearNode = Array.from(captionElement.childNodes).find(
+            (node) =>
+              node.nodeType === Node.TEXT_NODE &&
+              /\d{4}/.test(node.textContent || "")
+          );
+          if (yearNode && existingSpan.nextSibling !== yearNode) {
+            // Insert space between month span and year
+            const spaceNode = document.createTextNode(" ");
+            captionElement.insertBefore(spaceNode, yearNode);
+          }
+        }
+        return;
+      }
+
+      // Get the month name from the caption text
+      const text = captionElement.textContent || "";
+      const parts = text.trim().split(/\s+/);
+      // Also try splitting without space if no space found
+      let monthName = "";
+      let year = "";
+      if (parts.length >= 2) {
+        monthName = parts[0]; // First word is the month name
+        year = parts[1]; // Second word is the year
+      } else if (parts.length === 1) {
+        // If no space, try to extract month and year (e.g., "July2025")
+        const match = text.match(/^([A-Za-z]+)(\d{4})$/);
+        if (match) {
+          monthName = match[1];
+          year = match[2];
+        } else {
+          return; // Skip if we can't parse
+        }
+      } else {
+        return; // Skip if we can't parse
+      }
+
+      if (monthName && year) {
+        // Get text node
+        const textNode = captionElement.firstChild as Text;
+        captionElement.style.gap = "6px";
+
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          const fullText = textNode.textContent || "";
+          const monthNameIndex = fullText.indexOf(monthName);
+
+          if (monthNameIndex !== -1) {
+            // Split the text node: month name + space + year
+            // Create span for month name that inherits all styles
+            const monthSpan = document.createElement("span");
+            monthSpan.textContent = monthName;
+            monthSpan.setAttribute("data-month-name", "true");
+            monthSpan.style.cursor = "pointer";
+            // Don't set any other styles - let it inherit from parent to look identical
+
+            // Handle click on month name
+            monthSpan.onclick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              const yearNum = parseInt(year, 10);
+              if (!isNaN(yearNum)) {
+                setMonthsViewYear(yearNum);
+                setMonthsViewIndex(actualCalendarIndex);
+              }
+            };
+
+            // Replace content: monthSpan + space + year (ensure space is visible)
+            captionElement.innerHTML = "";
+            captionElement.appendChild(monthSpan);
+            // Add a space character between month and year
+            const spaceNode = document.createTextNode(" "); // Regular space
+            captionElement.appendChild(spaceNode);
+            captionElement.appendChild(document.createTextNode(year));
+          }
+        }
+      }
+    };
+
+    const attachMonthClickHandlers = (
+      container: HTMLDivElement | null,
+      calendarIndex: number | null // null means single DayPicker with 2 months
+    ) => {
+      if (!container) return;
+
+      const captions = container.querySelectorAll(".rdp-caption_label");
+      captions.forEach((caption, index) => {
+        const captionElement = caption as HTMLElement;
+
+        // Determine which calendar this caption belongs to
+        // If calendarIndex is null and numberOfMonths === 2, index 0 = left, index 1 = right
+        const actualCalendarIndex =
+          calendarIndex !== null ? calendarIndex : index === 0 ? 0 : 1;
+
+        // Skip if this calendar is in months view
+        if (monthsViewIndex === actualCalendarIndex) return;
+
+        // Apply the month click handler
+        applyMonthClickHandler(captionElement, actualCalendarIndex);
+      });
+    };
+
+    // Small delay to ensure calendar is rendered
+    const timer = setTimeout(() => {
+      if (monthsViewIndex === null) {
+        // Single DayPicker with 2 months
+        attachMonthClickHandlers(leftCalendarRef.current, null);
+      } else {
+        // Two separate calendars
+        attachMonthClickHandlers(leftCalendarRef.current, 0);
+        attachMonthClickHandlers(rightCalendarRef.current, 1);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [unit, displayedMonth, monthsViewIndex]);
 
   return (
     <div className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[85vh]">
@@ -1006,126 +1337,101 @@ export default function AdvancedDateRangePicker({
           {/* Calendar Views - Conditional based on unit */}
           <div className="flex gap-4 justify-center mb-4">
             {unit === "day" && (
-              <DayPicker
-                mode="range"
-                navLayout="around"
-                selected={selectedRange}
-                onSelect={handleCalendarSelect}
-                month={displayedMonth}
-                onMonthChange={setDisplayedMonth}
-                numberOfMonths={2}
-                disabled={(date) => {
-                  // Check if future dates are not allowed
-                  const isFutureDate =
-                    !ALLOW_FUTURE_DATES && formatUtc(date) > today;
-
-                  const isWeekdayExcluded =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("days") &&
-                    excludedWeekdays.includes(date.getDay());
-                  const isSpecificDateExcluded =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("specific-date") &&
-                    excludedSpecificDates.includes(formatUtc(date));
-
-                  // Check if date falls within any excluded saved date range
-                  // and also check if the date should be excluded based on the saved date's own filters
-                  const isInExcludedSavedDate =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("saved-dates") &&
-                    excludedSavedDates.some((savedId) => {
-                      const saved = savedDatesForFilter.find(
-                        (s) => s.id === savedId
-                      );
-                      if (!saved) return false;
-                      const dateStr = formatUtc(date);
-
-                      // Check if date is within the saved date's range
-                      const isInRange =
-                        dateStr >= saved.selection.startDateUtc &&
-                        dateStr <= saved.selection.endDateUtc;
-
-                      if (!isInRange) return false;
-
-                      // Check if the saved date has excluded weekdays and this date matches one
-                      if (
-                        saved.selection.excludedWeekdays &&
-                        saved.selection.excludedWeekdays.length > 0 &&
-                        saved.selection.excludedWeekdays.includes(date.getDay())
-                      ) {
-                        return true;
-                      }
-
-                      // Check if the saved date has excluded specific dates and this date is one of them
-                      if (
-                        saved.selection.excludedSpecificDates &&
-                        saved.selection.excludedSpecificDates.length > 0 &&
-                        saved.selection.excludedSpecificDates.includes(dateStr)
-                      ) {
-                        return true;
-                      }
-
-                      // Check if the saved date has excluded saved dates and this date is in one of them
-                      if (saved.selection.excludedSavedDates) {
-                        const isInExcludedSaved =
-                          saved.selection.excludedSavedDates.some(
-                            (excludedSavedId) => {
-                              const excludedSaved = savedDatesForFilter.find(
-                                (s) => s.id === excludedSavedId
-                              );
-                              if (!excludedSaved) return false;
-                              return (
-                                dateStr >=
-                                  excludedSaved.selection.startDateUtc &&
-                                dateStr <= excludedSaved.selection.endDateUtc
-                              );
-                            }
-                          );
-                        if (isInExcludedSaved) return true;
-                      }
-
-                      // Check if the saved date has excluded date ranges and this date is in one of them
-                      let isInExcludedRange = false;
-                      if (saved.selection.excludedDateRanges) {
-                        isInExcludedRange =
-                          saved.selection.excludedDateRanges.some(
-                            (range) =>
-                              dateStr >= range.start && dateStr <= range.end
-                          );
-                        if (isInExcludedRange) return true;
-                      }
-
-                      // Only exclude if this date was originally excluded in the saved date range
-                      // If it wasn't excluded, it should remain enabled
-                      return false;
-                    });
-
-                  // Check if date falls within any excluded date range
-                  const isInExcludedDateRange =
-                    excludeEnabled &&
-                    excludeFilterTypes.includes("date-range") &&
-                    excludedDateRanges.some((range) => {
-                      const dateStr = formatUtc(date);
-                      return dateStr >= range.start && dateStr <= range.end;
-                    });
-
-                  return (
-                    isFutureDate ||
-                    isWeekdayExcluded ||
-                    isSpecificDateExcluded ||
-                    isInExcludedSavedDate ||
-                    isInExcludedDateRange
-                  );
-                }}
-                modifiersClassNames={{
-                  selected: "rdp-day_selected bg-[#003DB8]",
-                  disabled:
-                    "rdp-day_disabled opacity-30 bg-gray-100 text-black",
-                }}
-                classNames={{
-                  chevron: "fill-black", // Style the chevron SVG
-                }}
-              />
+              <div className="flex gap-4">
+                {/* When monthsViewIndex === null, show single DayPicker with 2 months (original UI) */}
+                {monthsViewIndex === null ? (
+                  <div ref={leftCalendarRef}>
+                    <DayPicker
+                      mode="range"
+                      navLayout="around"
+                      selected={selectedRange}
+                      onSelect={handleCalendarSelect}
+                      month={displayedMonth}
+                      onMonthChange={setDisplayedMonth}
+                      numberOfMonths={2}
+                      disabled={isDateDisabled}
+                      modifiersClassNames={{
+                        selected: "rdp-day_selected bg-[#003DB8]",
+                        disabled:
+                          "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                      }}
+                      classNames={{
+                        chevron: "fill-black",
+                      }}
+                    />
+                  </div>
+                ) : monthsViewIndex === 0 ? (
+                  // When monthsViewIndex === 0, show months grid on left and single calendar on right
+                  <>
+                    <div
+                      className="w-full flex-shrink-0"
+                      style={{ minWidth: "280px", maxWidth: "280px" }}
+                    >
+                      {renderMonthsGrid(monthsViewYear)}
+                    </div>
+                    <div ref={rightCalendarRef}>
+                      <DayPicker
+                        mode="range"
+                        navLayout="around"
+                        selected={selectedRange}
+                        onSelect={handleCalendarSelect}
+                        month={startOfMonth(addMonths(displayedMonth, 1))}
+                        onMonthChange={(date) => {
+                          const prevMonth = new Date(displayedMonth);
+                          const newMonth = new Date(date);
+                          const diff =
+                            newMonth.getMonth() - prevMonth.getMonth();
+                          if (diff !== 1 && diff !== -11) {
+                            setDisplayedMonth(
+                              startOfMonth(addMonths(date, -1))
+                            );
+                          }
+                        }}
+                        numberOfMonths={1}
+                        disabled={isDateDisabled}
+                        modifiersClassNames={{
+                          selected: "rdp-day_selected bg-[#003DB8]",
+                          disabled:
+                            "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                        }}
+                        classNames={{
+                          chevron: "fill-black",
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  // When monthsViewIndex === 1, show single calendar on left and months grid on right
+                  <>
+                    <div ref={leftCalendarRef}>
+                      <DayPicker
+                        mode="range"
+                        navLayout="around"
+                        selected={selectedRange}
+                        onSelect={handleCalendarSelect}
+                        month={displayedMonth}
+                        onMonthChange={setDisplayedMonth}
+                        numberOfMonths={1}
+                        disabled={isDateDisabled}
+                        modifiersClassNames={{
+                          selected: "rdp-day_selected bg-[#003DB8]",
+                          disabled:
+                            "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                        }}
+                        classNames={{
+                          chevron: "fill-black",
+                        }}
+                      />
+                    </div>
+                    <div
+                      className="w-full flex-shrink-0"
+                      style={{ minWidth: "280px", maxWidth: "280px" }}
+                    >
+                      {renderMonthsGrid(monthsViewYear)}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
             {unit === "week" && (
               <DayPicker

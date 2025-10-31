@@ -150,6 +150,17 @@ export default function AdvancedDateRangePicker({
     return getYear(parseUtc(today));
   });
 
+  // State to control years view mode (0 = left calendar, 1 = right calendar, null = day view)
+  const [yearsViewIndex, setYearsViewIndex] = useState<number | null>(null);
+  const [yearsViewDecade, setYearsViewDecade] = useState<number>(() => {
+    if (initialSelection?.startDateUtc) {
+      const year = getYear(parseUtc(initialSelection.startDateUtc));
+      return Math.floor(year / 10) * 10; // Get decade (e.g., 2024 -> 2020)
+    }
+    const currentYear = getYear(parseUtc(today));
+    return Math.floor(currentYear / 10) * 10;
+  });
+
   // Recalculate duration whenever dependencies change
   useEffect(() => {
     if (startDateUtc && endDateUtc) {
@@ -555,12 +566,88 @@ export default function AdvancedDateRangePicker({
     setMonthsViewYear(year);
   };
 
+  // Handle year selection from years grid
+  const handleYearSelect = (year: number) => {
+    const currentMonth = getMonth(displayedMonth);
+    const newDate = startOfMonth(
+      setMonth(setYear(new Date(), year), currentMonth)
+    );
+    setDisplayedMonth(newDate);
+    setYearsViewIndex(null);
+    setYearsViewDecade(Math.floor(year / 10) * 10);
+  };
+
   // Sync monthsViewYear when displayedMonth changes
   useEffect(() => {
     if (monthsViewIndex === null) {
       setMonthsViewYear(getYear(displayedMonth));
     }
   }, [displayedMonth, monthsViewIndex]);
+
+  // Render years grid component
+  const renderYearsGrid = (decade: number) => {
+    const startYear = decade - 1; // Show one year before decade (e.g., 2019 for 2020-2029)
+    const endYear = decade + 10; // Show one year after decade (e.g., 2030 for 2020-2029)
+    const currentYear = getYear(displayedMonth);
+
+    const years: number[] = [];
+    for (let y = startYear; y <= endYear; y++) {
+      years.push(y);
+    }
+
+    return (
+      <div className="flex flex-col w-full">
+        {/* Decade Navigation */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setYearsViewDecade(yearsViewDecade - 10)}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <span className="text-lg">{"<<"}</span>
+          </button>
+          <div className="text-lg font-semibold">
+            {decade}-{decade + 9}
+          </div>
+          <button
+            onClick={() => setYearsViewDecade(yearsViewDecade + 10)}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+          >
+            <span className="text-lg">{">>"}</span>
+          </button>
+        </div>
+        {/* Years Grid */}
+        <div className="grid grid-cols-3 gap-2 w-full">
+          {years.map((year) => {
+            const isFuture =
+              !ALLOW_FUTURE_DATES && year > getYear(parseUtc(today));
+            const isOutsideDecade = year < decade || year > decade + 9;
+            const isSelected = currentYear === year;
+            return (
+              <button
+                key={year}
+                onClick={() => !isFuture && handleYearSelect(year)}
+                disabled={isFuture}
+                className={`
+                  px-3 py-4 border border-gray-300 text-sm font-medium rounded-md transition-colors 
+                  ${
+                    isFuture
+                      ? "opacity-30 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : isOutsideDecade
+                      ? "opacity-50 bg-gray-50 text-gray-500"
+                      : isSelected
+                      ? "bg-[#003DB8] text-white"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+              >
+                {year}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   // Render months grid component
   const renderMonthsGrid = (year: number) => {
@@ -630,26 +717,83 @@ export default function AdvancedDateRangePicker({
       actualCalendarIndex: number
     ) => {
       // Check if already processed by looking for the month span
-      const existingSpan = captionElement.querySelector(
+      const existingMonthSpan = captionElement.querySelector(
         "span[data-month-name]"
       );
-      if (existingSpan) {
-        // Already processed, just ensure space is there
+      const existingYearSpan = captionElement.querySelector(
+        "span[data-year-name]"
+      );
+
+      if (existingMonthSpan) {
+        // Already processed, ensure year span exists and handlers are updated
         const textContent = captionElement.textContent || "";
         captionElement.style.gap = "6px";
-        if (!textContent.includes(" ") && !textContent.includes("\u00A0")) {
-          // No space found, check if we have month span and year text node
-          const yearNode = Array.from(captionElement.childNodes).find(
-            (node) =>
-              node.nodeType === Node.TEXT_NODE &&
-              /\d{4}/.test(node.textContent || "")
-          );
-          if (yearNode && existingSpan.nextSibling !== yearNode) {
-            // Insert space between month span and year
-            const spaceNode = document.createTextNode(" ");
-            captionElement.insertBefore(spaceNode, yearNode);
-          }
+
+        // Get year from existing year span or text node
+        let year = "";
+        if (existingYearSpan) {
+          year = existingYearSpan.textContent || "";
+        } else {
+          const yearMatch = textContent.match(/\d{4}/);
+          if (yearMatch) year = yearMatch[0];
         }
+
+        // If no year span exists, create it
+        if (!existingYearSpan && year) {
+          const yearSpan = document.createElement("span");
+          yearSpan.textContent = year;
+          yearSpan.setAttribute("data-year-name", "true");
+          yearSpan.style.cursor = "pointer";
+
+          yearSpan.onclick = (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const yearNum = parseInt(year, 10);
+            if (!isNaN(yearNum)) {
+              const decade = Math.floor(yearNum / 10) * 10;
+              setYearsViewDecade(decade);
+              setYearsViewIndex(actualCalendarIndex);
+              setMonthsViewIndex(null);
+            }
+          };
+
+          // Find where to insert (after space after month span)
+          const spaceNode = existingMonthSpan.nextSibling;
+          if (spaceNode && spaceNode.nodeType === Node.TEXT_NODE) {
+            spaceNode.parentNode?.insertBefore(yearSpan, spaceNode.nextSibling);
+          } else {
+            // Insert space and year
+            const space = document.createTextNode(" ");
+            captionElement.appendChild(space);
+            captionElement.appendChild(yearSpan);
+          }
+        } else if (existingYearSpan) {
+          // Update year span click handler
+          (existingYearSpan as HTMLElement).onclick = (e: MouseEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const yearNum = parseInt(year, 10);
+            if (!isNaN(yearNum)) {
+              const decade = Math.floor(yearNum / 10) * 10;
+              setYearsViewDecade(decade);
+              setYearsViewIndex(actualCalendarIndex);
+              setMonthsViewIndex(null);
+            }
+          };
+        }
+
+        // Update month span click handler
+        (existingMonthSpan as HTMLElement).onclick = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          const yearNum = parseInt(year, 10);
+          if (!isNaN(yearNum)) {
+            setMonthsViewYear(yearNum);
+            setMonthsViewIndex(actualCalendarIndex);
+            setYearsViewIndex(null);
+          }
+        };
+
         return;
       }
 
@@ -701,16 +845,36 @@ export default function AdvancedDateRangePicker({
               if (!isNaN(yearNum)) {
                 setMonthsViewYear(yearNum);
                 setMonthsViewIndex(actualCalendarIndex);
+                setYearsViewIndex(null); // Close years view if open
               }
             };
 
-            // Replace content: monthSpan + space + year (ensure space is visible)
+            // Create year span that is clickable
+            const yearSpan = document.createElement("span");
+            yearSpan.textContent = year;
+            yearSpan.setAttribute("data-year-name", "true");
+            yearSpan.style.cursor = "pointer";
+
+            // Handle click on year
+            yearSpan.onclick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              const yearNum = parseInt(year, 10);
+              if (!isNaN(yearNum)) {
+                const decade = Math.floor(yearNum / 10) * 10;
+                setYearsViewDecade(decade);
+                setYearsViewIndex(actualCalendarIndex);
+                setMonthsViewIndex(null); // Close months view if open
+              }
+            };
+
+            // Replace content: monthSpan + space + yearSpan (ensure space is visible)
             captionElement.innerHTML = "";
             captionElement.appendChild(monthSpan);
             // Add a space character between month and year
             const spaceNode = document.createTextNode(" "); // Regular space
             captionElement.appendChild(spaceNode);
-            captionElement.appendChild(document.createTextNode(year));
+            captionElement.appendChild(yearSpan);
           }
         }
       }
@@ -731,8 +895,12 @@ export default function AdvancedDateRangePicker({
         const actualCalendarIndex =
           calendarIndex !== null ? calendarIndex : index === 0 ? 0 : 1;
 
-        // Skip if this calendar is in months view
-        if (monthsViewIndex === actualCalendarIndex) return;
+        // Skip if this calendar is in months view or years view
+        if (
+          monthsViewIndex === actualCalendarIndex ||
+          yearsViewIndex === actualCalendarIndex
+        )
+          return;
 
         // Apply the month click handler
         applyMonthClickHandler(captionElement, actualCalendarIndex);
@@ -741,7 +909,7 @@ export default function AdvancedDateRangePicker({
 
     // Small delay to ensure calendar is rendered
     const timer = setTimeout(() => {
-      if (monthsViewIndex === null) {
+      if (monthsViewIndex === null && yearsViewIndex === null) {
         // Single DayPicker with 2 months
         attachMonthClickHandlers(leftCalendarRef.current, null);
       } else {
@@ -752,7 +920,7 @@ export default function AdvancedDateRangePicker({
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [unit, displayedMonth, monthsViewIndex]);
+  }, [unit, displayedMonth, monthsViewIndex, yearsViewIndex]);
 
   return (
     <div className="flex gap-4 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden max-h-[85vh]">
@@ -1338,8 +1506,81 @@ export default function AdvancedDateRangePicker({
           <div className="flex gap-4 justify-center mb-4">
             {unit === "day" && (
               <div className="flex gap-4">
-                {/* When monthsViewIndex === null, show single DayPicker with 2 months (original UI) */}
-                {monthsViewIndex === null ? (
+                {/* Check years view first, then months view, then default calendar */}
+                {yearsViewIndex !== null ? (
+                  yearsViewIndex === 0 ? (
+                    // When yearsViewIndex === 0, show years grid on left and single calendar on right
+                    <>
+                      <div
+                        className="w-full flex-shrink-0"
+                        style={{ minWidth: "280px", maxWidth: "280px" }}
+                      >
+                        {renderYearsGrid(yearsViewDecade)}
+                      </div>
+                      <div ref={rightCalendarRef}>
+                        <DayPicker
+                          mode="range"
+                          navLayout="around"
+                          selected={selectedRange}
+                          onSelect={handleCalendarSelect}
+                          month={startOfMonth(addMonths(displayedMonth, 1))}
+                          onMonthChange={(date) => {
+                            const prevMonth = new Date(displayedMonth);
+                            const newMonth = new Date(date);
+                            const diff =
+                              newMonth.getMonth() - prevMonth.getMonth();
+                            if (diff !== 1 && diff !== -11) {
+                              setDisplayedMonth(
+                                startOfMonth(addMonths(date, -1))
+                              );
+                            }
+                          }}
+                          numberOfMonths={1}
+                          disabled={isDateDisabled}
+                          modifiersClassNames={{
+                            selected: "rdp-day_selected bg-[#003DB8]",
+                            disabled:
+                              "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                          }}
+                          classNames={{
+                            chevron: "fill-black",
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    // When yearsViewIndex === 1, show single calendar on left and years grid on right
+                    <>
+                      <div ref={leftCalendarRef}>
+                        <DayPicker
+                          mode="range"
+                          navLayout="around"
+                          selected={selectedRange}
+                          onSelect={handleCalendarSelect}
+                          month={displayedMonth}
+                          onMonthChange={setDisplayedMonth}
+                          numberOfMonths={1}
+                          disabled={isDateDisabled}
+                          modifiersClassNames={{
+                            selected: "rdp-day_selected bg-[#003DB8]",
+                            disabled:
+                              "rdp-day_disabled opacity-30 bg-gray-100 text-black",
+                          }}
+                          classNames={{
+                            chevron: "fill-black",
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="w-full flex-shrink-0"
+                        style={{ minWidth: "280px", maxWidth: "280px" }}
+                      >
+                        {renderYearsGrid(yearsViewDecade)}
+                      </div>
+                    </>
+                  )
+                ) : monthsViewIndex === null ? (
+                  // When monthsViewIndex === null, show single DayPicker with 2 months (original UI)
                   <div ref={leftCalendarRef}>
                     <DayPicker
                       mode="range"
